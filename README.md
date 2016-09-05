@@ -7,7 +7,7 @@ __This is not fully working yet.__ Help is appreciated.
 ## Installation
 
 * Open in Qt Creator and build
-* Build and install [patchelf](https://nixos.org/patchelf.html) (linuxdeployqt uses it to rewrite paths inside the binaries similar to `install_name_tool` on macOS)
+* Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS)
 
 ## Usage
 
