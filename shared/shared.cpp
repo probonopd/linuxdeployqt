@@ -235,12 +235,10 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
     // Don't deploy low-level libraries in /lib because these tend to break if moved to a system with a different glibc.
     // TODO: Could make bundling these low-level libraries optional but then the bundles might need to
     // use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
-
     if (trimmed.startsWith("/lib"))
         return info;
 
-
-    enum State {QtPath, FrameworkName, DylibName, Version, End};
+    enum State {QtPath, FrameworkName, LibraryName, Version, End};
     State state = QtPath;
     int part = 0;
     QString name;
@@ -260,11 +258,7 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
             if (part < parts.count() && parts.at(part).contains(".so")) {
                 info.frameworkDirectory += "/" + (qtPath + currentPart + "/").simplified();
                 LogDebug() << "info.frameworkDirectory:" << info.frameworkDirectory;
-                state = DylibName;
-                continue;
-            } else if (part < parts.count() && parts.at(part).endsWith(".framework")) {
-                info.frameworkDirectory += "/" + (qtPath + "lib/").simplified();
-                state = FrameworkName;
+                state = LibraryName;
                 continue;
             } else if (trimmed.startsWith("/") == false) {      // If the line does not contain a full path, the app is using a binary Qt package.
                 QStringList partsCopy = parts;
@@ -278,39 +272,17 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
                         break;
                     }
                 }
-                /*
-                if (currentPart.contains(".framework")) {
-                    if (info.frameworkDirectory.isEmpty())
-                        info.frameworkDirectory = "/Library/Frameworks/" + partsCopy.join("/");
-                    if (!info.frameworkDirectory.endsWith("/"))
-                        info.frameworkDirectory += "/";
-                    state = FrameworkName;
-                    --part;
-                    continue;
-
-                } else if (currentPart.contains(".so")) {
-                */
-                    if (info.frameworkDirectory.isEmpty())
-                        info.frameworkDirectory = "/usr/lib/" + partsCopy.join("/");
-                    if (!info.frameworkDirectory.endsWith("/"))
-                        info.frameworkDirectory += "/";
-                    state = DylibName;
-                    --part;
-                    continue;
-                // }
+                if (info.frameworkDirectory.isEmpty())
+                    info.frameworkDirectory = "/usr/lib/" + partsCopy.join("/");
+                if (!info.frameworkDirectory.endsWith("/"))
+                    info.frameworkDirectory += "/";
+                state = LibraryName;
+                --part;
+                continue;
             }
             qtPath += (currentPart + "/");
 
-        } if (state == FrameworkName) {
-            // remove ".framework"
-            name = currentPart;
-            name.chop(QString(".framework").length());
-            info.isDylib = false;
-            info.frameworkName = currentPart;
-            state = Version;
-            ++part;
-            continue;
-        } if (state == DylibName) {
+        } if (state == LibraryName) {
             name = currentPart;
             info.isDylib = true;
             info.frameworkName = name;
@@ -438,13 +410,13 @@ QList<FrameworkInfo> getQtFrameworks(const QList<DylibInfo> &dependencies, const
     return libraries;
 }
 
-
+// TODO: Switch the following to using patchelf
 QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString executablePath = QString())
 {
     QSet<QString> rpaths;
 
     QProcess otool;
-    otool.start("patchelf", QStringList() << "--print-rpath" << path);
+    otool.start("objdump", QStringList() << "-x" << path);
     otool.waitForFinished();
 
     if (otool.exitCode() != 0) {
@@ -456,15 +428,20 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
     }
 
     QString output = otool.readAllStandardOutput();
-    LogDebug() << "output:" << output;
     QStringList outputLines = output.split("\n");
     QStringListIterator i(outputLines);
 
     while (i.hasNext()) {
-        const QString &rpathCmd = i.next();
-        QString rpath = rpathCmd.trimmed();
-        LogDebug() << "rpath:" << rpath;
-        rpaths << rpath;
+        if (i.next().contains("RUNPATH") && i.hasNext()) {
+            i.previous();
+            const QString &rpathCmd = i.next();
+            int pathStart = rpathCmd.indexOf("RUNPATH");
+            if (pathStart >= 0) {
+                QString rpath = rpathCmd.mid(pathStart+8).trimmed();
+                LogDebug() << "rpath:" << rpath;
+                rpaths << rpath;
+            }
+        }
     }
 
     return rpaths;
