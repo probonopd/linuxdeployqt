@@ -297,17 +297,6 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
             state = End;
             ++part;
             continue;
-        } else if (state == Version) {
-            info.version = currentPart;
-            info.binaryDirectory = "Versions/" + info.version;
-            info.binaryName = name + suffix;
-            info.binaryPath = "/" + info.binaryDirectory + "/" + info.binaryName;
-            info.deployedInstallName = "$ORIGIN"; // + info.frameworkName + info.binaryPath;
-            info.frameworkPath = info.frameworkDirectory + info.frameworkName;
-            info.sourceFilePath = info.frameworkPath + info.binaryPath;
-            info.frameworkDestinationDirectory = bundleFrameworkDirectory + "/" + info.frameworkName;
-            info.binaryDestinationDirectory = info.frameworkDestinationDirectory + "/" + info.binaryDirectory;
-            state = End;
         } else if (state == End) {
             break;
         }
@@ -655,7 +644,7 @@ DeploymentInfo deployQtFrameworks(QList<FrameworkInfo> frameworks,
                                   bool useLoaderPath)
 {
     LogNormal();
-    LogNormal() << "Deploying Qt frameworks found inside:" << binaryPaths;
+    LogNormal() << "Deploying libraries found inside:" << binaryPaths;
     QStringList copiedFrameworks;
     DeploymentInfo deploymentInfo;
     deploymentInfo.useLoaderPath = useLoaderPath;
