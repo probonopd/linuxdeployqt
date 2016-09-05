@@ -612,7 +612,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         const QString &bundlePath, const QStringList &binaryPaths, bool useDebugLibs,
                                   bool useLoaderPath)
 {
-    LogNormal();
+
     LogNormal() << "Deploying libraries found inside:" << binaryPaths;
     QStringList copiedLibraries;
     DeploymentInfo deploymentInfo;
@@ -695,7 +695,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
    QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appDirPath, allLibraryPaths, useDebugLibs);
    if (libraries.isEmpty() && !alwaysOwerwriteEnabled) {
-        LogWarning();
+
         LogWarning() << "Could not find any external Qt libraries to deploy in" << appDirPath;
         LogWarning() << "Perhaps linuxdeployqt was already used on" << appDirPath << "?";
         LogWarning() << "If so, you will need to rebuild" << appDirPath << "before trying again.";
@@ -791,7 +791,7 @@ void createQtConf(const QString &appDirPath)
 
     QFile qtconf(fileName);
     if (qtconf.exists() && !alwaysOwerwriteEnabled) {
-        LogWarning();
+
         LogWarning() << fileName << "already exists, will not overwrite.";
         LogWarning() << "To make sure the plugins are loaded from the correct location,";
         LogWarning() << "please make sure qt.conf contains the following lines:";
@@ -971,7 +971,7 @@ void changeQtLibraries(const QString appPath, const QString &qtPath, bool useDeb
     const QStringList libraryPaths = findAppLibraries(appPath);
     const QList<LibraryInfo> libraries = getQtLibrariesForPaths(QStringList() << appBinaryPath << libraryPaths, appPath, getBinaryRPaths(appBinaryPath, true), useDebugLibs);
     if (libraries.isEmpty()) {
-        LogWarning();
+
         LogWarning() << "Could not find any _external_ Qt libraries to change in" << appPath;
         return;
     } else {
