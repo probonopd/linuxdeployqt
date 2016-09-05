@@ -625,10 +625,17 @@ void runStrip(const QString &binaryPath)
     QProcess strip;
     strip.start("strip", QStringList() << "-x" << binaryPath);
     strip.waitForFinished();
-    if (strip.exitCode() != 0) {
-        LogError() << strip.readAllStandardError();
-        LogError() << strip.readAllStandardOutput();
+
+    if (strip.exitCode() == 0)
+        return;
+
+    if (strip.readAllStandardError().contains("Not enough room for program headers")) {
+        LogError() << QFileInfo(binaryPath).completeBaseName() << "already stripped.";
+    } else {
+        LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardError();
+        LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardOutput();
     }
+
 }
 
 void stripAppBinary(const QString &bundlePath)

@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
     if (argc > 1)
         appBinaryPath = QString::fromLocal8Bit(argv[1]);
-        appBinaryPath = QDir::cleanPath(appBinaryPath);
+        appBinaryPath = QDir::cleanPath(appBinaryPath).trimmed();
 
     if (argc < 2 || appBinaryPath.startsWith("-")) {
         qDebug() << "Usage: linuxdeployqt app-binary [options]";
