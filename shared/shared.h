@@ -25,8 +25,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef MAC_DEPLOMYMENT_SHARED_H
-#define MAC_DEPLOMYMENT_SHARED_H
+
+#ifndef LINUX_DEPLOMYMENT_SHARED_H
+#define LINUX_DEPLOMYMENT_SHARED_H
 
 #include <QString>
 #include <QStringList>
@@ -124,13 +125,7 @@ void stripAppBinary(const QString &bundlePath);
 QString findAppBinary(const QString &appBundlePath);
 QStringList findAppFrameworkNames(const QString &appBundlePath);
 QStringList findAppFrameworkPaths(const QString &appBundlePath);
-void codesignFile(const QString &identity, const QString &filePath);
-QSet<QString> codesignBundle(const QString &identity,
-                             const QString &appBundlePath,
-                             QList<QString> additionalBinariesContainingRpaths);
-void codesign(const QString &identity, const QString &appBundlePath);
-void createDiskImage(const QString &appBundlePath);
-void fixupFramework(const QString &appBundlePath);
+void createAppImage(const QString &appBundlePath);
 
 
 #endif

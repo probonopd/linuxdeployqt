@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = macdeployqt macchangeqt
+SUBDIRS = linuxdeployqt

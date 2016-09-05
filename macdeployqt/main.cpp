@@ -34,52 +34,66 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
-    QString appBundlePath;
-    if (argc > 1)
-        appBundlePath = QString::fromLocal8Bit(argv[1]);
+    QString appBinaryPath;
 
-    if (argc < 2 || appBundlePath.startsWith("-")) {
-        qDebug() << "Usage: macdeployqt app-bundle [options]";
+    if (argc > 1)
+        appBinaryPath = QString::fromLocal8Bit(argv[1]);
+        appBinaryPath = QDir::cleanPath(appBinaryPath);
+
+    if (argc < 2 || appBinaryPath.startsWith("-")) {
+        qDebug() << "Usage: linuxdeployqt app-binary [options]";
         qDebug() << "";
         qDebug() << "Options:";
         qDebug() << "   -verbose=<0-3>     : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
         qDebug() << "   -no-plugins        : Skip plugin deployment";
-        qDebug() << "   -dmg               : Create a .dmg disk image";
+        qDebug() << "   -appimage          : Create an AppImage";
         qDebug() << "   -no-strip          : Don't run 'strip' on the binaries";
         qDebug() << "   -use-debug-libs    : Deploy with debug versions of frameworks and plugins (implies -no-strip)";
         qDebug() << "   -executable=<path> : Let the given executable use the deployed frameworks too";
         qDebug() << "   -qmldir=<path>     : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite  : Copy files even if the target file exists";
-        qDebug() << "   -codesign=<ident>  : Run codesign with the given identity on all executables";
-        qDebug() << "   -appstore-compliant: Skip deployment of components that use private API";
         qDebug() << "   -libpath=<path>    : Add the given path to the library search path";
         qDebug() << "";
-        qDebug() << "macdeployqt takes an application bundle as input and makes it";
-        qDebug() << "self-contained by copying in the Qt frameworks and plugins that";
+        qDebug() << "linuxdeployqt takes an application as input and makes it";
+        qDebug() << "self-contained by copying in the Qt libraries and plugins that";
         qDebug() << "the application uses.";
         qDebug() << "";
-        qDebug() << "Plugins related to a framework are copied in with the";
-        qDebug() << "framework. The accessibility, image formats, and text codec";
+        qDebug() << "Plugins related to a Qt library are copied in with the";
+        qDebug() << "library. The accessibility, image formats, and text codec";
         qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
         qDebug() << "";
-        qDebug() << "Qt plugins may use private API and will cause the app to be";
-        qDebug() << "rejected from the Mac App store. MacDeployQt will print a warning";
-        qDebug() << "when known incompatible plugins are deployed. Use -appstore-compliant ";
-        qDebug() << "to skip these plugins. Currently two SQL plugins are known to";
-        qDebug() << "be incompatible: qsqlodbc and qsqlpsql.";
-        qDebug() << "";
-        qDebug() << "See the \"Deploying Applications on OS X\" topic in the";
-        qDebug() << "documentation for more information about deployment on OS X.";
+        qDebug() << "See the \"Deploying Applications on Linux\" topic in the";
+        qDebug() << "documentation for more information about deployment on Linux.";
 
         return 1;
     }
 
-    appBundlePath = QDir::cleanPath(appBundlePath);
+    QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).baseName());
 
-    if (QDir().exists(appBundlePath) == false) {
-        qDebug() << "Error: Could not find app bundle" << appBundlePath;
+    if (QDir().exists(appBinaryPath)) {
+        qDebug() << "app-binary:" << appBinaryPath;
+    } else {
+        qDebug() << "Error: Could not find app-binary" << appBinaryPath;
         return 1;
     }
+
+    QDir dir;
+    // QString appDir = QDir::cleanPath(appFile + "/../" + appName + ".AppDir");
+    QString appDir = QDir::cleanPath(appBinaryPath + "/../");
+
+    if (QDir().exists(appDir) == false) {
+        qDebug() << "Error: Could not find AppDir" << appDir;
+        return 1;
+    }
+
+    QString appBundlePath = appDir;
+
+    QFile appRun(appDir + "/AppRun");
+
+    if(appRun.exists()){
+        appRun.remove();
+    }
+    QFile::link(appBinaryPath, appDir + "/AppRun");
 
     bool plugins = true;
     bool dmg = false;
@@ -90,14 +104,10 @@ int main(int argc, char **argv)
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     QStringList qmlDirs;
-    extern bool runCodesign;
-    extern QString codesignIdentiy;
-    extern bool appstoreCompliant;
-    extern bool deployFramework;
 
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
-        if (argument == QByteArray("-no-plugins")) {
+        if (argument == QByteArray("-no-pluginss")) {
             LogDebug() << "Argument found:" << argument;
             plugins = false;
         } else if (argument == QByteArray("-dmg")) {
@@ -144,24 +154,6 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
-        } else if (argument.startsWith(QByteArray("-codesign"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            if (index < 0 || index >= argument.size()) {
-                LogError() << "Missing code signing identity";
-            } else {
-                runCodesign = true;
-                codesignIdentiy = argument.mid(index+1);
-            }
-        } else if (argument == QByteArray("-appstore-compliant")) {
-            LogDebug() << "Argument found:" << argument;
-            appstoreCompliant = true;
-
-        // Undocumented option, may not work as intented
-        } else if (argument == QByteArray("-deploy-framework")) {
-            LogDebug() << "Argument found:" << argument;
-            deployFramework = true;
-
         } else if (argument.startsWith("-")) {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
@@ -169,9 +161,6 @@ int main(int argc, char **argv)
      }
 
     DeploymentInfo deploymentInfo = deployQtFrameworks(appBundlePath, additionalExecutables, useDebugLibs);
-
-    if (deployFramework && deploymentInfo.isFramework)
-        fixupFramework(appBundlePath);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {
@@ -193,8 +182,7 @@ int main(int argc, char **argv)
     }
 
     if (plugins && !deploymentInfo.qtPath.isEmpty()) {
-        deploymentInfo.pluginPath = deploymentInfo.qtPath + "/plugins";
-        LogNormal();
+        deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
         deployPlugins(appBundlePath, deploymentInfo, useDebugLibs);
         createQtConf(appBundlePath);
     }
@@ -202,12 +190,9 @@ int main(int argc, char **argv)
     if (runStripEnabled)
         stripAppBinary(appBundlePath);
 
-    if (runCodesign)
-        codesign(codesignIdentiy, appBundlePath);
-
     if (dmg) {
         LogNormal();
-        createDiskImage(appBundlePath);
+        createAppImage(appBundlePath);
     }
 
     return 0;
