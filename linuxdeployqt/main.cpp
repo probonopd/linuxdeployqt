@@ -177,7 +177,8 @@ int main(int argc, char **argv)
 
         // Update deploymentInfo.deployedFrameworks - the QML imports
         // may have brought in extra frameworks as dependencies.
-        deploymentInfo.deployedFrameworks += findAppFrameworkNames(appBundlePath);
+        // deploymentInfo.deployedFrameworks += findAppFrameworkNames(appBundlePath);
+        deploymentInfo.deployedFrameworks += findAppLibraries(appBundlePath);
         deploymentInfo.deployedFrameworks = deploymentInfo.deployedFrameworks.toSet().toList();
     }
 

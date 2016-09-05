@@ -123,8 +123,7 @@ void changeInstallName(const QString &oldName, const QString &newName, const QSt
 void runStrip(const QString &binaryPath);
 void stripAppBinary(const QString &bundlePath);
 QString findAppBinary(const QString &appBundlePath);
-QStringList findAppFrameworkNames(const QString &appBundlePath);
-QStringList findAppFrameworkPaths(const QString &appBundlePath);
+QStringList findAppLibraries(const QString &appBundlePath);
 void createAppImage(const QString &appBundlePath);
 
 

@@ -131,7 +131,7 @@ bool linkFilePrintStatus(const QString &file, const QString &link)
         if (QFile(link).symLinkTarget().isEmpty())
             LogError() << link << "exists but it's a file.";
         else
-            LogNormal() << "Symlink exists, skipping:" << link;
+            qDebug() << "Symlink exists, skipping:" << link;
         return false;
     } else if (QFile::link(file, link)) {
         LogNormal() << " symlink" << link;
@@ -314,24 +314,6 @@ QString findAppBinary(const QString &appBundlePath)
 
     return QString();
 }
-
-QStringList findAppFrameworkNames(const QString &appBundlePath)
-{
-    QStringList frameworks;
-
-    // populate the frameworks list with QtFoo.framework etc,
-    // as found in /Contents/Frameworks/
-    QString searchPath = appBundlePath + bundleFrameworkDirectory;
-    QDirIterator iter(searchPath, QStringList() << QString::fromLatin1("*.framework"), QDir::Dirs);
-    while (iter.hasNext()) {
-        iter.next();
-        frameworks << iter.fileInfo().fileName();
-    }
-
-    return frameworks;
-}
-
-
 
 QStringList findAppLibraries(const QString &appBundlePath)
 {
@@ -606,7 +588,7 @@ void runStrip(const QString &binaryPath)
         return;
 
     if (strip.readAllStandardError().contains("Not enough room for program headers")) {
-        LogError() << QFileInfo(binaryPath).completeBaseName() << "already stripped.";
+        qDebug() << QFileInfo(binaryPath).completeBaseName() << "already stripped.";
     } else {
         LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardError();
         LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardOutput();
@@ -648,7 +630,7 @@ DeploymentInfo deployQtFrameworks(QList<FrameworkInfo> frameworks,
 
 
         if (framework.frameworkDirectory.startsWith(bundlePath)) {
-            LogError()  << framework.frameworkName << "already deployed, skipping.";
+            qDebug()  << framework.frameworkName << "already deployed, skipping.";
             continue;
         }
 
