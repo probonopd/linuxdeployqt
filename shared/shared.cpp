@@ -94,7 +94,7 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
         if (alwaysOwerwriteEnabled) {
             QFile(to).remove();
         } else {
-            qDebug() << "File exists, skip copy:" << to;
+            LogNormal() << "File exists, skip copy:" << to;
             return false;
         }
     }
@@ -131,7 +131,7 @@ bool linkFilePrintStatus(const QString &file, const QString &link)
         if (QFile(link).symLinkTarget().isEmpty())
             LogError() << link << "exists but it's a file.";
         else
-            qDebug() << "Symlink exists, skipping:" << link;
+            LogNormal() << "Symlink exists, skipping:" << link;
         return false;
     } else if (QFile::link(file, link)) {
         LogNormal() << " symlink" << link;
@@ -588,7 +588,7 @@ void runStrip(const QString &binaryPath)
         return;
 
     if (strip.readAllStandardError().contains("Not enough room for program headers")) {
-        qDebug() << QFileInfo(binaryPath).completeBaseName() << "already stripped.";
+        LogNormal() << QFileInfo(binaryPath).completeBaseName() << "already stripped.";
     } else {
         LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardError();
         LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardOutput();
@@ -630,7 +630,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
 
 
         if (library.libraryDirectory.startsWith(bundlePath)) {
-            qDebug()  << library.libraryName << "already deployed, skipping.";
+            LogNormal()  << library.libraryName << "already deployed, skipping.";
             continue;
         }
 
