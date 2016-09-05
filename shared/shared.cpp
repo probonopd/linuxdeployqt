@@ -144,19 +144,6 @@ bool linkFilePrintStatus(const QString &file, const QString &link)
     }
 }
 
-void patch_debugInInfoPlist(const QString &infoPlistPath)
-{
-    // Older versions of qmake may have the "_debug" binary as
-    // the value for CFBundleExecutable. Remove it.
-    QFile infoPlist(infoPlistPath);
-    infoPlist.open(QIODevice::ReadOnly);
-    QByteArray contents = infoPlist.readAll();
-    infoPlist.close();
-    infoPlist.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    contents.replace("_debug", ""); // surely there are no legit uses of "_debug" in an Info.plist
-    infoPlist.write(contents);
-}
-
 OtoolInfo findDependencyInfo(const QString &binaryPath)
 {
     OtoolInfo info;
