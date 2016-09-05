@@ -50,21 +50,21 @@ bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
 int logLevel = 1;
-bool deployFramework = false;
+bool deployLibrary = false;
 
 using std::cout;
 using std::endl;
 
-bool operator==(const FrameworkInfo &a, const FrameworkInfo &b)
+bool operator==(const LibraryInfo &a, const LibraryInfo &b)
 {
-    return ((a.frameworkPath == b.frameworkPath) && (a.binaryPath == b.binaryPath));
+    return ((a.libraryPath == b.libraryPath) && (a.binaryPath == b.binaryPath));
 }
 
-QDebug operator<<(QDebug debug, const FrameworkInfo &info)
+QDebug operator<<(QDebug debug, const LibraryInfo &info)
 {
-    debug << "Framework name" << info.frameworkName << "\n";
-    debug << "Framework directory" << info.frameworkDirectory << "\n";
-    debug << "Framework path" << info.frameworkPath << "\n";
+    debug << "Library name" << info.libraryName << "\n";
+    debug << "Library directory" << info.libraryDirectory << "\n";
+    debug << "Library path" << info.libraryPath << "\n";
     debug << "Binary directory" << info.binaryDirectory << "\n";
     debug << "Binary name" << info.binaryName << "\n";
     debug << "Binary path" << info.binaryPath << "\n";
@@ -72,13 +72,13 @@ QDebug operator<<(QDebug debug, const FrameworkInfo &info)
     debug << "Install name" << info.installName << "\n";
     debug << "Deployed install name" << info.deployedInstallName << "\n";
     debug << "Source file Path" << info.sourceFilePath << "\n";
-    debug << "Framework Destination Directory (relative to bundle)" << info.frameworkDestinationDirectory << "\n";
+    debug << "Library Destination Directory (relative to bundle)" << info.libraryDestinationDirectory << "\n";
     debug << "Binary Destination Directory (relative to bundle)" << info.binaryDestinationDirectory << "\n";
 
     return debug;
 }
 
-const QString bundleFrameworkDirectory = "lib"; // the same directory as the main executable; could define a relative subdirectory here
+const QString bundleLibraryDirectory = "lib"; // the same directory as the main executable; could define a relative subdirectory here
 
 inline QDebug operator<<(QDebug debug, const ApplicationBundleInfo &info)
 {
@@ -209,9 +209,9 @@ OtoolInfo findDependencyInfo(const QString &binaryPath)
     return info;
 }
 
-FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
+LibraryInfo parseOtoolLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
 {
-    FrameworkInfo info;
+    LibraryInfo info;
     QString trimmed = line.trimmed();
 
     LogDebug() << "parsing" << trimmed;
@@ -225,14 +225,14 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
     if (trimmed.startsWith("/lib"))
         return info;
 
-    enum State {QtPath, FrameworkName, LibraryName, Version, End};
+    enum State {QtPath, LibraryName, Version, End};
     State state = QtPath;
     int part = 0;
     QString name;
     QString qtPath;
     QString suffix = useDebugLibs ? "_debug" : "";
 
-    // Split the line into [Qt-path]/lib/qt[Module].framework/Versions/[Version]/
+    // Split the line into [Qt-path]/lib/qt[Module].library/Versions/[Version]/
     QStringList parts = trimmed.split("/");
     while (part < parts.count()) {
         const QString currentPart = parts.at(part).simplified() ;
@@ -243,8 +243,8 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
         if (state == QtPath) {
             // Check for library name part
             if (part < parts.count() && parts.at(part).contains(".so")) {
-                info.frameworkDirectory += "/" + (qtPath + currentPart + "/").simplified();
-                LogDebug() << "info.frameworkDirectory:" << info.frameworkDirectory;
+                info.libraryDirectory += "/" + (qtPath + currentPart + "/").simplified();
+                LogDebug() << "info.libraryDirectory:" << info.libraryDirectory;
                 state = LibraryName;
                 continue;
             } else if (trimmed.startsWith("/") == false) {      // If the line does not contain a full path, the app is using a binary Qt package.
@@ -255,14 +255,14 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
                         path += '/';
                     QString nameInPath = path + parts.join("/");
                     if (QFile::exists(nameInPath)) {
-                        info.frameworkDirectory = path + partsCopy.join("/");
+                        info.libraryDirectory = path + partsCopy.join("/");
                         break;
                     }
                 }
-                if (info.frameworkDirectory.isEmpty())
-                    info.frameworkDirectory = "/usr/lib/" + partsCopy.join("/");
-                if (!info.frameworkDirectory.endsWith("/"))
-                    info.frameworkDirectory += "/";
+                if (info.libraryDirectory.isEmpty())
+                    info.libraryDirectory = "/usr/lib/" + partsCopy.join("/");
+                if (!info.libraryDirectory.endsWith("/"))
+                    info.libraryDirectory += "/";
                 state = LibraryName;
                 --part;
                 continue;
@@ -272,15 +272,15 @@ FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundl
         } if (state == LibraryName) {
             name = currentPart;
             info.isDylib = true;
-            info.frameworkName = name;
+            info.libraryName = name;
             info.binaryName = name.left(name.indexOf('.')) + suffix + name.mid(name.indexOf('.'));
             info.deployedInstallName = "$ORIGIN"; // + info.binaryName;
-            info.frameworkPath = info.frameworkDirectory + info.binaryName;
-            info.sourceFilePath = info.frameworkPath;
-            info.frameworkDestinationDirectory = bundleFrameworkDirectory + "/";
-            info.binaryDestinationDirectory = info.frameworkDestinationDirectory;
-            info.binaryDirectory = info.frameworkDirectory;
-            info.binaryPath = info.frameworkPath;
+            info.libraryPath = info.libraryDirectory + info.binaryName;
+            info.sourceFilePath = info.libraryPath;
+            info.libraryDestinationDirectory = bundleLibraryDirectory + "/";
+            info.binaryDestinationDirectory = info.libraryDestinationDirectory;
+            info.binaryDirectory = info.libraryDirectory;
+            info.binaryPath = info.libraryPath;
             state = End;
             ++part;
             continue;
@@ -354,13 +354,13 @@ QStringList findAppBundleFiles(const QString &appBundlePath, bool absolutePath =
     return result;
 }
 
-QList<FrameworkInfo> getQtFrameworks(const QList<DylibInfo> &dependencies, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
+QList<LibraryInfo> getQtLibraries(const QList<DylibInfo> &dependencies, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
 {
-    QList<FrameworkInfo> libraries;
+    QList<LibraryInfo> libraries;
     for (const DylibInfo &dylibInfo : dependencies) {
-        FrameworkInfo info = parseOtoolLibraryLine(dylibInfo.binaryPath, appBundlePath, rpaths, useDebugLibs);
-        if (info.frameworkName.isEmpty() == false) {
-            LogDebug() << "Adding framework:";
+        LibraryInfo info = parseOtoolLibraryLine(dylibInfo.binaryPath, appBundlePath, rpaths, useDebugLibs);
+        if (info.libraryName.isEmpty() == false) {
+            LogDebug() << "Adding library:";
             LogDebug() << info;
             libraries.append(info);
         }
@@ -405,21 +405,21 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
     return rpaths;
 }
 
-QList<FrameworkInfo> getQtFrameworks(const QString &path, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
+QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
 {
     const OtoolInfo info = findDependencyInfo(path);
-    return getQtFrameworks(info.dependencies, appBundlePath, rpaths + getBinaryRPaths(path), useDebugLibs);
+    return getQtLibraries(info.dependencies, appBundlePath, rpaths + getBinaryRPaths(path), useDebugLibs);
 }
 
-QList<FrameworkInfo> getQtFrameworksForPaths(const QStringList &paths, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
+QList<LibraryInfo> getQtLibrariesForPaths(const QStringList &paths, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
 {
-    QList<FrameworkInfo> result;
+    QList<LibraryInfo> result;
     QSet<QString> existing;
 
     foreach (const QString &path, paths) {
-        foreach (const FrameworkInfo &info, getQtFrameworks(path, appBundlePath, rpaths, useDebugLibs)) {
-            if (!existing.contains(info.frameworkPath)) { // avoid duplicates
-                existing.insert(info.frameworkPath);
+        foreach (const LibraryInfo &info, getQtLibraries(path, appBundlePath, rpaths, useDebugLibs)) {
+            if (!existing.contains(info.libraryPath)) { // avoid duplicates
+                existing.insert(info.libraryPath);
                 result << info;
             }
         }
@@ -521,17 +521,17 @@ void recursiveCopyAndDeploy(const QString &appBundlePath, const QSet<QString> &r
     }
 }
 
-QString copyDylib(const FrameworkInfo &framework, const QString path)
+QString copyDylib(const LibraryInfo &library, const QString path)
 {
-    if (!QFile::exists(framework.sourceFilePath)) {
-        LogError() << "no file at" << framework.sourceFilePath;
+    if (!QFile::exists(library.sourceFilePath)) {
+        LogError() << "no file at" << library.sourceFilePath;
         return QString();
     }
 
     // Construct destination paths. The full path typically looks like
-    // MyApp.app/Contents/Frameworks/libfoo.dylib
-    QString dylibDestinationDirectory = path + QLatin1Char('/') + framework.frameworkDestinationDirectory;
-    QString dylibDestinationBinaryPath = dylibDestinationDirectory + QLatin1Char('/') + framework.binaryName;
+    // MyApp.app/Contents/Libraries/libfoo.dylib
+    QString dylibDestinationDirectory = path + QLatin1Char('/') + library.libraryDestinationDirectory;
+    QString dylibDestinationBinaryPath = dylibDestinationDirectory + QLatin1Char('/') + library.binaryName;
 
     // Create destination directory
     if (!QDir().mkpath(dylibDestinationDirectory)) {
@@ -544,7 +544,7 @@ QString copyDylib(const FrameworkInfo &framework, const QString path)
         return dylibDestinationBinaryPath;
 
     // Copy dylib binary
-    copyFilePrintStatus(framework.sourceFilePath, dylibDestinationBinaryPath);
+    copyFilePrintStatus(library.sourceFilePath, dylibDestinationBinaryPath);
     return dylibDestinationBinaryPath;
 }
 
@@ -602,83 +602,83 @@ void stripAppBinary(const QString &bundlePath)
 }
 
 /*
-    Deploys the the listed frameworks listed into an app bundle.
-    The frameworks are searched for dependencies, which are also deployed.
+    Deploys the the libraries listed into an app bundle.
+    The libraries are searched for dependencies, which are also deployed.
     (deploying Qt3Support will also deploy QtNetwork and QtSql for example.)
     Returns a DeploymentInfo structure containing the Qt path used and a
-    a list of actually deployed frameworks.
+    a list of actually deployed libraries.
 */
-DeploymentInfo deployQtFrameworks(QList<FrameworkInfo> frameworks,
+DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         const QString &bundlePath, const QStringList &binaryPaths, bool useDebugLibs,
                                   bool useLoaderPath)
 {
     LogNormal();
     LogNormal() << "Deploying libraries found inside:" << binaryPaths;
-    QStringList copiedFrameworks;
+    QStringList copiedLibraries;
     DeploymentInfo deploymentInfo;
     deploymentInfo.useLoaderPath = useLoaderPath;
     QSet<QString> rpathsUsed;
 
-    while (frameworks.isEmpty() == false) {
-        const FrameworkInfo framework = frameworks.takeFirst();
-        copiedFrameworks.append(framework.frameworkName);
+    while (libraries.isEmpty() == false) {
+        const LibraryInfo library = libraries.takeFirst();
+        copiedLibraries.append(library.libraryName);
 
-        if(framework.frameworkName.contains("libQt") and framework.frameworkName.contains("Core.so")) {
-            LogNormal() << "Setting deploymentInfo.qtPath to:" << framework.frameworkDirectory;
-            deploymentInfo.qtPath = framework.frameworkDirectory;
+        if(library.libraryName.contains("libQt") and library.libraryName.contains("Core.so")) {
+            LogNormal() << "Setting deploymentInfo.qtPath to:" << library.libraryDirectory;
+            deploymentInfo.qtPath = library.libraryDirectory;
         }
 
 
-        if (framework.frameworkDirectory.startsWith(bundlePath)) {
-            qDebug()  << framework.frameworkName << "already deployed, skipping.";
+        if (library.libraryDirectory.startsWith(bundlePath)) {
+            qDebug()  << library.libraryName << "already deployed, skipping.";
             continue;
         }
 
-        if (framework.rpathUsed.isEmpty() != true) {
-            rpathsUsed << framework.rpathUsed;
+        if (library.rpathUsed.isEmpty() != true) {
+            rpathsUsed << library.rpathUsed;
         }
 
-        // Copy the framework/dylib to the app bundle.
-        const QString deployedBinaryPath = copyDylib(framework, bundlePath);
+        // Copy the library/dylib to the app bundle.
+        const QString deployedBinaryPath = copyDylib(library, bundlePath);
         // Skip the rest if already was deployed.
         if (deployedBinaryPath.isNull())
             continue;
 
         runStrip(deployedBinaryPath);
 
-        if (!framework.rpathUsed.length()) {
-            changeIdentification(framework.deployedInstallName, deployedBinaryPath);
+        if (!library.rpathUsed.length()) {
+            changeIdentification(library.deployedInstallName, deployedBinaryPath);
         }
 
-        // Check for framework dependencies
-        QList<FrameworkInfo> dependencies = getQtFrameworks(deployedBinaryPath, bundlePath, rpathsUsed, useDebugLibs);
+        // Check for library dependencies
+        QList<LibraryInfo> dependencies = getQtLibraries(deployedBinaryPath, bundlePath, rpathsUsed, useDebugLibs);
 
-        foreach (FrameworkInfo dependency, dependencies) {
+        foreach (LibraryInfo dependency, dependencies) {
             if (dependency.rpathUsed.isEmpty() != true) {
                 rpathsUsed << dependency.rpathUsed;
             }
 
-            // Deploy framework if necessary.
-            if (copiedFrameworks.contains(dependency.frameworkName) == false && frameworks.contains(dependency) == false) {
-                frameworks.append(dependency);
+            // Deploy library if necessary.
+            if (copiedLibraries.contains(dependency.libraryName) == false && libraries.contains(dependency) == false) {
+                libraries.append(dependency);
             }
         }
     }
-    deploymentInfo.deployedFrameworks = copiedFrameworks;
+    deploymentInfo.deployedLibraries = copiedLibraries;
 
     deploymentInfo.rpathsUsed += rpathsUsed;
 
     return deploymentInfo;
 }
 
-DeploymentInfo deployQtFrameworks(const QString &appBundlePath, const QStringList &additionalExecutables, bool useDebugLibs)
+DeploymentInfo deployQtLibraries(const QString &appBundlePath, const QStringList &additionalExecutables, bool useDebugLibs)
 {
    ApplicationBundleInfo applicationBundle;
    applicationBundle.path = appBundlePath;
    LogDebug() << "applicationBundle.path:" << applicationBundle.path;
    applicationBundle.binaryPath = findAppBinary(appBundlePath);
    LogDebug() << "applicationBundle.binaryPath:" << applicationBundle.binaryPath;
-   changeIdentification("$ORIGIN/" + bundleFrameworkDirectory, applicationBundle.binaryPath);
+   changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
    applicationBundle.libraryPaths = findAppLibraries(appBundlePath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
 
@@ -693,15 +693,15 @@ DeploymentInfo deployQtFrameworks(const QString &appBundlePath, const QStringLis
 
    LogDebug() << "allLibraryPaths:" << allLibraryPaths;
 
-   QList<FrameworkInfo> frameworks = getQtFrameworksForPaths(allBinaryPaths, appBundlePath, allLibraryPaths, useDebugLibs);
-   if (frameworks.isEmpty() && !alwaysOwerwriteEnabled) {
+   QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appBundlePath, allLibraryPaths, useDebugLibs);
+   if (libraries.isEmpty() && !alwaysOwerwriteEnabled) {
         LogWarning();
-        LogWarning() << "Could not find any external Qt frameworks to deploy in" << appBundlePath;
+        LogWarning() << "Could not find any external Qt libraries to deploy in" << appBundlePath;
         LogWarning() << "Perhaps linuxdeployqt was already used on" << appBundlePath << "?";
         LogWarning() << "If so, you will need to rebuild" << appBundlePath << "before trying again.";
         return DeploymentInfo();
    } else {
-       return deployQtFrameworks(frameworks, applicationBundle.path, allBinaryPaths, useDebugLibs, !additionalExecutables.isEmpty());
+       return deployQtLibraries(libraries, applicationBundle.path, allBinaryPaths, useDebugLibs, !additionalExecutables.isEmpty());
    }
 }
 
@@ -724,33 +724,33 @@ void deployPlugins(const ApplicationBundleInfo &appBundleInfo, const QString &pl
     pluginList.append("printsupport/libcupsprintersupport.so");
 
     // Network
-    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtNetwork"))) {
+    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtNetwork"))) {
         QStringList bearerPlugins = QDir(pluginSourcePath +  QStringLiteral("/bearer")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, bearerPlugins) {
             pluginList.append(QStringLiteral("bearer/") + plugin);
         }
     }
 
-    // All image formats (svg if QtSvg.framework is used)
+    // All image formats (svg if QtSvg.library is used)
     QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
     foreach (const QString &plugin, imagePlugins) {
         if (plugin.contains(QStringLiteral("qsvg"))) {
-            if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtSvg")))
+            if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtSvg")))
                 pluginList.append(QStringLiteral("imageformats/") + plugin);
             pluginList.append(QStringLiteral("imageformats/") + plugin);
         }
     }
 
-    // Sql plugins if QtSql.framework is in use
-    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtSql"))) {
+    // Sql plugins if QtSql.library is in use
+    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtSql"))) {
         QStringList sqlPlugins = QDir(pluginSourcePath +  QStringLiteral("/sqldrivers")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, sqlPlugins) {
             pluginList.append(QStringLiteral("sqldrivers/") + plugin);
         }
     }
 
-    // multimedia plugins if QtMultimedia.framework is in use
-    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtMultimedia"))) {
+    // multimedia plugins if QtMultimedia.library is in use
+    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtMultimedia"))) {
         QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, plugins) {
             pluginList.append(QStringLiteral("mediaservice/") + plugin);
@@ -770,8 +770,8 @@ void deployPlugins(const ApplicationBundleInfo &appBundleInfo, const QString &pl
 
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
-            QList<FrameworkInfo> frameworks = getQtFrameworks(destinationPath, appBundleInfo.path, deploymentInfo.rpathsUsed, useDebugLibs);
-            deployQtFrameworks(frameworks, appBundleInfo.path, QStringList() << destinationPath, useDebugLibs, deploymentInfo.useLoaderPath);
+            QList<LibraryInfo> libraries = getQtLibraries(destinationPath, appBundleInfo.path, deploymentInfo.rpathsUsed, useDebugLibs);
+            deployQtLibraries(libraries, appBundleInfo.path, QStringList() << destinationPath, useDebugLibs, deploymentInfo.useLoaderPath);
         }
     }
 }
@@ -936,11 +936,11 @@ bool deployQmlImports(const QString &appBundlePath, DeploymentInfo deploymentInf
     // Special case:
     // Use of QtQuick.PrivateWidgets is not discoverable at deploy-time.
     // Recreate the run-time logic here as best as we can - deploy it iff
-    //      1) QtWidgets.framework is used
+    //      1) QtWidgets.library is used
     //      2) QtQuick.Controls is used
     // The intended failure mode is that libwidgetsplugin.dylib will be present
     // in the app bundle but not used at run-time.
-    if (deploymentInfo.deployedFrameworks.contains("QtWidgets.framework") && qtQuickContolsInUse) {
+    if (deploymentInfo.deployedLibraries.contains("QtWidgets.library") && qtQuickContolsInUse) {
         LogNormal() << "Deploying QML import QtQuick.PrivateWidgets";
         QString name = "QtQuick/PrivateWidgets";
         QString path = qmlImportsPath + QLatin1Char('/') + name;
@@ -950,33 +950,33 @@ bool deployQmlImports(const QString &appBundlePath, DeploymentInfo deploymentInf
     return true;
 }
 
-void changeQtFrameworks(const QList<FrameworkInfo> frameworks, const QStringList &binaryPaths, const QString &absoluteQtPath)
+void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &binaryPaths, const QString &absoluteQtPath)
 {
     LogNormal() << "Changing" << binaryPaths << "to link against";
     LogNormal() << "Qt in" << absoluteQtPath;
     QString finalQtPath = absoluteQtPath;
 
-    if (!absoluteQtPath.startsWith("/Library/Frameworks"))
+    if (!absoluteQtPath.startsWith("/Library/Libraries"))
         finalQtPath += "/lib/";
 
-    foreach (FrameworkInfo framework, frameworks) {
-        const QString oldBinaryId = framework.installName;
-        const QString newBinaryId = finalQtPath + framework.frameworkName +  framework.binaryPath;
+    foreach (LibraryInfo library, libraries) {
+        const QString oldBinaryId = library.installName;
+        const QString newBinaryId = finalQtPath + library.libraryName +  library.binaryPath;
     }
 }
 
-void changeQtFrameworks(const QString appPath, const QString &qtPath, bool useDebugLibs)
+void changeQtLibraries(const QString appPath, const QString &qtPath, bool useDebugLibs)
 {
     const QString appBinaryPath = findAppBinary(appPath);
     const QStringList libraryPaths = findAppLibraries(appPath);
-    const QList<FrameworkInfo> frameworks = getQtFrameworksForPaths(QStringList() << appBinaryPath << libraryPaths, appPath, getBinaryRPaths(appBinaryPath, true), useDebugLibs);
-    if (frameworks.isEmpty()) {
+    const QList<LibraryInfo> libraries = getQtLibrariesForPaths(QStringList() << appBinaryPath << libraryPaths, appPath, getBinaryRPaths(appBinaryPath, true), useDebugLibs);
+    if (libraries.isEmpty()) {
         LogWarning();
-        LogWarning() << "Could not find any _external_ Qt frameworks to change in" << appPath;
+        LogWarning() << "Could not find any _external_ Qt libraries to change in" << appPath;
         return;
     } else {
         const QString absoluteQtPath = QDir(qtPath).absolutePath();
-        changeQtFrameworks(frameworks, QStringList() << appBinaryPath << libraryPaths, absoluteQtPath);
+        changeQtLibraries(libraries, QStringList() << appBinaryPath << libraryPaths, absoluteQtPath);
     }
 }
 

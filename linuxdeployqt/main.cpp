@@ -48,8 +48,8 @@ int main(int argc, char **argv)
         qDebug() << "   -no-plugins        : Skip plugin deployment";
         qDebug() << "   -appimage          : Create an AppImage";
         qDebug() << "   -no-strip          : Don't run 'strip' on the binaries";
-        qDebug() << "   -use-debug-libs    : Deploy with debug versions of frameworks and plugins (implies -no-strip)";
-        qDebug() << "   -executable=<path> : Let the given executable use the deployed frameworks too";
+        qDebug() << "   -use-debug-libs    : Deploy with debug versions of libraries and plugins (implies -no-strip)";
+        qDebug() << "   -executable=<path> : Let the given executable use the deployed libraries too";
         qDebug() << "   -qmldir=<path>     : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite  : Copy files even if the target file exists";
         qDebug() << "   -libpath=<path>    : Add the given path to the library search path";
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
         }
      }
 
-    DeploymentInfo deploymentInfo = deployQtFrameworks(appBundlePath, additionalExecutables, useDebugLibs);
+    DeploymentInfo deploymentInfo = deployQtLibraries(appBundlePath, additionalExecutables, useDebugLibs);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {
@@ -175,11 +175,11 @@ int main(int argc, char **argv)
         if (!ok && qmldirArgumentUsed)
             return 1; // exit if the user explicitly asked for qml import deployment
 
-        // Update deploymentInfo.deployedFrameworks - the QML imports
-        // may have brought in extra frameworks as dependencies.
-        // deploymentInfo.deployedFrameworks += findAppFrameworkNames(appBundlePath);
-        deploymentInfo.deployedFrameworks += findAppLibraries(appBundlePath);
-        deploymentInfo.deployedFrameworks = deploymentInfo.deployedFrameworks.toSet().toList();
+        // Update deploymentInfo.deployedLibraries - the QML imports
+        // may have brought in extra libraries as dependencies.
+        // deploymentInfo.deployedLibraries += findAppLibraryNames(appBundlePath);
+        deploymentInfo.deployedLibraries += findAppLibraries(appBundlePath);
+        deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
     }
 
     if (plugins && !deploymentInfo.qtPath.isEmpty()) {

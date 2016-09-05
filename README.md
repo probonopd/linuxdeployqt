@@ -22,8 +22,8 @@ Options:
    -no-plugins        : Skip plugin deployment
    -appimage          : Create an AppImage
    -no-strip          : Don't run 'strip' on the binaries
-   -use-debug-libs    : Deploy with debug versions of frameworks and plugins (implies -no-strip)
-   -executable=<path> : Let the given executable use the deployed frameworks too
+   -use-debug-libs    : Deploy with debug versions of libraries and plugins (implies -no-strip)
+   -executable=<path> : Let the given executable use the deployed libraries too
    -qmldir=<path>     : Scan for QML imports in the given path
    -always-overwrite  : Copy files even if the target file exists
    -libpath=<path>    : Add the given path to the library search path

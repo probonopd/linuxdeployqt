@@ -43,13 +43,13 @@ extern int logLevel;
 
 extern bool runStripEnabled;
 
-class FrameworkInfo
+class LibraryInfo
 {
 public:
     bool isDylib;
-    QString frameworkDirectory;
-    QString frameworkName;
-    QString frameworkPath;
+    QString libraryDirectory;
+    QString libraryName;
+    QString libraryPath;
     QString binaryDirectory;
     QString binaryName;
     QString binaryPath;
@@ -58,7 +58,7 @@ public:
     QString installName;
     QString deployedInstallName;
     QString sourceFilePath;
-    QString frameworkDestinationDirectory;
+    QString libraryDestinationDirectory;
     QString binaryDestinationDirectory;
 };
 
@@ -80,8 +80,8 @@ public:
     QList<DylibInfo> dependencies;
 };
 
-bool operator==(const FrameworkInfo &a, const FrameworkInfo &b);
-QDebug operator<<(QDebug debug, const FrameworkInfo &info);
+bool operator==(const LibraryInfo &a, const LibraryInfo &b);
+QDebug operator<<(QDebug debug, const LibraryInfo &info);
 
 class ApplicationBundleInfo
 {
@@ -96,25 +96,25 @@ class DeploymentInfo
 public:
     QString qtPath;
     QString pluginPath;
-    QStringList deployedFrameworks;
+    QStringList deployedLibraries;
     QSet<QString> rpathsUsed;
     bool useLoaderPath;
-    bool isFramework;
+    bool isLibrary;
 };
 
 inline QDebug operator<<(QDebug debug, const ApplicationBundleInfo &info);
 
-void changeQtFrameworks(const QString appPath, const QString &qtPath, bool useDebugLibs);
-void changeQtFrameworks(const QList<FrameworkInfo> frameworks, const QStringList &binaryPaths, const QString &qtPath);
+void changeQtLibraries(const QString appPath, const QString &qtPath, bool useDebugLibs);
+void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &binaryPaths, const QString &qtPath);
 
 OtoolInfo findDependencyInfo(const QString &binaryPath);
-FrameworkInfo parseOtoolLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
+LibraryInfo parseOtoolLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
 QString findAppBinary(const QString &appBundlePath);
-QList<FrameworkInfo> getQtFrameworks(const QString &path, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
-QList<FrameworkInfo> getQtFrameworks(const QStringList &otoolLines, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
-QString copyFramework(const FrameworkInfo &framework, const QString path);
-DeploymentInfo deployQtFrameworks(const QString &appBundlePath, const QStringList &additionalExecutables, bool useDebugLibs);
-DeploymentInfo deployQtFrameworks(QList<FrameworkInfo> frameworks,const QString &bundlePath, const QStringList &binaryPaths, bool useDebugLibs, bool useLoaderPath);
+QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
+QList<LibraryInfo> getQtLibraries(const QStringList &otoolLines, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
+QString copyLibrary(const LibraryInfo &library, const QString path);
+DeploymentInfo deployQtLibraries(const QString &appBundlePath, const QStringList &additionalExecutables, bool useDebugLibs);
+DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useDebugLibs, bool useLoaderPath);
 void createQtConf(const QString &appBundlePath);
 void deployPlugins(const QString &appBundlePath, DeploymentInfo deploymentInfo, bool useDebugLibs);
 bool deployQmlImports(const QString &appBundlePath, DeploymentInfo deploymentInfo, QStringList &qmlDirs);
