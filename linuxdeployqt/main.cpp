@@ -86,7 +86,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    QString appBundlePath = appDir;
+    QString appDirPath = appDir;
 
     QFile appRun(appDir + "/AppRun");
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
         }
      }
 
-    DeploymentInfo deploymentInfo = deployQtLibraries(appBundlePath, additionalExecutables, useDebugLibs);
+    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables, useDebugLibs);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {
@@ -171,29 +171,29 @@ int main(int argc, char **argv)
     }
 
     if (!qmlDirs.isEmpty()) {
-        bool ok = deployQmlImports(appBundlePath, deploymentInfo, qmlDirs);
+        bool ok = deployQmlImports(appDirPath, deploymentInfo, qmlDirs);
         if (!ok && qmldirArgumentUsed)
             return 1; // exit if the user explicitly asked for qml import deployment
 
         // Update deploymentInfo.deployedLibraries - the QML imports
         // may have brought in extra libraries as dependencies.
-        // deploymentInfo.deployedLibraries += findAppLibraryNames(appBundlePath);
-        deploymentInfo.deployedLibraries += findAppLibraries(appBundlePath);
+        // deploymentInfo.deployedLibraries += findAppLibraryNames(appDirPath);
+        deploymentInfo.deployedLibraries += findAppLibraries(appDirPath);
         deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
     }
 
     if (plugins && !deploymentInfo.qtPath.isEmpty()) {
         deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
-        deployPlugins(appBundlePath, deploymentInfo, useDebugLibs);
-        createQtConf(appBundlePath);
+        deployPlugins(appDirPath, deploymentInfo, useDebugLibs);
+        createQtConf(appDirPath);
     }
 
     if (runStripEnabled)
-        stripAppBinary(appBundlePath);
+        stripAppBinary(appDirPath);
 
     if (dmg) {
         LogNormal();
-        createAppImage(appBundlePath);
+        createAppImage(appDirPath);
     }
 
     return 0;
