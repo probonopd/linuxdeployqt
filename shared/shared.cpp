@@ -144,19 +144,19 @@ bool linkFilePrintStatus(const QString &file, const QString &link)
     }
 }
 
-OtoolInfo findDependencyInfo(const QString &binaryPath)
+LddInfo findDependencyInfo(const QString &binaryPath)
 {
-    OtoolInfo info;
+    LddInfo info;
     info.binaryPath = binaryPath;
 
     LogDebug() << "Using ldd:";
     LogDebug() << " inspecting" << binaryPath;
-    QProcess otool;
-    otool.start("ldd", QStringList() << binaryPath);
-    otool.waitForFinished();
+    QProcess ldd;
+    ldd.start("ldd", QStringList() << binaryPath);
+    ldd.waitForFinished();
 
-    if (otool.exitStatus() != QProcess::NormalExit || otool.exitCode() != 0) {
-        LogError() << "findDependencyInfo:" << otool.readAllStandardError();
+    if (ldd.exitStatus() != QProcess::NormalExit || ldd.exitCode() != 0) {
+        LogError() << "findDependencyInfo:" << ldd.readAllStandardError();
         return info;
     }
 
@@ -170,7 +170,7 @@ OtoolInfo findDependencyInfo(const QString &binaryPath)
     */
 
 
-    QString output = otool.readAllStandardOutput();
+    QString output = ldd.readAllStandardOutput();
     QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
     if (outputLines.size() < 2) {
         if (output.contains("statically linked") == false){
@@ -209,7 +209,7 @@ OtoolInfo findDependencyInfo(const QString &binaryPath)
     return info;
 }
 
-LibraryInfo parseOtoolLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
+LibraryInfo parseLddLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
 {
     LibraryInfo info;
     QString trimmed = line.trimmed();
@@ -358,7 +358,7 @@ QList<LibraryInfo> getQtLibraries(const QList<DylibInfo> &dependencies, const QS
 {
     QList<LibraryInfo> libraries;
     for (const DylibInfo &dylibInfo : dependencies) {
-        LibraryInfo info = parseOtoolLibraryLine(dylibInfo.binaryPath, appBundlePath, rpaths, useDebugLibs);
+        LibraryInfo info = parseLddLibraryLine(dylibInfo.binaryPath, appBundlePath, rpaths, useDebugLibs);
         if (info.libraryName.isEmpty() == false) {
             LogDebug() << "Adding library:";
             LogDebug() << info;
@@ -373,19 +373,19 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
 {
     QSet<QString> rpaths;
 
-    QProcess otool;
-    otool.start("objdump", QStringList() << "-x" << path);
-    otool.waitForFinished();
+    QProcess ldd;
+    ldd.start("objdump", QStringList() << "-x" << path);
+    ldd.waitForFinished();
 
-    if (otool.exitCode() != 0) {
-        LogError() << "getBinaryRPaths:" << otool.readAllStandardError();
+    if (ldd.exitCode() != 0) {
+        LogError() << "getBinaryRPaths:" << ldd.readAllStandardError();
     }
 
     if (resolve && executablePath.isEmpty()) {
       executablePath = path;
     }
 
-    QString output = otool.readAllStandardOutput();
+    QString output = ldd.readAllStandardOutput();
     QStringList outputLines = output.split("\n");
     QStringListIterator i(outputLines);
 
@@ -407,7 +407,7 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
 
 QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs)
 {
-    const OtoolInfo info = findDependencyInfo(path);
+    const LddInfo info = findDependencyInfo(path);
     return getQtLibraries(info.dependencies, appBundlePath, rpaths + getBinaryRPaths(path), useDebugLibs);
 }
 

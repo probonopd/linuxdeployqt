@@ -70,7 +70,7 @@ public:
     QVersionNumber compatibilityVersion;
 };
 
-class OtoolInfo
+class LddInfo
 {
 public:
     QString installName;
@@ -107,11 +107,11 @@ inline QDebug operator<<(QDebug debug, const ApplicationBundleInfo &info);
 void changeQtLibraries(const QString appPath, const QString &qtPath, bool useDebugLibs);
 void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &binaryPaths, const QString &qtPath);
 
-OtoolInfo findDependencyInfo(const QString &binaryPath);
-LibraryInfo parseOtoolLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
+LddInfo findDependencyInfo(const QString &binaryPath);
+LibraryInfo parseLddLibraryLine(const QString &line, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
 QString findAppBinary(const QString &appBundlePath);
 QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
-QList<LibraryInfo> getQtLibraries(const QStringList &otoolLines, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
+QList<LibraryInfo> getQtLibraries(const QStringList &lddLines, const QString &appBundlePath, const QSet<QString> &rpaths, bool useDebugLibs);
 QString copyLibrary(const LibraryInfo &library, const QString path);
 DeploymentInfo deployQtLibraries(const QString &appBundlePath, const QStringList &additionalExecutables, bool useDebugLibs);
 DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useDebugLibs, bool useLoaderPath);
