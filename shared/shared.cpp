@@ -738,70 +738,49 @@ void deployPlugins(const ApplicationBundleInfo &appBundleInfo, const QString &pl
     pluginList.append("platforms/libqxcb.so");
 
     // CUPS print support
+    // TODO: Only install if libQt5PrintSupport.so* is about to be bundled?
     pluginList.append("printsupport/libcupsprintersupport.so");
 
     // Network
-    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtNetwork.framework"))) {
-        QStringList bearerPlugins = QDir(pluginSourcePath +  QStringLiteral("/bearer")).entryList(QStringList() << QStringLiteral("*.dylib"));
+    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtNetwork"))) {
+        QStringList bearerPlugins = QDir(pluginSourcePath +  QStringLiteral("/bearer")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, bearerPlugins) {
-            if (!plugin.endsWith(QStringLiteral("_debug.dylib")))
-                pluginList.append(QStringLiteral("bearer/") + plugin);
+            pluginList.append(QStringLiteral("bearer/") + plugin);
         }
     }
 
     // All image formats (svg if QtSvg.framework is used)
-    QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.dylib"));
+    QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
     foreach (const QString &plugin, imagePlugins) {
         if (plugin.contains(QStringLiteral("qsvg"))) {
-            if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtSvg.framework")))
+            if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtSvg")))
                 pluginList.append(QStringLiteral("imageformats/") + plugin);
-        } else if (!plugin.endsWith(QStringLiteral("_debug.dylib"))) {
             pluginList.append(QStringLiteral("imageformats/") + plugin);
         }
     }
 
     // Sql plugins if QtSql.framework is in use
-    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtSql.framework"))) {
-        QStringList sqlPlugins = QDir(pluginSourcePath +  QStringLiteral("/sqldrivers")).entryList(QStringList() << QStringLiteral("*.dylib"));
+    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtSql"))) {
+        QStringList sqlPlugins = QDir(pluginSourcePath +  QStringLiteral("/sqldrivers")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, sqlPlugins) {
-            if (plugin.endsWith(QStringLiteral("_debug.dylib")))
-                continue;
-
-            // Some sql plugins are known to cause app store rejections. Skip or warn for these plugins.
-            if (plugin.startsWith(QStringLiteral("libqsqlodbc")) || plugin.startsWith(QStringLiteral("libqsqlpsql"))) {
-                LogWarning() << "Plugin" << plugin << "uses private API and is not Mac App store compliant.";
-                if (appstoreCompliant) {
-                    LogWarning() << "Skip plugin" << plugin;
-                    continue;
-                }
-            }
-
             pluginList.append(QStringLiteral("sqldrivers/") + plugin);
         }
     }
 
     // multimedia plugins if QtMultimedia.framework is in use
-    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtMultimedia.framework"))) {
-        QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.dylib"));
+    if (deploymentInfo.deployedFrameworks.contains(QStringLiteral("QtMultimedia"))) {
+        QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, plugins) {
-            if (!plugin.endsWith(QStringLiteral("_debug.dylib")))
-                pluginList.append(QStringLiteral("mediaservice/") + plugin);
+            pluginList.append(QStringLiteral("mediaservice/") + plugin);
         }
-        plugins = QDir(pluginSourcePath + QStringLiteral("/audio")).entryList(QStringList() << QStringLiteral("*.dylib"));
+        plugins = QDir(pluginSourcePath + QStringLiteral("/audio")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, plugins) {
-            if (!plugin.endsWith(QStringLiteral("_debug.dylib")))
-                pluginList.append(QStringLiteral("audio/") + plugin);
+            pluginList.append(QStringLiteral("audio/") + plugin);
         }
     }
 
     foreach (const QString &plugin, pluginList) {
         QString sourcePath = pluginSourcePath + "/" + plugin;
-        if (useDebugLibs) {
-            // Use debug plugins if found.
-            QString debugSourcePath = sourcePath.replace(".dylib", "_debug.dylib");
-            if (QFile::exists(debugSourcePath))
-                sourcePath = debugSourcePath;
-        }
 
         const QString destinationPath = pluginDestinationPath + "/" + plugin;
         QDir dir;
