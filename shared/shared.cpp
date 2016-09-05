@@ -750,7 +750,7 @@ void deployPlugins(const ApplicationBundleInfo &appBundleInfo, const QString &pl
     // Platform plugin:
     pluginList.append("platforms/libqxcb.so");
 
-    // Cocoa print support
+    // CUPS print support
     pluginList.append("printsupport/libcupsprintersupport.so");
 
     // Network
