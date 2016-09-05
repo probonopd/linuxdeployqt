@@ -10,7 +10,7 @@ linuxdeployqt takes an application as input and makes it self-contained by copyi
 ## Installation
 
 * Open in Qt Creator and build
-* Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS)
+* Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS). To learn more about this, see http://blog.qt.io/blog/2011/10/28/rpath-and-runpath/
 
 ## Usage
 
