@@ -1,6 +1,6 @@
 # linuxdeployqt
 
-linuxdeployqt takes an application as input and makes it self-contained by copying in the Qt libraries and plugins that the application uses.
+linuxdeployqt takes an application as input and makes it self-contained by copying in the Qt libraries and plugins that the application uses. It is based on macdeployqt in the tools applications of the Qt Toolkit.
 
 __This is not fully working yet.__ Help is appreciated.
 
