@@ -48,7 +48,6 @@ int main(int argc, char **argv)
         qDebug() << "   -no-plugins        : Skip plugin deployment";
         qDebug() << "   -appimage          : Create an AppImage";
         qDebug() << "   -no-strip          : Don't run 'strip' on the binaries";
-        qDebug() << "   -use-debug-libs    : Deploy with debug versions of libraries and plugins (implies -no-strip)";
         qDebug() << "   -executable=<path> : Let the given executable use the deployed libraries too";
         qDebug() << "   -qmldir=<path>     : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite  : Copy files even if the target file exists";
@@ -97,7 +96,6 @@ int main(int argc, char **argv)
 
     bool plugins = true;
     bool dmg = false;
-    bool useDebugLibs = false;
     extern bool runStripEnabled;
     extern bool alwaysOwerwriteEnabled;
     extern QStringList librarySearchPath;
@@ -115,10 +113,6 @@ int main(int argc, char **argv)
             dmg = true;
         } else if (argument == QByteArray("-no-strip")) {
             LogDebug() << "Argument found:" << argument;
-            runStripEnabled = false;
-        } else if (argument == QByteArray("-use-debug-libs")) {
-            LogDebug() << "Argument found:" << argument;
-            useDebugLibs = true;
             runStripEnabled = false;
         } else if (argument.startsWith(QByteArray("-verbose"))) {
             LogDebug() << "Argument found:" << argument;
@@ -160,7 +154,7 @@ int main(int argc, char **argv)
         }
      }
 
-    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables, useDebugLibs);
+    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {
@@ -184,7 +178,7 @@ int main(int argc, char **argv)
 
     if (plugins && !deploymentInfo.qtPath.isEmpty()) {
         deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
-        deployPlugins(appDirPath, deploymentInfo, useDebugLibs);
+        deployPlugins(appDirPath, deploymentInfo);
         createQtConf(appDirPath);
     }
 

@@ -104,19 +104,19 @@ public:
 
 inline QDebug operator<<(QDebug debug, const AppDirInfo &info);
 
-void changeQtLibraries(const QString appPath, const QString &qtPath, bool useDebugLibs);
+void changeQtLibraries(const QString appPath, const QString &qtPath);
 void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &binaryPaths, const QString &qtPath);
 
 LddInfo findDependencyInfo(const QString &binaryPath);
-LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths, bool useDebugLibs);
+LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths);
 QString findAppBinary(const QString &appDirPath);
-QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appDirPath, const QSet<QString> &rpaths, bool useDebugLibs);
-QList<LibraryInfo> getQtLibraries(const QStringList &lddLines, const QString &appDirPath, const QSet<QString> &rpaths, bool useDebugLibs);
+QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appDirPath, const QSet<QString> &rpaths);
+QList<LibraryInfo> getQtLibraries(const QStringList &lddLines, const QString &appDirPath, const QSet<QString> &rpaths);
 QString copyLibrary(const LibraryInfo &library, const QString path);
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, bool useDebugLibs);
-DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useDebugLibs, bool useLoaderPath);
+DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables);
+DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useLoaderPath);
 void createQtConf(const QString &appDirPath);
-void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo, bool useDebugLibs);
+void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo);
 bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs);
 void changeIdentification(const QString &id, const QString &binaryPath);
 void changeInstallName(const QString &oldName, const QString &newName, const QString &binaryPath);

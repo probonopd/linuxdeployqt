@@ -209,7 +209,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     return info;
 }
 
-LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths, bool useDebugLibs)
+LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths)
 {
     LibraryInfo info;
     QString trimmed = line.trimmed();
@@ -230,7 +230,7 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     int part = 0;
     QString name;
     QString qtPath;
-    QString suffix = useDebugLibs ? "_debug" : "";
+    QString suffix = "";
 
     // Split the line into [Qt-path]/lib/qt[Module].library/Versions/[Version]/
     QStringList parts = trimmed.split("/");
@@ -326,8 +326,8 @@ QStringList findAppLibraries(const QString &appDirPath)
         iter.next();
         result << iter.fileInfo().filePath();
     }
-    // .so.*
-    QDirIterator iter2(appDirPath, QStringList() << QString::fromLatin1("*.so.*"),
+    // .so.*, FIXME: Is the above really needed or is it covered by the below too?
+    QDirIterator iter2(appDirPath, QStringList() << QString::fromLatin1("*.so*"),
             QDir::Files, QDirIterator::Subdirectories);
 
     while (iter2.hasNext()) {
@@ -354,11 +354,11 @@ QStringList findAppBundleFiles(const QString &appDirPath, bool absolutePath = fa
     return result;
 }
 
-QList<LibraryInfo> getQtLibraries(const QList<DylibInfo> &dependencies, const QString &appDirPath, const QSet<QString> &rpaths, bool useDebugLibs)
+QList<LibraryInfo> getQtLibraries(const QList<DylibInfo> &dependencies, const QString &appDirPath, const QSet<QString> &rpaths)
 {
     QList<LibraryInfo> libraries;
     for (const DylibInfo &dylibInfo : dependencies) {
-        LibraryInfo info = parseLddLibraryLine(dylibInfo.binaryPath, appDirPath, rpaths, useDebugLibs);
+        LibraryInfo info = parseLddLibraryLine(dylibInfo.binaryPath, appDirPath, rpaths);
         if (info.libraryName.isEmpty() == false) {
             LogDebug() << "Adding library:";
             LogDebug() << info;
@@ -405,19 +405,19 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
     return rpaths;
 }
 
-QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appDirPath, const QSet<QString> &rpaths, bool useDebugLibs)
+QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appDirPath, const QSet<QString> &rpaths)
 {
     const LddInfo info = findDependencyInfo(path);
-    return getQtLibraries(info.dependencies, appDirPath, rpaths + getBinaryRPaths(path), useDebugLibs);
+    return getQtLibraries(info.dependencies, appDirPath, rpaths + getBinaryRPaths(path));
 }
 
-QList<LibraryInfo> getQtLibrariesForPaths(const QStringList &paths, const QString &appDirPath, const QSet<QString> &rpaths, bool useDebugLibs)
+QList<LibraryInfo> getQtLibrariesForPaths(const QStringList &paths, const QString &appDirPath, const QSet<QString> &rpaths)
 {
     QList<LibraryInfo> result;
     QSet<QString> existing;
 
     foreach (const QString &path, paths) {
-        foreach (const LibraryInfo &info, getQtLibraries(path, appDirPath, rpaths, useDebugLibs)) {
+        foreach (const LibraryInfo &info, getQtLibraries(path, appDirPath, rpaths)) {
             if (!existing.contains(info.libraryPath)) { // avoid duplicates
                 existing.insert(info.libraryPath);
                 result << info;
@@ -609,7 +609,7 @@ void stripAppBinary(const QString &bundlePath)
     a list of actually deployed libraries.
 */
 DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
-        const QString &bundlePath, const QStringList &binaryPaths, bool useDebugLibs,
+        const QString &bundlePath, const QStringList &binaryPaths,
                                   bool useLoaderPath)
 {
 
@@ -651,7 +651,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         }
 
         // Check for library dependencies
-        QList<LibraryInfo> dependencies = getQtLibraries(deployedBinaryPath, bundlePath, rpathsUsed, useDebugLibs);
+        QList<LibraryInfo> dependencies = getQtLibraries(deployedBinaryPath, bundlePath, rpathsUsed);
 
         foreach (LibraryInfo dependency, dependencies) {
             if (dependency.rpathUsed.isEmpty() != true) {
@@ -671,7 +671,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
     return deploymentInfo;
 }
 
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, bool useDebugLibs)
+DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables)
 {
    AppDirInfo applicationBundle;
    applicationBundle.path = appDirPath;
@@ -693,7 +693,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
    LogDebug() << "allLibraryPaths:" << allLibraryPaths;
 
-   QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appDirPath, allLibraryPaths, useDebugLibs);
+   QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appDirPath, allLibraryPaths);
    if (libraries.isEmpty() && !alwaysOwerwriteEnabled) {
 
         LogWarning() << "Could not find any external Qt libraries to deploy in" << appDirPath;
@@ -701,12 +701,12 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
         LogWarning() << "If so, you will need to rebuild" << appDirPath << "before trying again.";
         return DeploymentInfo();
    } else {
-       return deployQtLibraries(libraries, applicationBundle.path, allBinaryPaths, useDebugLibs, !additionalExecutables.isEmpty());
+       return deployQtLibraries(libraries, applicationBundle.path, allBinaryPaths, !additionalExecutables.isEmpty());
    }
 }
 
 void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath,
-        const QString pluginDestinationPath, DeploymentInfo deploymentInfo, bool useDebugLibs)
+        const QString pluginDestinationPath, DeploymentInfo deploymentInfo)
 {
     LogNormal() << "Deploying plugins from" << pluginSourcePath;
 
@@ -770,8 +770,8 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
-            QList<LibraryInfo> libraries = getQtLibraries(destinationPath, appDirInfo.path, deploymentInfo.rpathsUsed, useDebugLibs);
-            deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, useDebugLibs, deploymentInfo.useLoaderPath);
+            QList<LibraryInfo> libraries = getQtLibraries(destinationPath, appDirInfo.path, deploymentInfo.rpathsUsed);
+            deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
         }
     }
 }
@@ -807,14 +807,14 @@ void createQtConf(const QString &appDirPath)
     }
 }
 
-void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo, bool useDebugLibs)
+void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo)
 {
     AppDirInfo applicationBundle;
     applicationBundle.path = appDirPath;
     applicationBundle.binaryPath = findAppBinary(appDirPath);
 
     const QString pluginDestinationPath = appDirPath + "/" + "plugins";
-    deployPlugins(applicationBundle, deploymentInfo.pluginPath, pluginDestinationPath, deploymentInfo, useDebugLibs);
+    deployPlugins(applicationBundle, deploymentInfo.pluginPath, pluginDestinationPath, deploymentInfo);
 }
 
 void deployQmlImport(const QString &appDirPath, const QSet<QString> &rpaths, const QString &importSourcePath, const QString &importName)
@@ -965,11 +965,11 @@ void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &bi
     }
 }
 
-void changeQtLibraries(const QString appPath, const QString &qtPath, bool useDebugLibs)
+void changeQtLibraries(const QString appPath, const QString &qtPath)
 {
     const QString appBinaryPath = findAppBinary(appPath);
     const QStringList libraryPaths = findAppLibraries(appPath);
-    const QList<LibraryInfo> libraries = getQtLibrariesForPaths(QStringList() << appBinaryPath << libraryPaths, appPath, getBinaryRPaths(appBinaryPath, true), useDebugLibs);
+    const QList<LibraryInfo> libraries = getQtLibrariesForPaths(QStringList() << appBinaryPath << libraryPaths, appPath, getBinaryRPaths(appBinaryPath, true));
     if (libraries.isEmpty()) {
 
         LogWarning() << "Could not find any _external_ Qt libraries to change in" << appPath;
