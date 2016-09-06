@@ -30,5 +30,6 @@ script:
   - find .
   - strip linuxdeployqt/linuxdeployqt
   - curl --upload-file ./linuxdeployqt/linuxdeployqt https://transfer.sh/linuxdeployqt
-  - mkdir linuxdeployqt.AppDir ; cp linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/AppRun
-  - linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/AppRun
+  - mkdir linuxdeployqt.AppDir
+  - cp /usr/local/bin/linuxdeployqt linuxdeployqt.AppDir/AppRun
+  - linuxdeployqt linuxdeployqt.AppDir/AppRun --verbose=3
