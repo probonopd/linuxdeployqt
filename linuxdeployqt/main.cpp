@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     QFile::link(appBinaryPath, appDir + "/AppRun");
 
     bool plugins = true;
-    bool dmg = false;
+    bool appimage = false;
     extern bool runStripEnabled;
     extern bool alwaysOwerwriteEnabled;
     extern QStringList librarySearchPath;
@@ -108,9 +108,9 @@ int main(int argc, char **argv)
         if (argument == QByteArray("-no-pluginss")) {
             LogDebug() << "Argument found:" << argument;
             plugins = false;
-        } else if (argument == QByteArray("-dmg")) {
+        } else if (argument == QByteArray("-appimage")) {
             LogDebug() << "Argument found:" << argument;
-            dmg = true;
+            appimage = true;
         } else if (argument == QByteArray("-no-strip")) {
             LogDebug() << "Argument found:" << argument;
             runStripEnabled = false;
@@ -154,6 +154,11 @@ int main(int argc, char **argv)
         }
      }
 
+    if (appimage) {
+        if(checkAppImagePrerequisites(appDirPath) == false)
+            return 1;
+    }
+
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
@@ -185,8 +190,7 @@ int main(int argc, char **argv)
     if (runStripEnabled)
         stripAppBinary(appDirPath);
 
-    if (dmg) {
-        LogNormal();
+    if (appimage) {
         createAppImage(appDirPath);
     }
 

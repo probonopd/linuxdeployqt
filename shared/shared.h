@@ -125,6 +125,6 @@ void stripAppBinary(const QString &bundlePath);
 QString findAppBinary(const QString &appDirPath);
 QStringList findAppLibraries(const QString &appDirPath);
 void createAppImage(const QString &appBundlePath);
-
+bool checkAppImagePrerequisites(const QString &appBundlePath);
 
 #endif

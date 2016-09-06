@@ -980,32 +980,70 @@ void changeQtLibraries(const QString appPath, const QString &qtPath)
     }
 }
 
-void createAppImage(const QString &appDirPath)
+bool checkAppImagePrerequisites(const QString &appDirPath)
 {
-    QString appBaseName = appDirPath;
-    appBaseName.chop(4); // remove ".app" from end
-
-    QString dmgName = appBaseName + ".dmg";
-
-    QFile dmg(dmgName);
-
-    if (dmg.exists() && alwaysOwerwriteEnabled)
-        dmg.remove();
-
-    if (dmg.exists()) {
-        LogNormal() << "Disk image already exists, skipping .dmg creation for" << dmg.fileName();
-    } else {
-        LogNormal() << "Creating disk image (.dmg) for" << appDirPath;
+    QDirIterator iter(appDirPath, QStringList() << QString::fromLatin1("*.desktop"),
+            QDir::Files, QDirIterator::Subdirectories);
+    if (!iter.hasNext()) {
+        LogError() << "Desktop file missing, cannot create AppImage";
+        // TODO: Create a generic desktop file (never overwrite an existing one though!)
+        return false;
     }
 
-    // More dmg options can be found in the hdiutil man page.
-    QStringList options = QStringList()
-            << "create" << dmgName
-            << "-srcfolder" << appDirPath
-            << "-format" << "UDZO"
-            << "-volname" << appBaseName;
+    // TODO: Compare whether the icon filename matches the Icon= entry without ending in the *.desktop file above
+    QDirIterator iter2(appDirPath, QStringList() << QString::fromLatin1("*.png"),
+            QDir::Files, QDirIterator::Subdirectories);
+    if (!iter2.hasNext()) {
+        LogError() << "Icon file missing, cannot create AppImage";
+        // TODO: Create a generic icon (never overwrite an existing one though!)
+        return false;
+    }
+    return true;
+}
 
-    QProcess hdutil;
-    hdutil.start("hdiutil", options);
-    hdutil.waitForFinished(-1);
+void createAppImage(const QString &appDirPath)
+{
+    QString appImagePath = appDirPath + ".AppImage";
+
+    QFile appImage(appImagePath);
+    LogDebug() << "appImageName:" << appImagePath;
+
+    if (appImage.exists() && alwaysOwerwriteEnabled)
+        appImage.remove();
+
+    if (appImage.exists()) {
+        LogNormal() << "AppImage already exists, skipping .AppImage creation for" << appImage.fileName();
+        LogNormal() << "use -always-overwrite to overwrite";
+    } else {
+        LogNormal() << "Creating AppImage for" << appDirPath;
+    }
+
+    QStringList options = QStringList()  << appDirPath << appImagePath;
+
+    QProcess appImageAssistant;
+    appImageAssistant.start("AppImageAssistant", options);
+    appImageAssistant.waitForFinished(-1);
+
+    // FIXME: How to get the output to appear on the console as it happens rather than after the fact?
+    QString output = appImageAssistant.readAllStandardError();
+    QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
+
+    for (const QString &outputLine : outputLines) {
+        // xorriso spits out a lot of WARNINGs which in the context of AppImage can be safely ignored
+        if(!outputLine.contains("WARNING")) {
+            LogNormal() << outputLine;
+        }
+    }
+
+    // AppImageAssistant doesn't always give nonzero error codes, so we check for the presence of the AppImage file
+    // This should eventually be fixed in AppImageAssistant
+    if (!QFile(appDirPath).exists()) {
+        LogError() << "FIXME: TODO: Check for the presence of AppImageAssistant on the $PATH";
+        if(appImageAssistant.readAllStandardOutput().isEmpty() == false)
+            LogError() << "AppImageAssistant:" << appImageAssistant.readAllStandardOutput();
+        if(appImageAssistant.readAllStandardError().isEmpty() == false)
+            LogError() << "AppImageAssistant:" << appImageAssistant.readAllStandardError();
+    } else {
+        LogNormal() << "Created AppImage at" << appImagePath;
+    }
 }
