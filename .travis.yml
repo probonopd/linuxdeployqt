@@ -1,10 +1,17 @@
-# Is Qt 4 sufficient?
+language: c++
+os:
+- linux
 
-install:
-  - sudo apt-get update
-  - sudo apt-get install libqt4-dev qt4-qmake
+sudo: required
+dist: trusty
 
+before_install:
+    - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+    - sudo apt-get -qq update
+    - sudo apt-get -qq install qt55base
+    - sudo apt-get install -y build-essential cmake 
+compiler: g++
 script:
-  - qmake -project
-  - qmake linuxdeployqt.pro
-  - make linuxdeployqt.pro
+    - source /opt/qt55/bin/qt55-env.sh
+    - /opt/qt55/bin/qmake
+    - make
