@@ -173,10 +173,8 @@ int main(int argc, char **argv)
         bool ok = deployQmlImports(appDirPath, deploymentInfo, qmlDirs);
         if (!ok && qmldirArgumentUsed)
             return 1; // exit if the user explicitly asked for qml import deployment
-
         // Update deploymentInfo.deployedLibraries - the QML imports
         // may have brought in extra libraries as dependencies.
-        // deploymentInfo.deployedLibraries += findAppLibraryNames(appDirPath);
         deploymentInfo.deployedLibraries += findAppLibraries(appDirPath);
         deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
     }

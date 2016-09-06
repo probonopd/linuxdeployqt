@@ -743,6 +743,11 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         const QString destinationPath = pluginDestinationPath + "/" + plugin;
         QDir dir;
         dir.mkpath(QFileInfo(destinationPath).path());
+        LogError() << "FIXME: Need to scan" << destinationPath << "for additional dependencies (this is not yorking yet)";
+        LogError() << "FIXME: Update deploymentInfo.deployedLibraries - the plugins";
+        LogError() << "FIXME: will have brought in extra libraries as dependencies (e.g., plugins/platforms/libqxcb.so needs libQt5XcbQpa.so.5)";
+        deploymentInfo.deployedLibraries += findAppLibraries(destinationPath);
+        deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
 
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
