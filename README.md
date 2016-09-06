@@ -16,7 +16,7 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 ## Installation
 
-* Get and build linuxdeployqt e.g., in Qt Creator 5.7
+* Get and build linuxdeployqt e.g., using Qt 5.7.0 (you could use this [Qt Creator AppImage](https://bintray.com/probono/AppImages/QtCreator#files) for this)
 
 ```
 sudo apt-get -y install git g++
