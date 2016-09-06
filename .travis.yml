@@ -17,7 +17,6 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  # Packages from https://launchpad.net/~beineri/+archive/ubuntu/opt-qt57-trusty
   - sudo apt-get -y install qt51tools qt51base
 
 script:
@@ -27,4 +26,5 @@ script:
   - find .
   - strip linuxdeployqt/linuxdeployqt
   - curl --upload-file ./linuxdeployqt/linuxdeployqt https://transfer.sh/linuxdeployqt
-  # TODO: linuxdeployqt itself and create an AppImage
+  - mkdir linuxdeployqt.AppDir ; cp linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/AppRun
+  - linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/AppRun
