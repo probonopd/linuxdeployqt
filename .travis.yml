@@ -1,0 +1,8 @@
+install:
+  - sudo apt-get update
+  - sudo apt-get install libqt4-dev qt4-qmake
+
+script:
+  - qmake -project
+  - qmake linuxdeployqt.pro
+  - make linuxdeployqt.pro
