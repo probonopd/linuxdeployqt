@@ -6,7 +6,7 @@ This Linux Deployment Tool for Qt, `linuxdeployqt`, takes an application as inpu
 This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt-5/osx-deployment.html), `macdeployqt` in the tools applications of the Qt Toolkit, but has been changed to a slightly different logic and other tools needed for Linux.
 
 * Instead of an `.app` bundle for macOS, this produces an [AppDir](http://rox.sourceforge.net/desktop/AppDirs.html) for Linux
-* Instead of a `.dmg` disk image for macOS, this produces an [AppImage](http://appimage.org/) which is quite similar to a dmg but executes the contained application rather than just opening a window on the desktop from where the application can be launched
+* Instead of a `.dmg` disk image for macOS, this produces an [AppImage](http://appimage.org/) for Linux which is quite similar to a dmg but executes the contained application rather than just opening a window on the desktop from where the application can be launched
 
 ## Known issues
 
