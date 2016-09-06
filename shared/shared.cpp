@@ -335,23 +335,6 @@ QStringList findAppLibraries(const QString &appDirPath)
     return result;
 }
 
-QStringList findAppBundleFiles(const QString &appDirPath, bool absolutePath = false)
-{
-    QStringList result;
-
-    QDirIterator iter(appDirPath, QStringList() << QString::fromLatin1("*"),
-            QDir::Files, QDirIterator::Subdirectories);
-
-    while (iter.hasNext()) {
-        iter.next();
-        if (iter.fileInfo().isSymLink())
-            continue;
-        result << (absolutePath ? iter.fileInfo().absoluteFilePath() : iter.fileInfo().filePath());
-    }
-
-    return result;
-}
-
 QList<LibraryInfo> getQtLibraries(const QList<DylibInfo> &dependencies, const QString &appDirPath, const QSet<QString> &rpaths)
 {
     QList<LibraryInfo> libraries;
