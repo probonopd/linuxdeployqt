@@ -1,17 +1,10 @@
-language: c++
-os:
-- linux
-
 sudo: required
 dist: trusty
 
-before_install:
-    - sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
-    - sudo apt-get -qq update
-    - sudo apt-get -qq install qt55base
-    - sudo apt-get install -y build-essential cmake 
-compiler: g++
+install:
+  - sudo apt-get install -y qt5-default qttools5-dev-tools
+
 script:
-    - source /opt/qt55/bin/qt55-env.sh
-    - /opt/qt55/bin/qmake
-    - make
+  - qmake linuxdeployqt.pro 
+  - make
+  - ./linuxdeployqt
