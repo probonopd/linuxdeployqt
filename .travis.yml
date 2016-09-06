@@ -24,4 +24,7 @@ script:
   - source /opt/qt57/bin/qt57-env.sh
   - /opt/qt57/bin/qmake linuxdeployqt.pro
   - make CXX='g++-6' -j7
-  - ./linuxdeployqt
+  - find .
+  - strip linuxdeployqt/linuxdeployqt
+  - curl --upload-file ./linuxdeployqt/linuxdeployqt https://transfer.sh/linuxdeployqt
+  # TODO: linuxdeployqt itself and create an AppImage
