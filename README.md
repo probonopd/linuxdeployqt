@@ -1,6 +1,12 @@
 # linuxdeployqt
 
-linuxdeployqt takes an application as input and makes it self-contained by copying in the Qt libraries and plugins that the application uses into an [AppDir](http://rox.sourceforge.net/desktop/AppDirs.html) bundle. This can optionally be put into an [AppImage](http://appimage.org/). It is based on macdeployqt in the tools applications of the Qt Toolkit.
+This Linux Deployment Tool for Qt, `linuxdeployqt`, takes an application as input and makes it self-contained by copying in the Qt libraries and plugins that the application uses into a bundle. This can optionally be put into an [AppImage](http://appimage.org/).
+
+## Differences to macdeployqt
+This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt-5/osx-deployment.html), `macdeployqt` in the tools applications of the Qt Toolkit, but has been changed to a slightly different logic and other tools needed for Linux.
+
+* Instead of an `.app` bundle for macOS, this produces an [AppDir](http://rox.sourceforge.net/desktop/AppDirs.html) for Linux
+* Instead of a `.dmg` disk image for macOS, this produces an [AppImage](http://appimage.org/) which is quite similar to a dmg but executes the contained application rather than just opening a window on the desktop from where the application can be launched
 
 ## Known issues
 
