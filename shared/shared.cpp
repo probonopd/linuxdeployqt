@@ -125,25 +125,6 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
     }
 }
 
-bool linkFilePrintStatus(const QString &file, const QString &link)
-{
-    if (QFile(link).exists()) {
-        if (QFile(link).symLinkTarget().isEmpty())
-            LogError() << link << "exists but it's a file.";
-        else
-            LogNormal() << "Symlink exists, skipping:" << link;
-        return false;
-    } else if (QFile::link(file, link)) {
-        LogNormal() << " symlink" << link;
-        LogNormal() << " points to" << file;
-        return true;
-    } else {
-        LogError() << "failed to symlink" << link;
-        LogError() << " to" << file;
-        return false;
-    }
-}
-
 LddInfo findDependencyInfo(const QString &binaryPath)
 {
     LddInfo info;
@@ -162,13 +143,6 @@ LddInfo findDependencyInfo(const QString &binaryPath)
 
     static const QRegularExpression regexp(QStringLiteral(
         "^.+ => (.+) \\("));
-
-    /*
-    static const QRegularExpression regexp(QStringLiteral(
-        "^\\t(.+) \\(compatibility version (\\d+\\.\\d+\\.\\d+), "
-        "current version (\\d+\\.\\d+\\.\\d+)\\)$"));
-    */
-
 
     QString output = ldd.readAllStandardOutput();
     QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
