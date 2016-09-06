@@ -33,7 +33,6 @@
 #include <QStringList>
 #include <QDebug>
 #include <QSet>
-#include <QVersionNumber>
 
 extern int logLevel;
 #define LogError()      if (logLevel < 0) {} else qDebug() << "ERROR:"
@@ -66,8 +65,6 @@ class DylibInfo
 {
 public:
     QString binaryPath;
-    QVersionNumber currentVersion;
-    QVersionNumber compatibilityVersion;
 };
 
 class LddInfo
@@ -75,8 +72,6 @@ class LddInfo
 public:
     QString installName;
     QString binaryPath;
-    QVersionNumber currentVersion;
-    QVersionNumber compatibilityVersion;
     QList<DylibInfo> dependencies;
 };
 

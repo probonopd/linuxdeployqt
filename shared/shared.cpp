@@ -184,8 +184,6 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         const auto match = regexp.match(outputLines.first());
         if (match.hasMatch()) {
             info.installName = match.captured(1);
-            info.compatibilityVersion = QVersionNumber::fromString(match.captured(2));
-            info.currentVersion = QVersionNumber::fromString(match.captured(3));
         } else {
             LogError() << "Could not parse objdump output line:" << outputLines.first();
         }
