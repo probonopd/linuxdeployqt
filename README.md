@@ -27,6 +27,11 @@ tar xf patchelf-0.9.tar.bz2
 
 * Download [AppImageAssistant](https://github.com/probonopd/AppImagaeKit/releases) and put it into your $PATH, e.g., into `/usr/local/bin`. Make sure it is renamed to `AppImageAssistant` and is `chmod a+x`
 
+```
+wget https://github.com/probonopd/AppImageKit/releases/download/6/AppImageExtract_6-x86_64.AppImage -O AppImageExtract
+mv AppImageExtract /usr/local/bin/
+```
+
 ## Usage
 
 ```
