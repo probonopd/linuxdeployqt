@@ -330,6 +330,16 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
 
     QProcess ldd;
     ldd.start("objdump", QStringList() << "-x" << path);
+
+    if (!ldd.waitForStarted()) {
+        if(ldd.errorString().contains("execvp: No such file or directory")){
+            LogError() << "Could not start ldd.";
+            LogError() << "Make sure it is installed on your $PATH.";
+        } else {
+            LogError() << "Could not start ldd. Process error is" << ldd.errorString();
+        }
+    }
+
     ldd.waitForFinished();
 
     if (ldd.exitCode() != 0) {
@@ -507,9 +517,17 @@ void runPatchelf(QStringList options)
 {
     QProcess patchelftool;
     patchelftool.start("patchelf", options);
+    if (!patchelftool.waitForStarted()) {
+        if(patchelftool.errorString().contains("execvp: No such file or directory")){
+            LogError() << "Could not start patchelf.";
+            LogError() << "Make sure it is installed on your $PATH, e.g., in /usr/local/bin.";
+            LogError() << "You can get it from https://nixos.org/patchelf.html.";
+        } else {
+            LogError() << "Could not start patchelftool. Process error is" << patchelftool.errorString();
+        }
+    }
     patchelftool.waitForFinished();
     if (patchelftool.exitCode() != 0) {
-        LogError() << "FIXME: Check whether patchelf is on the $PATH and otherwise inform the user where to get it from";
         LogError() << "runPatchelf:" << patchelftool.readAllStandardError();
         LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
     }
@@ -532,6 +550,14 @@ void runStrip(const QString &binaryPath)
     LogDebug() << " stripped" << binaryPath;
     QProcess strip;
     strip.start("strip", QStringList() << "-x" << binaryPath);
+    if (!strip.waitForStarted()) {
+        if(strip.errorString().contains("execvp: No such file or directory")){
+            LogError() << "Could not start strip.";
+            LogError() << "Make sure it is installed on your $PATH.";
+        } else {
+            LogError() << "Could not start strip. Process error is" << strip.errorString();
+        }
+    }
     strip.waitForFinished();
 
     if (strip.exitCode() == 0)
@@ -935,18 +961,29 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
     QDirIterator iter(appDirPath, QStringList() << QString::fromLatin1("*.desktop"),
             QDir::Files, QDirIterator::Subdirectories);
     if (!iter.hasNext()) {
-        LogError() << "Desktop file missing, cannot create AppImage";
-        // TODO: Create a generic desktop file (never overwrite an existing one though!)
-        return false;
+        LogError() << "Desktop file missing, creating a default one (you will probably want to edit it)";
+        QFile file(appDirPath + "/default.desktop");
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&file);
+        out << "[Desktop Entry]\n";
+        out << "Type=Application]\n";
+        out << "Name=Application\n";
+        out << "Exec=AppRun %F\n";
+        out << "Icon=default\n";
+        out << "Comment=Edit this default file\n";
+        out << "Terminal=true\n";
+        file.close();
     }
 
     // TODO: Compare whether the icon filename matches the Icon= entry without ending in the *.desktop file above
     QDirIterator iter2(appDirPath, QStringList() << QString::fromLatin1("*.png"),
             QDir::Files, QDirIterator::Subdirectories);
     if (!iter2.hasNext()) {
-        LogError() << "Icon file missing, cannot create AppImage";
-        // TODO: Create a generic icon (never overwrite an existing one though!)
-        return false;
+        LogError() << "Icon file missing, creating a default one (you will probably want to edit it)";
+        QFile file2(appDirPath + "/default.png");
+        file2.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&file2);
+        file2.close();
     }
     return true;
 }
@@ -972,6 +1009,17 @@ void createAppImage(const QString &appDirPath)
 
     QProcess appImageAssistant;
     appImageAssistant.start("AppImageAssistant", options);
+
+    if (!appImageAssistant.waitForStarted()) {
+        if(appImageAssistant.errorString().contains("execvp: No such file or directory")){
+            LogError() << "Could not start AppImageAssistant which is needed to generate AppImages.";
+            LogError() << "Make sure it is installed on your $PATH, e.g., in /usr/local/bin.";
+        } else {
+            LogError() << "Could not start AppImageAssistant. Process error is" << appImageAssistant.errorString();
+        }
+        return;
+    }
+
     appImageAssistant.waitForFinished(-1);
 
     // FIXME: How to get the output to appear on the console as it happens rather than after the fact?
@@ -988,7 +1036,6 @@ void createAppImage(const QString &appDirPath)
     // AppImageAssistant doesn't always give nonzero error codes, so we check for the presence of the AppImage file
     // This should eventually be fixed in AppImageAssistant
     if (!QFile(appDirPath).exists()) {
-        LogError() << "FIXME: TODO: Check for the presence of AppImageAssistant on the $PATH";
         if(appImageAssistant.readAllStandardOutput().isEmpty() == false)
             LogError() << "AppImageAssistant:" << appImageAssistant.readAllStandardOutput();
         if(appImageAssistant.readAllStandardError().isEmpty() == false)
