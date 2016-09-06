@@ -518,14 +518,9 @@ void runPatchelf(QStringList options)
 void changeIdentification(const QString &id, const QString &binaryPath)
 {
     LogDebug() << "Using patchelf:";
-    LogDebug() << " change identification in" << binaryPath;
+    LogDebug() << " change rpath in" << binaryPath;
     LogDebug() << " to" << id;
     runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
-}
-
-void addRPath(const QString &rpath, const QString &binaryPath)
-{
-    runPatchelf(QStringList() << "-add_rpath" << rpath << binaryPath);
 }
 
 void runStrip(const QString &binaryPath)
