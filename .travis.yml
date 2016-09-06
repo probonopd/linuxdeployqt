@@ -18,7 +18,7 @@ before_install:
 
 install:
   # Packages from https://launchpad.net/~beineri/+archive/ubuntu/opt-qt57-trusty
-  - sudo apt-get -y install qt57tools qt57base qt57multimedia qt57declarative qt57creator
+  - sudo apt-get -y install qt57tools qt57base
 
 script:
   - source /opt/qt57/bin/qt57-env.sh
