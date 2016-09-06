@@ -37,4 +37,4 @@ script:
   - mkdir -p linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/AppRun
-  - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/AppRun --verbose=3
+  - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/AppRun -verbose=3
