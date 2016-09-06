@@ -19,7 +19,7 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 * Get and build linuxdeployqt e.g., using Qt 5.7.0 (you could use this [Qt Creator AppImage](https://bintray.com/probono/AppImages/QtCreator#files) for this)
 
 ```
-sudo apt-get -y install git g++
+sudo apt-get -y install git g++ libgl1-mesa-dev package
 git clone https://github.com/probonopd/linuxdeployqt.git
 ```
 
