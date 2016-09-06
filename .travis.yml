@@ -13,15 +13,15 @@ os: linux
 env: COMPILER=g++-6
 
 before_install:
-  - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt51-trusty
   - sudo apt-get update -qq
 
 install:
   # Packages from https://launchpad.net/~beineri/+archive/ubuntu/opt-qt57-trusty
-  - sudo apt-get -y install qt57tools qt57base
+  - sudo apt-get -y install qt51tools qt51base
 
 script:
-  - source /opt/qt57/bin/qt57-env.sh
+  - source /opt/qt57/bin/qt51-env.sh
   - /opt/qt57/bin/qmake linuxdeployqt.pro
   - make CXX='g++-6' -j7
   - find .
