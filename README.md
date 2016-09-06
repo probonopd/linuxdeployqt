@@ -18,6 +18,13 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 * Open in Qt Creator and build
 * Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS). To learn more about this, see http://blog.qt.io/blog/2011/10/28/rpath-and-runpath/
+
+```
+wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2
+tar xf patchelf-0.9.tar.bz2
+( cd patchelf-0.9/ && ./configure  && make && sudo make install )
+```
+
 * Download [AppImageAssistant](https://github.com/probonopd/AppImagaeKit/releases) and put it into your $PATH, e.g., into `/usr/local/bin`. Make sure it is renamed to `AppImageAssistant` and is `chmod a+x`
 
 ## Usage
