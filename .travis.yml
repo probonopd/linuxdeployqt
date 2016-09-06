@@ -1,10 +1,27 @@
+language: cpp
 sudo: required
 dist: trusty
 
+addons:
+  apt:
+    packages:
+      - g++-6
+    sources: &sources
+      - ubuntu-toolchain-r-test
+
+os: linux
+env: COMPILER=g++-6
+
+before_install:
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
+  - sudo apt-get update -qq
+
 install:
-  - sudo apt-get install -y qt5-default qttools5-dev-tools
+  # Packages from https://launchpad.net/~beineri/+archive/ubuntu/opt-qt57-trusty
+  - sudo apt-get -y install qt57tools qt57base
 
 script:
-  - qmake linuxdeployqt.pro 
-  - make
+  - source /opt/qt57/bin/qt57-env.sh
+  - /opt/qt57/bin/qmake linuxdeployqt.pro
+  - make CXX='g++-6' -j7
   - ./linuxdeployqt
