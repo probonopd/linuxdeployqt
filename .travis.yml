@@ -20,8 +20,8 @@ install:
   - sudo apt-get -y install qt51tools qt51base
 
 script:
-  - source /opt/qt57/bin/qt51-env.sh
-  - /opt/qt57/bin/qmake linuxdeployqt.pro
+  - source /opt/qt51/bin/qt51-env.sh
+  - /opt/qt51/bin/qmake linuxdeployqt.pro
   - make CXX='g++-6' -j7
   - find .
   - strip linuxdeployqt/linuxdeployqt
