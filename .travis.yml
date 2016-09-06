@@ -13,7 +13,7 @@ os: linux
 env: COMPILER=g++-6
 
 before_install:
-  - sudo add-apt-repository --yes ppa:beineri/opt-qt51-trusty
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt511-trusty
   - sudo apt-get update -qq
 
 install:
