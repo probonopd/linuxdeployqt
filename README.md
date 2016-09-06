@@ -16,7 +16,7 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 ## Installation
 
-* Open in Qt Creator and build
+* Open in Qt Creator and build your application. Run it from the command line and inspect it with `ldd` to make sure the correct libraries from the correct locations are getting loaded, as `linuxdeployqt` will use `ldd` internally to determine from where to copy libraries into the bundle
 * Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS). To learn more about this, see http://blog.qt.io/blog/2011/10/28/rpath-and-runpath/
 
 ```
