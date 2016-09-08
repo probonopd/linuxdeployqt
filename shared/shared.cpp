@@ -328,30 +328,30 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
 {
     QSet<QString> rpaths;
 
-    QProcess ldd;
-    ldd.start("objdump", QStringList() << "-x" << path);
+    QProcess objdump;
+    objdump.start("objdump", QStringList() << "-x" << path);
 
-    if (!ldd.waitForStarted()) {
-        if(ldd.errorString().contains("execvp: No such file or directory")){
-            LogError() << "Could not start ldd.";
+    if (!objdump.waitForStarted()) {
+        if(objdump.errorString().contains("execvp: No such file or directory")){
+            LogError() << "Could not start objdump.";
             LogError() << "Make sure it is installed on your $PATH.";
         } else {
-            LogError() << "Could not start ldd. Process error is" << ldd.errorString();
+            LogError() << "Could not start objdump. Process error is" << objdump.errorString();
         }
         exit(1);
     }
 
-    ldd.waitForFinished();
+    objdump.waitForFinished();
 
-    if (ldd.exitCode() != 0) {
-        LogError() << "getBinaryRPaths:" << ldd.readAllStandardError();
+    if (objdump.exitCode() != 0) {
+        LogError() << "getBinaryRPaths:" << objdump.readAllStandardError();
     }
 
     if (resolve && executablePath.isEmpty()) {
       executablePath = path;
     }
 
-    QString output = ldd.readAllStandardOutput();
+    QString output = objdump.readAllStandardOutput();
     QStringList outputLines = output.split("\n");
     QStringListIterator i(outputLines);
 
@@ -653,10 +653,12 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
 DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables)
 {
    AppDirInfo applicationBundle;
+
    applicationBundle.path = appDirPath;
    LogDebug() << "applicationBundle.path:" << applicationBundle.path;
    applicationBundle.binaryPath = findAppBinary(appDirPath);
    LogDebug() << "applicationBundle.binaryPath:" << applicationBundle.binaryPath;
+   LogError() << "FIXME: Here I would like to determine the original rpath of the main executable, but get:" << getBinaryRPaths(applicationBundle.binaryPath, true);
    changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
    applicationBundle.libraryPaths = findAppLibraries(appDirPath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
@@ -667,12 +669,11 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
                                                  << additionalExecutables;
    LogDebug() << "allBinaryPaths:" << allBinaryPaths;
 
-   QSet<QString> allLibraryPaths = getBinaryRPaths(applicationBundle.binaryPath, true);
-   allLibraryPaths.insert(QLibraryInfo::location(QLibraryInfo::LibrariesPath));
+   QSet<QString> allRPaths = getBinaryRPaths(applicationBundle.binaryPath, true);
+   allRPaths.insert(QLibraryInfo::location(QLibraryInfo::LibrariesPath));
+   LogDebug() << "allRPaths:" << allRPaths;
 
-   LogDebug() << "allLibraryPaths:" << allLibraryPaths;
-
-   QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appDirPath, allLibraryPaths);
+   QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appDirPath, allRPaths);
    if (libraries.isEmpty() && !alwaysOwerwriteEnabled) {
 
         LogWarning() << "Could not find any external Qt libraries to deploy in" << appDirPath;
