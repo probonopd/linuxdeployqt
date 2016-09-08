@@ -680,10 +680,12 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
    QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appDirPath, allRPaths);
    if (libraries.isEmpty() && !alwaysOwerwriteEnabled) {
-
         LogWarning() << "Could not find any external Qt libraries to deploy in" << appDirPath;
         LogWarning() << "Perhaps linuxdeployqt was already used on" << appDirPath << "?";
         LogWarning() << "If so, you will need to rebuild" << appDirPath << "before trying again.";
+        LogWarning() << "Or ldd does not find the external Qt libraries but sees the system ones.";
+        LogWarning() << "If so, you will need to set LD_LIBRARY_PATH to the directory containing the external Qt libraries before trying again.";
+        LogWarning() << "FIXME: https://github.com/probonopd/linuxdeployqt/issues/2";
         return DeploymentInfo();
    } else {
        return deployQtLibraries(libraries, applicationBundle.path, allBinaryPaths, !additionalExecutables.isEmpty());
@@ -752,9 +754,6 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         const QString destinationPath = pluginDestinationPath + "/" + plugin;
         QDir dir;
         dir.mkpath(QFileInfo(destinationPath).path());
-        LogError() << "FIXME: Need to scan" << destinationPath << "for additional dependencies (this is not yorking yet)";
-        LogError() << "FIXME: Update deploymentInfo.deployedLibraries - the plugins";
-        LogError() << "FIXME: will have brought in extra libraries as dependencies (e.g., plugins/platforms/libqxcb.so needs libQt5XcbQpa.so.5)";
         deploymentInfo.deployedLibraries += findAppLibraries(destinationPath);
         deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
 
