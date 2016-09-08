@@ -6,8 +6,8 @@ addons:
   apt:
     packages:
       - g++-6
-    sources: &sources
-      - ubuntu-toolchain-r-test
+#    sources: &sources
+#      - ubuntu-toolchain-r-test
 
 os: linux
 env: COMPILER=g++-6
