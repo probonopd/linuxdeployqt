@@ -281,7 +281,7 @@ QString findAppBinary(const QString &appDirPath)
 
     // FIXME: Do without the need for an AppRun symlink
     // by passing appBinaryPath from main.cpp here
-    binaryPath = appDirPath + "/AppRun";
+    binaryPath = appDirPath + "/" + "AppRun";
 
     if (QFile::exists(binaryPath))
         return binaryPath;
@@ -535,6 +535,7 @@ void runPatchelf(QStringList options)
     if (patchelftool.exitCode() != 0) {
         LogError() << "runPatchelf:" << patchelftool.readAllStandardError();
         LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
+        exit(1);
     }
 }
 
@@ -551,10 +552,13 @@ void runStrip(const QString &binaryPath)
     if (runStripEnabled == false)
         return;
 
+    // Since we might have a symlink, we need to find its target first
+    QString resolvedPath = QFileInfo(binaryPath).canonicalFilePath();
+
     LogDebug() << "Using strip:";
-    LogDebug() << " stripped" << binaryPath;
+    LogDebug() << " stripping" << resolvedPath;
     QProcess strip;
-    strip.start("strip", QStringList() << "-x" << binaryPath);
+    strip.start("strip", QStringList() << "-x" << resolvedPath);
     if (!strip.waitForStarted()) {
         if(strip.errorString().contains("execvp: No such file or directory")){
             LogError() << "Could not start strip.";
@@ -570,10 +574,11 @@ void runStrip(const QString &binaryPath)
         return;
 
     if (strip.readAllStandardError().contains("Not enough room for program headers")) {
-        LogNormal() << QFileInfo(binaryPath).completeBaseName() << "already stripped.";
+        LogNormal() << QFileInfo(resolvedPath).completeBaseName() << "already stripped.";
     } else {
-        LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardError();
-        LogError() << "Error stripping" << QFileInfo(binaryPath).completeBaseName() << ":" << strip.readAllStandardOutput();
+        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << strip.readAllStandardError();
+        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << strip.readAllStandardOutput();
+        exit(1);
     }
 
 }
@@ -620,7 +625,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
             rpathsUsed << library.rpathUsed;
         }
 
-        // Copy the library/dylib to the app bundle.
+        // Copy the library to the app bundle.
         const QString deployedBinaryPath = copyDylib(library, bundlePath);
         // Skip the rest if already was deployed.
         if (deployedBinaryPath.isNull())
@@ -702,27 +707,29 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     QStringList pluginList;
 
     // Platform plugin:
-    pluginList.append("platforms/libqxcb.so");
+    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("libQt5Gui"))) {
+        pluginList.append("platforms/libqxcb.so");
+        // All image formats (svg if QtSvg.library is used)
+        QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
+        foreach (const QString &plugin, imagePlugins) {
+            if (plugin.contains(QStringLiteral("qsvg"))) {
+                if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtSvg")))
+                    pluginList.append(QStringLiteral("imageformats/") + plugin);
+                pluginList.append(QStringLiteral("imageformats/") + plugin);
+            }
+        }
+    }
 
     // CUPS print support
-    // TODO: Only install if libQt5PrintSupport.so* is about to be bundled?
-    pluginList.append("printsupport/libcupsprintersupport.so");
+    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("libQt5PrintSupport"))) {
+        pluginList.append("printsupport/libcupsprintersupport.so");
+    }
 
     // Network
     if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtNetwork"))) {
         QStringList bearerPlugins = QDir(pluginSourcePath +  QStringLiteral("/bearer")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, bearerPlugins) {
             pluginList.append(QStringLiteral("bearer/") + plugin);
-        }
-    }
-
-    // All image formats (svg if QtSvg.library is used)
-    QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
-    foreach (const QString &plugin, imagePlugins) {
-        if (plugin.contains(QStringLiteral("qsvg"))) {
-            if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtSvg")))
-                pluginList.append(QStringLiteral("imageformats/") + plugin);
-            pluginList.append(QStringLiteral("imageformats/") + plugin);
         }
     }
 
