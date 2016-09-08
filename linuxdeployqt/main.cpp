@@ -67,6 +67,11 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Allow binaries in the usr/bin subdirectory to be found; this is useful for bundling
+    // this application itself together with helper binaries such as patchelf
+    QString pathToUsrBin = QCoreApplication::applicationDirPath()+ "/usr/bin";
+    setenv("PATH",pathToUsrBin.toUtf8().constData(),1);
+
     QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).completeBaseName());
 
     if (QDir().exists(appBinaryPath)) {
@@ -194,4 +199,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
