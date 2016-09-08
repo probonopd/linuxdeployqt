@@ -281,15 +281,13 @@ QString findAppBinary(const QString &appDirPath)
 
     // FIXME: Do without the need for an AppRun symlink
     // by passing appBinaryPath from main.cpp here
-    QString parentDir =  QDir::cleanPath(QFileInfo(appDirPath).path());
-    QString appDir =   QDir::cleanPath(QFileInfo(appDirPath).baseName());
-    binaryPath = parentDir + "/" + appDir + "/AppRun";
+    binaryPath = appDirPath + "/AppRun";
 
     if (QFile::exists(binaryPath))
         return binaryPath;
-    LogError() << "Could not find bundle binary for" << appDirPath;
 
-    return QString();
+    LogError() << "Could not find bundle binary for" << appDirPath << "at" << binaryPath;
+    exit(1);
 }
 
 QStringList findAppLibraries(const QString &appDirPath)
