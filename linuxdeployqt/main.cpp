@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     if(appRun.exists()){
         appRun.remove();
     }
-    QFile::link(appBinaryPath, appDir + "/AppRun");
+    QFile::link(appBinaryPath, "AppRun");
 
     bool plugins = true;
     bool appimage = false;
