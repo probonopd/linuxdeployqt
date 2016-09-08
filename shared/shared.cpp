@@ -141,19 +141,24 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         return info;
     }
 
-    static const QRegularExpression regexp(QStringLiteral(
-        "^.+ => (.+) \\("));
+    static const QRegularExpression regexp(QStringLiteral("^.+ => (.+) \\("));
 
     QString output = ldd.readAllStandardOutput();
     QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
     if (outputLines.size() < 2) {
         if (output.contains("statically linked") == false){
-            LogError() << "Could not parse objdump output:" << output;
+            LogError() << "Could not parse ldd output:" << output;
         }
         return info;
     }
 
-    outputLines.removeFirst(); // remove line containing the binary path
+    foreach (QString outputLine, outputLines) {
+        LogDebug() << "ldd outputLine:" << outputLine;
+        if (outputLine.contains("not found")){
+            LogError() << "ldd outputLine:" << outputLine;
+        }
+    }
+
     if (binaryPath.contains(".so.") || binaryPath.endsWith(".so")) {
         const auto match = regexp.match(outputLines.first());
         if (match.hasMatch()) {
