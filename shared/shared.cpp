@@ -191,10 +191,10 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     if (trimmed.isEmpty())
         return info;
 
-    // Don't deploy low-level libraries in /lib because these tend to break if moved to a system with a different glibc.
+    // Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
     // TODO: Could make bundling these low-level libraries optional but then the bundles might need to
     // use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
-    if (trimmed.startsWith("/lib"))
+    if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib"))))
         return info;
 
     enum State {QtPath, LibraryName, Version, End};
