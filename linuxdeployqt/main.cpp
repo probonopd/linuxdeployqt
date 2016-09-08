@@ -27,7 +27,7 @@
 ****************************************************************************/
 #include <QCoreApplication>
 #include <QDir>
-
+#include <QProcessEnvironment>
 #include "../shared/shared.h"
 
 int main(int argc, char **argv)
@@ -69,8 +69,10 @@ int main(int argc, char **argv)
 
     // Allow binaries in the usr/bin subdirectory to be found; this is useful for bundling
     // this application itself together with helper binaries such as patchelf
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
     QString pathToUsrBin = QCoreApplication::applicationDirPath()+ "/usr/bin";
-    setenv("PATH",pathToUsrBin.toUtf8().constData(),1);
+    QString oldPath = env.value("PATH");
+    env.insert("PATH", pathToUsrBin + ":" + oldPath);
 
     QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).completeBaseName());
 
@@ -199,3 +201,4 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
