@@ -67,7 +67,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).baseName());
+    QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).completeBaseName());
 
     if (QDir().exists(appBinaryPath)) {
         qDebug() << "app-binary:" << appBinaryPath;
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     if(appRun.exists()){
         appRun.remove();
     }
-    QFile::link(appBinaryPath, "AppRun");
+    QFile::link(appName, appDir + "/AppRun");
 
     bool plugins = true;
     bool appimage = false;
