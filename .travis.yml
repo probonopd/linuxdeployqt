@@ -10,7 +10,7 @@ dist: trusty
 #      - ubuntu-toolchain-r-test
 
 os: linux
-env: COMPILER=g++-6
+# env: COMPILER=g++-6
 
 before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
