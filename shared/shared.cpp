@@ -338,6 +338,7 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
         } else {
             LogError() << "Could not start ldd. Process error is" << ldd.errorString();
         }
+        exit(1);
     }
 
     ldd.waitForFinished();
@@ -525,6 +526,7 @@ void runPatchelf(QStringList options)
         } else {
             LogError() << "Could not start patchelftool. Process error is" << patchelftool.errorString();
         }
+        exit(1);
     }
     patchelftool.waitForFinished();
     if (patchelftool.exitCode() != 0) {
@@ -557,6 +559,7 @@ void runStrip(const QString &binaryPath)
         } else {
             LogError() << "Could not start strip. Process error is" << strip.errorString();
         }
+        exit(1);
     }
     strip.waitForFinished();
 
@@ -1022,7 +1025,7 @@ void createAppImage(const QString &appDirPath)
         } else {
             LogError() << "Could not start AppImageAssistant. Process error is" << appImageAssistant.errorString();
         }
-        return;
+        exit(1);
     }
 
     appImageAssistant.waitForFinished(-1);
