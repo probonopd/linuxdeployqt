@@ -70,9 +70,10 @@ int main(int argc, char **argv)
     // Allow binaries in the usr/bin subdirectory to be found; this is useful for bundling
     // this application itself together with helper binaries such as patchelf
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString pathToUsrBin = QCoreApplication::applicationDirPath()+ "/usr/bin";
     QString oldPath = env.value("PATH");
-    env.insert("PATH", pathToUsrBin + ":" + oldPath);
+    QString newPath = QCoreApplication::applicationDirPath()+ "/usr/bin" + ":" + oldPath;
+    qDebug() << newPath;
+    setenv("PATH",newPath.toUtf8().constData(),1);
 
     QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).completeBaseName());
 
