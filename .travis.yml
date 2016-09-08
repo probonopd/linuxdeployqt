@@ -28,5 +28,5 @@ script:
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt -verbose=3 -appimage
-  - find .
-  # - curl --upload-file ./linuxdeployqt/linuxdeployqt https://transfer.sh/linuxdeployqt
+  - mv linuxdeployqt.AppDir.AppImage linuxdeployqt.AppImage
+  - curl --upload-file ./linuxdeployqt.AppImage https://transfer.sh/linuxdeployqt.appimage
