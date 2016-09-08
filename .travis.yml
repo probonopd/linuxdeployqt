@@ -15,7 +15,8 @@ before_install:
   - sudo make install
   - cd -
   - sudo wget -c "https://github.com/probonopd/AppImageKit/releases/download/6/AppImageAssistant_6-x86_64.AppImage" -O /usr/local/bin/AppImageAssistant
-
+  - sudo chmod a+x /usr/local/bin/AppImageAssistant
+  
 install:
   - sudo apt-get -y install qt57base
 
