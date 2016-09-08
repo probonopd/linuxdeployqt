@@ -2,10 +2,10 @@ language: cpp
 sudo: required
 dist: trusty
 
-addons:
-  apt:
-    packages:
-      - g++-6
+#addons:
+#  apt:
+#    packages:
+#      - g++-6
 #    sources: &sources
 #      - ubuntu-toolchain-r-test
 
