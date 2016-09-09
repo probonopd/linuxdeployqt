@@ -16,7 +16,7 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 ## Installation
 
-* If you believe in dogfeeding, download __linuxdeployqt-x86_64.AppImage__ from the [Releases](https://github.com/probonopd/linuxdeployqt/releases) page and `chmod a+x` it. Then you can skip the following steps because it is a self-contained bundle of linuxdeployqt (made with linuxdeployqt of course).
+* If you believe in dogfeeding, download __linuxdeployqt-x86_64.AppImage__ from the [Releases](https://github.com/probonopd/linuxdeployqt/releases) page and `chmod a+x` it. Then you can skip the following steps because it is a self-contained bundle of linuxdeployqt (made with linuxdeployqt of course)
 
 * Get and build linuxdeployqt e.g., using Qt 5.7.0 (you could use this [Qt Creator AppImage](https://bintray.com/probono/AppImages/QtCreator#files) for this)
 
