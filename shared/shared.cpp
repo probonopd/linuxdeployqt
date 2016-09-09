@@ -201,9 +201,9 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     // use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
     // With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
     // Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
-    if not (trimmed.contains("libicu")) {
+    if (! trimmed.contains("libicu")) {
         if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
-            return info;            
+            return info;
         }
     }
 
