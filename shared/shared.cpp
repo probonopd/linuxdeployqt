@@ -199,8 +199,13 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     // Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
     // TODO: Could make bundling these low-level libraries optional but then the bundles might need to
     // use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
-    if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib"))))
-        return info;
+    // With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
+    // Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
+    if not (trimmed.contains("libicu")) {
+        if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
+            return info;            
+        }
+    }
 
     enum State {QtPath, LibraryName, Version, End};
     State state = QtPath;
