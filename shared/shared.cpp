@@ -700,6 +700,11 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    }
 }
 
+int containsHowOften(QStringList haystack, QString needle) {
+    int result = haystack.filter(needle).length();
+    return result;
+}
+
 void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath,
         const QString pluginDestinationPath, DeploymentInfo deploymentInfo)
 {
@@ -711,27 +716,32 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // Plugin white list:
     QStringList pluginList;
 
+    LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
+
     // Platform plugin:
-    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("libQt5Gui"))) {
+
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
+        LogDebug() << "libQt5Gui detected";
         pluginList.append("platforms/libqxcb.so");
         // All image formats (svg if QtSvg.library is used)
         QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, imagePlugins) {
             if (plugin.contains(QStringLiteral("qsvg"))) {
-                if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtSvg")))
+                if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
                     pluginList.append(QStringLiteral("imageformats/") + plugin);
+                }
                 pluginList.append(QStringLiteral("imageformats/") + plugin);
             }
         }
     }
 
     // CUPS print support
-    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("libQt5PrintSupport"))) {
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5PrintSupport")) {
         pluginList.append("printsupport/libcupsprintersupport.so");
     }
 
     // Network
-    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtNetwork"))) {
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Network")) {
         QStringList bearerPlugins = QDir(pluginSourcePath +  QStringLiteral("/bearer")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, bearerPlugins) {
             pluginList.append(QStringLiteral("bearer/") + plugin);
@@ -739,7 +749,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     }
 
     // Sql plugins if QtSql.library is in use
-    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtSql"))) {
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Sql")) {
         QStringList sqlPlugins = QDir(pluginSourcePath +  QStringLiteral("/sqldrivers")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, sqlPlugins) {
             pluginList.append(QStringLiteral("sqldrivers/") + plugin);
@@ -747,7 +757,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     }
 
     // multimedia plugins if QtMultimedia.library is in use
-    if (deploymentInfo.deployedLibraries.contains(QStringLiteral("QtMultimedia"))) {
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Multimedia")) {
         QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, plugins) {
             pluginList.append(QStringLiteral("mediaservice/") + plugin);
@@ -758,6 +768,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         }
     }
 
+    LogDebug() << "pluginList after having detected hopefully all required plugins:" << pluginList;
     foreach (const QString &plugin, pluginList) {
         QString sourcePath = pluginSourcePath + "/" + plugin;
 
