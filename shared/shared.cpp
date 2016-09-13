@@ -146,8 +146,8 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     QString output = ldd.readAllStandardOutput();
     QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
     if (outputLines.size() < 2) {
-        if (output.contains("statically linked") == false){
-            LogError() << "Could not parse ldd output:" << output;
+        if ((output.contains("statically linked") == false)){
+            LogError() << "Could not parse ldd output under 2 lines:" << output;
         }
         return info;
     }
@@ -159,12 +159,12 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         }
     }
 
-    if (binaryPath.contains(".so.") || binaryPath.endsWith(".so")) {
+    if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) and (!output.contains("linux-vdso.so.1"))) {
         const auto match = regexp.match(outputLines.first());
-        if (match.hasMatch()) {
+        if (match.hasMatch())  {
             info.installName = match.captured(1);
         } else {
-            LogError() << "Could not parse objdump output line:" << outputLines.first();
+            LogError() << "Could not parse ldd output line:" << outputLines.first();
         }
         outputLines.removeFirst();
     }
