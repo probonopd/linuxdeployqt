@@ -1000,7 +1000,7 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
         file.open(QIODevice::WriteOnly | QIODevice::Text);
         QTextStream out(&file);
         out << "[Desktop Entry]\n";
-        out << "Type=Application]\n";
+        out << "Type=Application\n";
         out << "Name=Application\n";
         out << "Exec=AppRun %F\n";
         out << "Icon=default\n";
