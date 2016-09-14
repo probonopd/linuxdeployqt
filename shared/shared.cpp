@@ -46,6 +46,7 @@
 
 
 bool runStripEnabled = true;
+bool bundleAllButCoreLibs = false;
 bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
@@ -186,6 +187,11 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     return info;
 }
 
+int containsHowOften(QStringList haystack, QString needle) {
+    int result = haystack.filter(needle).length();
+    return result;
+}
+
 LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths)
 {
     LibraryInfo info;
@@ -196,14 +202,43 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     if (trimmed.isEmpty())
         return info;
 
-    // Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
-    // TODO: Could make bundling these low-level libraries optional but then the bundles might need to
-    // use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
-    // With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
-    // Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
-    if (! trimmed.contains("libicu")) {
-        if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
-            return info;
+
+    if(bundleAllButCoreLibs) {
+        /*
+        Bundle every lib including the low-level ones except those that are explicitly blacklisted.
+        This is more suitable for bundling in a way that is portable between different distributions and target systems.
+        Along the way, this also takes care of non-Qt libraries.
+
+        The excludelist can be updated by running
+        #/bin/bash
+        blacklisted=$(wget https://raw.githubusercontent.com/probonopd/AppImages/master/excludelist -O - | sort | uniq | grep -v "^#.*" | grep "[^-\s]")
+        for item in $blacklisted; do
+          echo -ne '"'$item'" << '
+        done
+        */
+
+        QStringList excludelist;
+        excludelist << "libasound.so.2" << "libcom_err.so.2" << "libcrypt.so.1" << "libc.so.6" << "libdl.so.2" << "libdrm.so.2" << "libexpat.so.1" << "libfontconfig.so.1" << "libgcc_s.so.1" << "libgdk_pixbuf-2.0.so.0" << "libgdk-x11-2.0.so.0" << "libgio-2.0.so.0" << "libglib-2.0.so.0" << "libGL.so.1" << "libgobject-2.0.so.0" << "libgpg-error.so.0" << "libgssapi_krb5.so.2" << "libgtk-x11-2.0.so.0" << "libhcrypto.so.4" << "libhx509.so.5" << "libICE.so.6" << "libidn.so.11" << "libk5crypto.so.3" << "libkeyutils.so.1" << "libkrb5.so.26" << "libkrb5.so.3" << "libkrb5support.so.0" << "libm.so.6" << "libp11-kit.so.0" << "libpcre.so.3" << "libpthread.so.0" << "libresolv.so.2" << "libroken.so.18" << "librt.so.1" << "libselinux.so.1" << "libSM.so.6" << "libstdc++.so.6" << "libusb-1.0.so.0" << "libuuid.so.1" << "libwind.so.0" << "libX11.so.6" << "libxcb.so.1" << "libz.so.1";
+        LogDebug() << "excludelist:" << excludelist;
+        if (! trimmed.contains("libicu")) {
+            if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName())) {
+                LogDebug() << "Skipping blacklisted" << trimmed;
+                return info;
+            }
+        }
+    } else {
+        /*
+        Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
+        TODO: Could make bundling these low-level libraries optional but then the bundles might need to
+        use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
+        With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
+        Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
+        */
+
+        if (! trimmed.contains("libicu")) {
+            if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
+                return info;
+            }
         }
     }
 
@@ -698,11 +733,6 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    } else {
        return deployQtLibraries(libraries, applicationBundle.path, allBinaryPaths, !additionalExecutables.isEmpty());
    }
-}
-
-int containsHowOften(QStringList haystack, QString needle) {
-    int result = haystack.filter(needle).length();
-    return result;
 }
 
 void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath,
