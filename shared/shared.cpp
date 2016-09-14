@@ -1063,8 +1063,8 @@ void createAppImage(const QString &appDirPath)
         appImage.remove();
 
     if (appImage.exists()) {
-        LogNormal() << "AppImage already exists, skipping .AppImage creation for" << appImage.fileName();
-        LogNormal() << "use -always-overwrite to overwrite";
+        LogError() << "AppImage already exists, skipping .AppImage creation for" << appImage.fileName();
+        LogError() << "use -always-overwrite to overwrite";
     } else {
         LogNormal() << "Creating AppImage for" << appDirPath;
     }
