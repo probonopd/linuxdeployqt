@@ -41,6 +41,7 @@ extern int logLevel;
 #define LogDebug()      if (logLevel < 3) {} else qDebug() << "Log:"
 
 extern bool runStripEnabled;
+extern bool bundleAllButCoreLibs;
 
 class LibraryInfo
 {
