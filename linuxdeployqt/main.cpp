@@ -44,14 +44,15 @@ int main(int argc, char **argv)
         qDebug() << "Usage: linuxdeployqt app-binary [options]";
         qDebug() << "";
         qDebug() << "Options:";
-        qDebug() << "   -verbose=<0-3>     : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
-        qDebug() << "   -no-plugins        : Skip plugin deployment";
-        qDebug() << "   -appimage          : Create an AppImage";
-        qDebug() << "   -no-strip          : Don't run 'strip' on the binaries";
-        qDebug() << "   -executable=<path> : Let the given executable use the deployed libraries too";
-        qDebug() << "   -qmldir=<path>     : Scan for QML imports in the given path";
-        qDebug() << "   -always-overwrite  : Copy files even if the target file exists";
-        qDebug() << "   -libpath=<path>    : Add the given path to the library search path";
+        qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
+        qDebug() << "   -no-plugins         : Skip plugin deployment";
+        qDebug() << "   -appimage           : Create an AppImage";
+        qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
+        qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
+        qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
+        qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
+        qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
+        qDebug() << "   -libpath=<path>     : Add the given path to the library search path";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
@@ -105,6 +106,7 @@ int main(int argc, char **argv)
     bool plugins = true;
     bool appimage = false;
     extern bool runStripEnabled;
+    extern bool bundleAllButCoreLibs;
     extern bool alwaysOwerwriteEnabled;
     extern QStringList librarySearchPath;
     QStringList additionalExecutables;
@@ -122,6 +124,9 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-no-strip")) {
             LogDebug() << "Argument found:" << argument;
             runStripEnabled = false;
+        } else if (argument == QByteArray("-bundle-non-qt-libs")) {
+            LogDebug() << "Argument found:" << argument;
+            bundleAllButCoreLibs = true;
         } else if (argument.startsWith(QByteArray("-verbose"))) {
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
