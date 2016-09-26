@@ -810,7 +810,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
-            QList<LibraryInfo> libraries = getQtLibraries(destinationPath, appDirInfo.path, deploymentInfo.rpathsUsed);
+            QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
             deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
         }
     }
