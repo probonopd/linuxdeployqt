@@ -749,7 +749,6 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
     // Platform plugin:
-
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
         LogDebug() << "libQt5Gui detected";
         pluginList.append("platforms/libqxcb.so");
@@ -762,6 +761,14 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 }
                 pluginList.append(QStringLiteral("imageformats/") + plugin);
             }
+        }
+    }
+
+    // Platform OpenGL context
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5OpenGL")) {
+        QStringList xcbglintegrationPlugins = QDir(pluginSourcePath +  QStringLiteral("/xcbglintegrations")).entryList(QStringList() << QStringLiteral("*.so"));
+        foreach (const QString &plugin, xcbglintegrationPlugins) {
+            pluginList.append(QStringLiteral("xcbglintegrations/") + plugin);
         }
     }
 
