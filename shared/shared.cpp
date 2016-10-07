@@ -878,10 +878,13 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
 
     // Use qmlimportscanner from QLibraryInfo::BinariesPath
     QString qmlImportScannerPath = QDir::cleanPath(QLibraryInfo::location(QLibraryInfo::BinariesPath) + "/qmlimportscanner");
+    LogDebug() << "Looking for qmlimportscanner at" << qmlImportScannerPath;
 
     // Fallback: Look relative to the linuxdeployqt binary
-    if (!QFile(qmlImportScannerPath).exists())
+    if (!QFile(qmlImportScannerPath).exists()){
         qmlImportScannerPath = QCoreApplication::applicationDirPath() + "/qmlimportscanner";
+        LogDebug() << "Fallback, looking for qmlimportscanner at" << qmlImportScannerPath;
+    }
 
     // Verify that we found a qmlimportscanner binary
     if (!QFile(qmlImportScannerPath).exists()) {
@@ -898,6 +901,15 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         argumentList.append(qmlDir);
     }
     QString qmlImportsPath = QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
+
+    // Verify that we found a valid qmlImportsPath
+    if (!QFile(qmlImportsPath + "/QtQml").exists()) {
+        LogError() << "Valid qmlImportsPath not found at" << qmlImportsPath;
+        LogError() << "Possibly your Qt library has the wrong information in qt_prfxpath, e.g., because it was moved since it was compiled";
+        return false;
+    }
+
+    LogDebug() << "Qml2ImportsPath:" << QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
     argumentList.append( "-importPath");
     argumentList.append(qmlImportsPath);
 
@@ -944,6 +956,8 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
             qtQuickContolsInUse = true;
 
         LogNormal() << "Deploying QML import" << name;
+        LogDebug() << "path:" << path;
+        LogDebug() << "type:" << type;
 
         // Skip imports with missing info - path will be empty if the import is not found.
         if (name.isEmpty() || path.isEmpty()) {
