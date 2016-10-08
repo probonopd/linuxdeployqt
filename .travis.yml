@@ -27,7 +27,7 @@ script:
   - mkdir -p linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/AppImageAssistant linuxdeployqt.AppDir/usr/bin/
-  - cp $(which qmlimportscanner) linuxdeployqt.AppDir/
+  - # cp $(which qmlimportscanner) linuxdeployqt.AppDir/ # use the one from the Qt to be bundled instead
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt -verbose=3 -appimage
   - mv linuxdeployqt.AppDir.AppImage linuxdeployqt.AppImage
