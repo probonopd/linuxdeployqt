@@ -59,6 +59,9 @@ int main(int argc, char **argv)
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
         qDebug() << "the application uses.";
         qDebug() << "";
+        qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
+        qDebug() << "so make sure that it is the correct one.";
+        qDebug() << "";
         qDebug() << "Plugins related to a Qt library are copied in with the";
         qDebug() << "library. The accessibility, image formats, and text codec";
         qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
