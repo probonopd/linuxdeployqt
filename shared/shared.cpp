@@ -942,6 +942,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         argumentList.append(qmlDir);
     }
     QString qmlImportsPath = QDir::cleanPath(qtPathToBeBundled) + "/qml";
+    // FIXME: Directory layout might be different for system Qt; cannot assume qml/ to always be inside the Qt directory
     LogDebug() << "qmlImportsPath candidate:" << qmlImportsPath;
 
     // Verify that we found a valid qmlImportsPath
