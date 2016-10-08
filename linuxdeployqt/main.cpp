@@ -47,7 +47,7 @@ int main(int argc, char **argv)
         qDebug() << "Options:";
         qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
         qDebug() << "   -no-plugins         : Skip plugin deployment";
-        qDebug() << "   -appimage           : Create an AppImage";
+        qDebug() << "   -appimage           : Create an AppImage (implies -bundle-non-qt-libs)";
         qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
         qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
         qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
@@ -125,6 +125,7 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-appimage")) {
             LogDebug() << "Argument found:" << argument;
             appimage = true;
+            bundleAllButCoreLibs = true;
         } else if (argument == QByteArray("-no-strip")) {
             LogDebug() << "Argument found:" << argument;
             runStripEnabled = false;
