@@ -29,6 +29,7 @@
 #include <QDir>
 #include <QProcessEnvironment>
 #include "../shared/shared.h"
+#include <QRegularExpression>
 
 int main(int argc, char **argv)
 {
