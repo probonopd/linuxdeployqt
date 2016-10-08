@@ -735,6 +735,8 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    }
    if(qtPathToBeBundled == ""){
        LogError() << "Qt path could not be determined from qmake on the $PATH";
+       LogError() << "Make sure you have the correct Qt on your $PATH";
+       LogError() << "You can check this with qmake -v";
    }
 
    changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
