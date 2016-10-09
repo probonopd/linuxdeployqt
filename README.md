@@ -10,9 +10,7 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 ## Known issues
 
-* __This may not be fully working yet.__ Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated
-* Some functions may still refer to macOS specifics. These need to be converted over to their Linux counterparts or deleted
-* Scan for QML imports has not been tested yet
+__This may not be fully working yet.__ Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated
 
 ## Installation
 
@@ -43,6 +41,16 @@ sudo mv AppImageAssistant /usr/local/bin/
 ## Usage
 
 Open in Qt Creator and build your application. Run it from the command line and inspect it with `ldd` to make sure the correct libraries from the correct locations are getting loaded, as `linuxdeployqt` will use `ldd` internally to determine from where to copy libraries into the bundle.
+
+__Important:__ `linuxdeployqt` deploys the Qt instance that qmake on the $PATH points to, so make sure that it is the correct one. Verify that qmake finds the correct Qt instance like this before running the `linuxdeployqt` tool:
+
+```
+qmake -v
+
+QMake version 3.0
+Using Qt version 5.7.0 in /tmp/.mount_QtCreator-5.7.0-x86_64/5.7/gcc_64/lib
+```
+If this does not show the correct path to your Qt instance that you want to be bundled, then adjust your `$PATH` to find the correct `qmake`.
 
 ```
 Usage: linuxdeployqt app-binary [options]
