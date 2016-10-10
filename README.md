@@ -83,9 +83,11 @@ These are my first steps with Qt and with C++ for that matter, and it is stil ve
 
 ## Projects using linuxdeployqt
 
-These projects use Travis CI and linuxdeployqt to provide AppImages of their builds:
+These projects use [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
 
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
 - https://github.com/coryo/amphetype2
 - https://github.com/chkmue/MyQtTravisTemplateProject
 - https://github.com/chkmue/qttravisCI_1
+- https://github.com/eteran/edb-debugger/pull/458
+- https://github.com/probonopd/tiled/blob/patch-1/.travis.yml
