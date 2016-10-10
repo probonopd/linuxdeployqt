@@ -21,6 +21,11 @@ __This may not be fully working yet.__ Use with care, run with maximum verbosity
 ```
 sudo apt-get -y install git g++ libgl1-mesa-dev
 git clone https://github.com/probonopd/linuxdeployqt.git
+# Then build in Qt Creator, or use
+export PATH=/tmp/.mount_QtCreator-5.7.0-x86_64/5.7/gcc_64/bin/:$PATH
+cd linuxdeployqt
+qmake linuxdeployqt.pro
+make
 ```
 
 * Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS). To learn more about this, see http://blog.qt.io/blog/2011/10/28/rpath-and-runpath/
