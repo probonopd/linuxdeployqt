@@ -80,3 +80,12 @@ the application uses.
 ## Contributing
 
 These are my first steps with Qt and with C++ for that matter, and it is stil very young, so I'd appreciate your testing, comments, and (ideally) code review. Please discuss in the [forum](http://discourse.appimage.org/t/linuxdeployqt-new-linux-deployment-tool-for-qt/57) or using GitHub issues and pull requests.
+
+## Projects using linuxdeployqt
+
+These projects use Travis CI and linuxdeployqt to provide AppImages of their builds:
+
+- https://github.com/probonopd/linuxdeployqt/ obviously ;-)
+- https://github.com/coryo/amphetype2
+- https://github.com/chkmue/MyQtTravisTemplateProject
+- https://github.com/chkmue/qttravisCI_1
