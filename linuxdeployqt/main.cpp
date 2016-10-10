@@ -207,7 +207,10 @@ int main(int argc, char **argv)
         stripAppBinary(appDirPath);
 
     if (appimage) {
-        createAppImage(appDirPath);
+        int result = createAppImage(appDirPath);
+        if(result =! 0){
+            exit(result);
+        }
     }
 
     return 0;

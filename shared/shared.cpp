@@ -1110,7 +1110,7 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
     return true;
 }
 
-void createAppImage(const QString &appDirPath)
+int createAppImage(const QString &appDirPath)
 {
     QString appImagePath = appDirPath + ".AppImage";
 
@@ -1129,4 +1129,5 @@ void createAppImage(const QString &appDirPath)
     }
     QString appImageCommand = "AppImageAssistant '" + appDirPath +"' '" + appImagePath + "'";
     int ret = system(appImageCommand.toUtf8().constData());
+    return ret;
 }
