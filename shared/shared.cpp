@@ -1127,45 +1127,6 @@ void createAppImage(const QString &appDirPath)
     } else {
         LogNormal() << "Creating AppImage for" << appDirPath;
     }
-
-    QStringList options = QStringList()  << appDirPath << appImagePath;
-
-    QProcess appImageAssistant;
-    appImageAssistant.start("AppImageAssistant", options);
-
-    if (!appImageAssistant.waitForStarted()) {
-        if(appImageAssistant.errorString().contains("execvp: No such file or directory")){
-            LogError() << "Could not start AppImageAssistant which is needed to generate AppImages.";
-            LogError() << "Make sure it is installed on your $PATH, e.g., in /usr/local/bin.";
-        } else {
-            LogError() << "Could not start AppImageAssistant. Process error is" << appImageAssistant.errorString();
-        }
-        exit(1);
-    }
-
-    appImageAssistant.waitForFinished(-1);
-
-    // FIXME: How to get the output to appear on the console as it happens rather than after the fact?
-    QString output = appImageAssistant.readAllStandardError();
-    QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
-
-    for (const QString &outputLine : outputLines) {
-        // xorriso spits out a lot of WARNINGs which in the context of AppImage can be safely ignored
-        if(!outputLine.contains("WARNING")) {
-            LogNormal() << outputLine;
-        }
-    }
-
-    // AppImageAssistant doesn't always give nonzero error codes, so we check for the presence of the AppImage file
-    // This should eventually be fixed in AppImageAssistant
-    if (!QFile(appDirPath).exists()) {
-        if(appImageAssistant.readAllStandardOutput().isEmpty() == false) {
-            LogError() << "AppImageAssistant:" << appImageAssistant.readAllStandardOutput();
-        }
-        if(appImageAssistant.readAllStandardError().isEmpty() == false){
-            LogError() << "AppImageAssistant:" << appImageAssistant.readAllStandardError();
-        }
-    } else {
-        LogNormal() << "Created AppImage at" << appImagePath;
-    }
+    QString appImageCommand = "AppImageAssistant '" + appDirPath +"' '" + appImagePath + "'";
+    int ret = system(appImageCommand.toUtf8().constData());
 }
