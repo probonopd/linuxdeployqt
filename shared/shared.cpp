@@ -784,7 +784,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
         LogDebug() << "libQt5Gui detected";
         pluginList.append("platforms/libqxcb.so");
-        // All image formats (svg if QtSvg.library is used)
+        // All image formats (svg if QtSvg library is used)
         QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, imagePlugins) {
             if (plugin.contains(QStringLiteral("qsvg"))) {
@@ -817,7 +817,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         }
     }
 
-    // Sql plugins if QtSql.library is in use
+    // Sql plugins if QtSql library is in use
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Sql")) {
         QStringList sqlPlugins = QDir(pluginSourcePath +  QStringLiteral("/sqldrivers")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, sqlPlugins) {
@@ -825,7 +825,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         }
     }
 
-    // multimedia plugins if QtMultimedia.library is in use
+    // multimedia plugins if QtMultimedia library is in use
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Multimedia")) {
         QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, plugins) {
@@ -958,6 +958,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
 
     // run qmlimportscanner
     QProcess qmlImportScanner;
+    LogDebug() << qmlImportScannerPath << argumentList;
     qmlImportScanner.start(qmlImportScannerPath, argumentList);
     if (!qmlImportScanner.waitForStarted()) {
         LogError() << "Could not start qmlimpoortscanner. Process error is" << qmlImportScanner.errorString();
@@ -1031,14 +1032,14 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     }
 
     // Special case:
-    // Use of QtQuick.PrivateWidgets is not discoverable at deploy-time.
+    // Use of QtQuick/PrivateWidgets is not discoverable at deploy-time.
     // Recreate the run-time logic here as best as we can - deploy it iff
-    //      1) QtWidgets.library is used
+    //      1) QtWidgets library is used
     //      2) QtQuick.Controls is used
     // The intended failure mode is that libwidgetsplugin.dylib will be present
     // in the app bundle but not used at run-time.
-    if (deploymentInfo.deployedLibraries.contains("QtWidgets.library") && qtQuickContolsInUse) {
-        LogNormal() << "Deploying QML import QtQuick.PrivateWidgets";
+    if (deploymentInfo.deployedLibraries.contains("QtWidgets") && qtQuickContolsInUse) {
+        LogNormal() << "Deploying QML import QtQuick/PrivateWidgets";
         QString name = "QtQuick/PrivateWidgets";
         QString path = qmlImportsPath + QLatin1Char('/') + name;
         deployQmlImport(appDirPath, deploymentInfo.rpathsUsed, path, name);
