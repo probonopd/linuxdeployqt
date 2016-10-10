@@ -1116,8 +1116,9 @@ void createAppImage(const QString &appDirPath)
     QFile appImage(appImagePath);
     LogDebug() << "appImageName:" << appImagePath;
 
-    if (appImage.exists() && alwaysOwerwriteEnabled)
+    if (appImage.exists() && alwaysOwerwriteEnabled){
         appImage.remove();
+    }
 
     if (appImage.exists()) {
         LogError() << "AppImage already exists, skipping .AppImage creation for" << appImage.fileName();
@@ -1157,10 +1158,12 @@ void createAppImage(const QString &appDirPath)
     // AppImageAssistant doesn't always give nonzero error codes, so we check for the presence of the AppImage file
     // This should eventually be fixed in AppImageAssistant
     if (!QFile(appDirPath).exists()) {
-        if(appImageAssistant.readAllStandardOutput().isEmpty() == false)
+        if(appImageAssistant.readAllStandardOutput().isEmpty() == false) {
             LogError() << "AppImageAssistant:" << appImageAssistant.readAllStandardOutput();
-        if(appImageAssistant.readAllStandardError().isEmpty() == false)
+        }
+        if(appImageAssistant.readAllStandardError().isEmpty() == false){
             LogError() << "AppImageAssistant:" << appImageAssistant.readAllStandardError();
+        }
     } else {
         LogNormal() << "Created AppImage at" << appImagePath;
     }
