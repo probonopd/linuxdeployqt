@@ -40,6 +40,7 @@ tar xf patchelf-0.9.tar.bz2
 
 ```
 wget https://github.com/probonopd/AppImageKit/releases/download/6/AppImageAssistant_6-x86_64.AppImage -O AppImageAssistant
+chmod a+x AppImageAssistant
 sudo mv AppImageAssistant /usr/local/bin/
 ```
 
