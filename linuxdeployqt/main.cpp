@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
-        if (argument == QByteArray("-no-pluginss")) {
+        if (argument == QByteArray("-no-plugins")) {
             LogDebug() << "Argument found:" << argument;
             plugins = false;
         } else if (argument == QByteArray("-appimage")) {
