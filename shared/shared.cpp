@@ -837,11 +837,45 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         }
     }
 
+    QString sourcePath;
+    QString destinationPath;
+    
+    // Qt WebEngine if libQt5WebEngineCore is in use
+    // https://doc-snapshots.qt.io/qt5-5.7/qtwebengine-deploying.html
+    // TODO: Rather than hardcode the source paths, somehow get them dynamically
+    // from the Qt instance that is to be bundled (pull requests welcome!)
+    // especially since stuff that is supposed to come from resources actually
+    // seems to come in libexec in the upstream Qt binary distribution
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5WebEngineCore")) {
+        QDir().mkpath(appDirInfo.path + "/resources");
+        QDir().mkpath(appDirInfo.path + "/libexec");
+        sourcePath = pluginSourcePath + "/../libexec/QtWebEngineProcess";
+        destinationPath = pluginDestinationPath + "/../libexec/QtWebEngineProcess";
+        copyFilePrintStatus(sourcePath, destinationPath);
+        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources.pak";
+        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources.pak";
+        copyFilePrintStatus(sourcePath, destinationPath);
+        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_devtools_resources.pak";
+        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_devtools_resources.pak";
+        copyFilePrintStatus(sourcePath, destinationPath);
+        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources_100p.pak";
+        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources_100p.pak";
+        copyFilePrintStatus(sourcePath, destinationPath);
+        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources_200p.pak";
+        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources_200p.pak";
+        copyFilePrintStatus(sourcePath, destinationPath);
+        sourcePath = pluginSourcePath + "/../libexec/icudtl.dat";
+        destinationPath = pluginDestinationPath + "/../resources/icudtl.dat";
+        copyFilePrintStatus(sourcePath, destinationPath);
+        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_locales";
+        destinationPath = pluginDestinationPath + "/../resources/";
+        recursiveCopy(sourcePath, destinationPath);
+    }
+    
     LogDebug() << "pluginList after having detected hopefully all required plugins:" << pluginList;
     foreach (const QString &plugin, pluginList) {
-        QString sourcePath = pluginSourcePath + "/" + plugin;
-
-        const QString destinationPath = pluginDestinationPath + "/" + plugin;
+        sourcePath = pluginSourcePath + "/" + plugin;
+        destinationPath = pluginDestinationPath + "/" + plugin;
         QDir dir;
         dir.mkpath(QFileInfo(destinationPath).path());
         deploymentInfo.deployedLibraries += findAppLibraries(destinationPath);
