@@ -1163,5 +1163,5 @@ int createAppImage(const QString &appDirPath)
     }
     QString appImageCommand = "AppImageAssistant '" + appDirPath +"' '" + appImagePath + "'";
     int ret = system(appImageCommand.toUtf8().constData());
-    return ret;
+    return WEXITSTATUS(ret);
 }
