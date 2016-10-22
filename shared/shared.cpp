@@ -1138,6 +1138,8 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
         LogError() << "Icon file missing, creating a default one (you will probably want to edit it)";
         QFile file2(appDirPath + "/default.png");
         file2.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out2(&file2);
+        out2 << "";
         QTextStream out(&file2);
         file2.close();
     }
@@ -1146,22 +1148,7 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
 
 int createAppImage(const QString &appDirPath)
 {
-    QString appImagePath = appDirPath + ".AppImage";
-
-    QFile appImage(appImagePath);
-    LogDebug() << "appImageName:" << appImagePath;
-
-    if (appImage.exists() && alwaysOwerwriteEnabled){
-        appImage.remove();
-    }
-
-    if (appImage.exists()) {
-        LogError() << "AppImage already exists, skipping .AppImage creation for" << appImage.fileName();
-        LogError() << "use -always-overwrite to overwrite";
-    } else {
-        LogNormal() << "Creating AppImage for" << appDirPath;
-    }
-    QString appImageCommand = "AppImageAssistant '" + appDirPath +"' '" + appImagePath + "'";
+    QString appImageCommand = "appimagetool '" + appDirPath; // +"' '" + appImagePath + "'";
     int ret = system(appImageCommand.toUtf8().constData());
     return WEXITSTATUS(ret);
 }
