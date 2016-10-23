@@ -210,11 +210,7 @@ int main(int argc, char **argv)
     if (appimage) {
         int result = createAppImage(appDirPath);
         LogDebug() << "result:" << result;
-        if(result =! 0){
-            LogDebug() << "result != 0:" << result;
-            exit(result);
-        }
+        exit(result);
     }
-    LogDebug() << "exit(0);";
     exit(0);
 }
