@@ -1150,5 +1150,7 @@ int createAppImage(const QString &appDirPath)
 {
     QString appImageCommand = "appimagetool '" + appDirPath + "' --verbose"; // +"' '" + appImagePath + "'";
     int ret = system(appImageCommand.toUtf8().constData());
+    LogNormal() << "ret" << ret;
+    LogNormal() << "WEXITSTATUS(ret)" << WEXITSTATUS(ret);
     return WEXITSTATUS(ret);
 }
