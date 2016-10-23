@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=linuxdeployqt
-Name=linuxdeployqt
+Exec=linuxdeployqt
 Icon=linuxdeployqt
 Terminal=true
 Categories=Development;
