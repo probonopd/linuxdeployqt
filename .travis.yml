@@ -31,6 +31,7 @@ script:
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/appimagetool linuxdeployqt.AppDir/usr/bin/
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt
+  - export VERSION=$(git describe --always)
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt -verbose=3 -appimage
   - ls -lh
-#  - curl --upload-file ./linuxdeployqt.AppImage https://transfer.sh/linuxdeployqt.appimage
+  - curl --upload-file ./linuxdeployqt-*.AppImage https://transfer.sh/linuxdeployqt-$VERSION-x86_64.appimage
