@@ -3,5 +3,6 @@ Type=Application
 Name=linuxdeployqt
 Exec=linuxdeployqt
 Icon=linuxdeployqt
+Comment=Bundle an application as an AppDir and/or AppImage
 Terminal=true
 Categories=Development;
