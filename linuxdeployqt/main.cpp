@@ -30,6 +30,7 @@
 #include <QProcessEnvironment>
 #include "../shared/shared.h"
 #include <QRegularExpression>
+#include <stdlib.h>
 
 int main(int argc, char **argv)
 {
@@ -212,7 +213,6 @@ int main(int argc, char **argv)
             exit(result);
         }
     }
-
-    return 0;
+    exit(0);
 }
 
