@@ -94,6 +94,7 @@ These are my first steps with Qt and with C++ for that matter, and it is stil ve
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
 
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
+- https://github.com/fathomssen/redtimer
 - https://github.com/coryo/amphetype2
 - https://github.com/chkmue/MyQtTravisTemplateProject
 - https://github.com/chkmue/qttravisCI_1
