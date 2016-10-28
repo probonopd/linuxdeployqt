@@ -98,6 +98,7 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/coryo/amphetype2
 - https://github.com/chkmue/MyQtTravisTemplateProject
 - https://github.com/chkmue/qttravisCI_1
+- https://github.com/eteran/edb-debugger
 
 These can be bundled successfully using linuxdeployqt:
 
