@@ -38,9 +38,10 @@ int main(int argc, char **argv)
 
     QString appBinaryPath;
 
-    if (argc > 1)
+    if (argc > 1) {
         appBinaryPath = QString::fromLocal8Bit(argv[1]);
         appBinaryPath = QDir::cleanPath(appBinaryPath).trimmed();
+    }
 
     if (argc < 2 || appBinaryPath.startsWith("-")) {
         qDebug() << "Usage: linuxdeployqt app-binary [options]";
@@ -199,7 +200,8 @@ int main(int argc, char **argv)
     }
 
     if (plugins && !deploymentInfo.qtPath.isEmpty()) {
-        deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
+        if (deploymentInfo.pluginPath.isEmpty())
+            deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
         deployPlugins(appDirPath, deploymentInfo);
         createQtConf(appDirPath);
     }

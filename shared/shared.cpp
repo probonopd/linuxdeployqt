@@ -56,7 +56,7 @@ bool deployLibrary = false;
 using std::cout;
 using std::endl;
 
-QString qtPathToBeBundled = "";
+QMap<QString,QString> qtToBeBundledInfo;
 
 bool operator==(const LibraryInfo &a, const LibraryInfo &b)
 {
@@ -645,6 +645,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
     QStringList copiedLibraries;
     DeploymentInfo deploymentInfo;
     deploymentInfo.useLoaderPath = useLoaderPath;
+    deploymentInfo.pluginPath = qtToBeBundledInfo.value("QT_INSTALL_PLUGINS");
     QSet<QString> rpathsUsed;
 
     while (libraries.isEmpty() == false) {
@@ -699,6 +700,21 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
     return deploymentInfo;
 }
 
+static QString captureOutput(const QString &command)
+{
+    QProcess process;
+    process.start(command, QIODevice::ReadOnly);
+    process.waitForFinished();
+
+    if (process.exitStatus() != QProcess::NormalExit) {
+        LogError() << command << "crashed:" << process.readAllStandardError();
+    } else if (process.exitCode() != 0) {
+        LogError() << command << "exited with" << process.exitCode() << ":" << process.readAllStandardError();
+    }
+
+    return process.readAllStandardOutput();
+}
+
 DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables)
 {
    AppDirInfo applicationBundle;
@@ -710,33 +726,31 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
    // Determine the location of the Qt to be bundled
    LogDebug() << "Using qmake to determine the location of the Qt to be bundled";
-   QProcess qmake;
-   qmake.start("qmake -v");
-   qmake.waitForFinished();
-   if (qmake.exitStatus() != QProcess::NormalExit || qmake.exitCode() != 0) {
-       LogError() << "qmake:" << qmake.readAllStandardError();
-   }
-   static const QRegularExpression regexp(QStringLiteral("^Using Qt version .+ in (.+)"));
-   QString output = qmake.readAllStandardOutput();
+   QString output = captureOutput("qmake -query");
    QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
-   foreach (QString outputLine, outputLines) {
-       LogDebug() << "qmake outputLine:" << outputLine;
-       const auto match = regexp.match(outputLine);
-       if ((match.hasMatch()) and (QFileInfo(match.captured(1)).absoluteDir().exists()))  {
-           qtPathToBeBundled = QFileInfo(match.captured(1)).absolutePath();
-           LogDebug() << "Qt path determined from qmake:" << qtPathToBeBundled;
-           QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-           QString oldPath = env.value("LD_LIBRARY_PATH");
-           QString newPath = qtPathToBeBundled + "/lib" + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
-           // FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
-           LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
-           setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
+   foreach (const QString &outputLine, outputLines) {
+       int colonIndex = outputLine.indexOf(QLatin1Char(':'));
+       if (colonIndex != -1) {
+           QString name = outputLine.left(colonIndex);
+           QString value = outputLine.mid(colonIndex + 1);
+           qtToBeBundledInfo.insert(name, value);
        }
    }
-   if(qtPathToBeBundled == ""){
+
+   QString qtLibsPath = qtToBeBundledInfo.value("QT_INSTALL_LIBS");
+
+   if (qtLibsPath.isEmpty() || !QFile::exists(qtLibsPath)) {
        LogError() << "Qt path could not be determined from qmake on the $PATH";
        LogError() << "Make sure you have the correct Qt on your $PATH";
        LogError() << "You can check this with qmake -v";
+   } else {
+       LogDebug() << "Qt libs path determined from qmake:" << qtLibsPath;
+       QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+       QString oldPath = env.value("LD_LIBRARY_PATH");
+       QString newPath = qtLibsPath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
+       // FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
+       LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
+       setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
    }
 
    changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
@@ -952,7 +966,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     LogNormal() << "Application QML file search path(s) is" << qmlDirs;
 
     // Use qmlimportscanner from QLibraryInfo::BinariesPath
-    QString qmlImportScannerPath = QDir::cleanPath(qtPathToBeBundled) + "/bin/qmlimportscanner";
+    QString qmlImportScannerPath = QDir::cleanPath(qtToBeBundledInfo.value("QT_INSTALL_BINS")) + "/qmlimportscanner";
     LogDebug() << "Looking for qmlimportscanner at" << qmlImportScannerPath;
 
     // Fallback: Look relative to the linuxdeployqt binary
@@ -975,8 +989,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         argumentList.append("-rootPath");
         argumentList.append(qmlDir);
     }
-    QString qmlImportsPath = QDir::cleanPath(qtPathToBeBundled) + "/qml";
-    // FIXME: Directory layout might be different for system Qt; cannot assume qml/ to always be inside the Qt directory
+    QString qmlImportsPath = qtToBeBundledInfo.value("QT_INSTALL_QML");
     LogDebug() << "qmlImportsPath candidate:" << qmlImportsPath;
 
     // Verify that we found a valid qmlImportsPath
