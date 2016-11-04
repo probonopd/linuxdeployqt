@@ -816,6 +816,12 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         foreach (const QString &plugin, xcbglintegrationPlugins) {
             pluginList.append(QStringLiteral("xcbglintegrations/") + plugin);
         }
+    }    
+    
+    // Also deploy plugins/iconengines/libqsvgicon.so whenever libQt5Svg.so.* is about to be deployed,
+    // https://github.com/probonopd/linuxdeployqt/issues/36
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
+        pluginList.append(QStringLiteral("iconengines/libqsvgicon.so"));
     }
 
     // CUPS print support
