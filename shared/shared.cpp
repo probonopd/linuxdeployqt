@@ -91,6 +91,27 @@ inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
     return debug;
 }
 
+// Determine whether the given 'ldd' output contains a Linux VDSO
+// shared object. The name of the VDSO object differs depending
+// on architecture. See "vDSO names" in the notes section of vdso(7)
+// for more information.
+static bool lddOutputContainsLinuxVDSO(const QString &lddOutput) {
+	// aarch64, arm, mips, x86_64, x86/x32
+	if (lddOutput.contains(QStringLiteral("linux-vdso.so.1"))) {
+		return true;
+	// ppc32, s390
+	} else if (lddOutput.contains(QStringLiteral("linux-vdso32.so.1"))) {
+		return true;
+	// ppc64, s390x
+	} else if (lddOutput.contains(QStringLiteral("linux-vdso64.so.1"))) {
+		return true;
+	// ia64, sh, i386
+	} else if (lddOutput.contains(QStringLiteral("linux-gate.so.1"))) {
+		return true;
+	}
+	return false;
+}
+
 bool copyFilePrintStatus(const QString &from, const QString &to)
 {
     if (QFile(to).exists()) {
@@ -162,7 +183,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         }
     }
 
-    if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) and (!output.contains("linux-vdso.so.1"))) {
+    if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) && (!lddOutputContainsLinuxVDSO(output))) {
         const QRegularExpressionMatch match = regexp.match(outputLines.first());
         if (match.hasMatch())  {
             info.installName = match.captured(1);
