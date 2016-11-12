@@ -163,7 +163,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     }
 
     if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) and (!output.contains("linux-vdso.so.1"))) {
-        const auto match = regexp.match(outputLines.first());
+        const QRegularExpressionMatch match = regexp.match(outputLines.first());
         if (match.hasMatch())  {
             info.installName = match.captured(1);
         } else {
@@ -172,8 +172,8 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         outputLines.removeFirst();
     }
 
-    for (const QString &outputLine : outputLines) {
-        const auto match = regexp.match(outputLine);
+    foreach (const QString &outputLine, outputLines) {
+        const QRegularExpressionMatch match = regexp.match(outputLine);
         if (match.hasMatch()) {
             DylibInfo dylib;
             dylib.binaryPath = match.captured(1).trimmed();
@@ -357,7 +357,7 @@ QStringList findAppLibraries(const QString &appDirPath)
 QList<LibraryInfo> getQtLibraries(const QList<DylibInfo> &dependencies, const QString &appDirPath, const QSet<QString> &rpaths)
 {
     QList<LibraryInfo> libraries;
-    for (const DylibInfo &dylibInfo : dependencies) {
+    foreach (const DylibInfo &dylibInfo, dependencies) {
         LibraryInfo info = parseLddLibraryLine(dylibInfo.binaryPath, appDirPath, rpaths);
         if (info.libraryName.isEmpty() == false) {
             LogDebug() << "Adding library:";
@@ -444,7 +444,7 @@ QStringList getBinaryDependencies(const QString executablePath,
 {
     QStringList binaries;
 
-    const auto dependencies = findDependencyInfo(path).dependencies;
+    const QList<DylibInfo> dependencies = findDependencyInfo(path).dependencies;
 
     bool rpathsLoaded = false;
     QSet<QString> rpaths;
