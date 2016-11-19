@@ -219,7 +219,12 @@ int containsHowOften(QStringList haystack, QString needle) {
 
 LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths)
 {
-    bundleLibraryDirectory= "lib"; // relative to bundle
+    if(fhsLikeMode == false){
+        bundleLibraryDirectory= "lib"; // relative to bundle
+    } else {
+        QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
+        bundleLibraryDirectory = relativePrefix + "/lib/";
+    }
     LogDebug() << "bundleLibraryDirectory:" << bundleLibraryDirectory;
 
     LibraryInfo info;
@@ -764,7 +769,11 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
    }
 
-   changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+   if(fhsLikeMode == false){
+       changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+   } else {
+       changeIdentification("$ORIGIN/../lib/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+   }
    applicationBundle.libraryPaths = findAppLibraries(appDirPath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
 

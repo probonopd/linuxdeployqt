@@ -120,20 +120,16 @@ int main(int argc, char **argv)
     }
 
     QString appDirPath;
-    if(fhsLikeMode == false){
-        appDirPath = appDir;
-    } else {
-        appDirPath = QDir::cleanPath(fhsPrefix + "/../");
-    }
-    qDebug() << "appDirPath:" << appDirPath;
-
     QString relativeBinPath;
     if(fhsLikeMode == false){
+        appDirPath = appDir;
         relativeBinPath = appName;
     } else {
+        appDirPath = QDir::cleanPath(fhsPrefix + "/../");
         QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
         relativeBinPath = relativePrefix + "/bin/" + appName;
     }
+    qDebug() << "appDirPath:" << appDirPath;
     qDebug() << "relativeBinPath:" << relativeBinPath;
 
     QFile appRun(appDirPath + "/AppRun");
