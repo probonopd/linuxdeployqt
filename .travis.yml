@@ -31,4 +31,10 @@ script:
   - export VERSION=$(git describe --always)
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt -verbose=3 -appimage
   - ls -lh
-  - curl --upload-file ./linuxdeployqt-*.AppImage https://transfer.sh/linuxdeployqt-$VERSION-x86_64.appimage
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash ./upload.sh ./linuxdeployqt-*.AppImage
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)$/
