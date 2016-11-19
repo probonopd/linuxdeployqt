@@ -44,9 +44,11 @@
 #include <QRegularExpression>
 #include "shared.h"
 
-
+QString appBinaryPath;
 bool runStripEnabled = true;
 bool bundleAllButCoreLibs = false;
+bool fhsLikeMode = false;
+QString fhsPrefix;
 bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
@@ -81,7 +83,7 @@ QDebug operator<<(QDebug debug, const LibraryInfo &info)
     return debug;
 }
 
-const QString bundleLibraryDirectory = "lib"; // the same directory as the main executable; could define a relative subdirectory here
+QString bundleLibraryDirectory;
 
 inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
 {
@@ -217,6 +219,9 @@ int containsHowOften(QStringList haystack, QString needle) {
 
 LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths)
 {
+    bundleLibraryDirectory= "lib"; // relative to bundle
+    LogDebug() << "bundleLibraryDirectory:" << bundleLibraryDirectory;
+
     LibraryInfo info;
     QString trimmed = line.trimmed();
 
@@ -336,21 +341,6 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     }
 
     return info;
-}
-
-QString findAppBinary(const QString &appDirPath)
-{
-    QString binaryPath;
-
-    // FIXME: Do without the need for an AppRun symlink
-    // by passing appBinaryPath from main.cpp here
-    binaryPath = appDirPath + "/" + "AppRun";
-
-    if (QFile::exists(binaryPath))
-        return binaryPath;
-
-    LogError() << "Could not find bundle binary for" << appDirPath << "at" << binaryPath;
-    exit(1);
 }
 
 QStringList findAppLibraries(const QString &appDirPath)
@@ -648,7 +638,7 @@ void runStrip(const QString &binaryPath)
 
 void stripAppBinary(const QString &bundlePath)
 {
-    runStrip(findAppBinary(bundlePath));
+    runStrip(appBinaryPath);
 }
 
 /*
@@ -742,7 +732,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
    applicationBundle.path = appDirPath;
    LogDebug() << "applicationBundle.path:" << applicationBundle.path;
-   applicationBundle.binaryPath = findAppBinary(appDirPath);
+   applicationBundle.binaryPath = appBinaryPath;
    LogDebug() << "applicationBundle.binaryPath:" << applicationBundle.binaryPath;
 
    // Determine the location of the Qt to be bundled
@@ -967,7 +957,7 @@ void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo)
 {
     AppDirInfo applicationBundle;
     applicationBundle.path = appDirPath;
-    applicationBundle.binaryPath = findAppBinary(appDirPath);
+    applicationBundle.binaryPath = appBinaryPath;
 
     const QString pluginDestinationPath = appDirPath + "/" + "plugins";
     deployPlugins(applicationBundle, deploymentInfo.pluginPath, pluginDestinationPath, deploymentInfo);
@@ -1139,7 +1129,6 @@ void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &bi
 
 void changeQtLibraries(const QString appPath, const QString &qtPath)
 {
-    const QString appBinaryPath = findAppBinary(appPath);
     const QStringList libraryPaths = findAppLibraries(appPath);
     const QList<LibraryInfo> libraries = getQtLibrariesForPaths(QStringList() << appBinaryPath << libraryPaths, appPath, getBinaryRPaths(appBinaryPath, true));
     if (libraries.isEmpty()) {
