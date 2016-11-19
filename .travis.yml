@@ -14,10 +14,7 @@ before_install:
   - make -j7
   - sudo make install
   - cd -
-  - ID=$(wget -q https://api.travis-ci.org/repos/probonopd/appimagetool/builds -O - | head -n 1 | sed -e 's|}|\n|g' | grep '"result":0' | head -n 1 | sed -e 's|,|\n|g' | grep '"id"' | cut -d ":" -f 2)
-  - URL=$(wget -q "http://archive.travis-ci.org/jobs/$((ID+1))/log.txt" -O - | grep -o "https://transfer.sh/.*/appimagetool" | tail -n 1 | sed -e 's|\r||g')
-  - if [ -z "$URL" ] ; then URL=$(wget -q "http://archive.travis-ci.org/jobs/$((ID+2))/log.txt" -O - | grep -o "https://transfer.sh/.*/appimagetool" | tail -n 1 | sed -e 's|\r||g') ; fi
-  - sudo wget -c "$URL" -O /usr/local/bin/appimagetool
+  - sudo wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O /usr/local/bin/appimagetool
   - sudo chmod a+x /usr/local/bin/appimagetool
   
 install:
