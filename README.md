@@ -36,12 +36,11 @@ tar xf patchelf-0.9.tar.bz2
 ( cd patchelf-0.9/ && ./configure  && make && sudo make install )
 ```
 
-* Optional if you want to generate AppImages: Download [AppImageAssistant](https://github.com/probonopd/AppImageKit/releases) and put it into your $PATH, e.g., into `/usr/local/bin`. Make sure it is renamed to `AppImageAssistant` and is `chmod a+x`
+* Optional if you want to generate AppImages: Download [appimagetool](https://github.com/probonopd/AppImageKit/releases) and put it into your $PATH, e.g., into `/usr/local/bin`. Make sure it is renamed to `appimagetool` and is `chmod a+x`
 
 ```
-wget https://github.com/probonopd/AppImageKit/releases/download/6/AppImageAssistant_6-x86_64.AppImage -O AppImageAssistant
-chmod a+x AppImageAssistant
-sudo mv AppImageAssistant /usr/local/bin/
+sudo wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O /usr/local/bin/appimagetool
+sudo chmod a+x /usr/local/bin/appimagetool
 ```
 
 ## Usage
