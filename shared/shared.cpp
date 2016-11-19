@@ -940,7 +940,7 @@ void createQtConf(const QString &appDirPath)
                           "Qml2Imports = qml\n";
 
     QString filePath = appDirPath + "/"; // Is picked up when placed next to the main executable
-    QString fileName = filePath + "qt.conf";
+    QString fileName = appBinaryPath + "/../qt.conf";
 
     QDir().mkpath(filePath);
 
@@ -1034,7 +1034,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     LogDebug() << qmlImportScannerPath << argumentList;
     qmlImportScanner.start(qmlImportScannerPath, argumentList);
     if (!qmlImportScanner.waitForStarted()) {
-        LogError() << "Could not start qmlimpoortscanner. Process error is" << qmlImportScanner.errorString();
+        LogError() << "Could not start qmlimportscanner. Process error is" << qmlImportScanner.errorString();
         return false;
     }
     qmlImportScanner.waitForFinished();
@@ -1152,6 +1152,12 @@ void changeQtLibraries(const QString appPath, const QString &qtPath)
 
 bool checkAppImagePrerequisites(const QString &appDirPath)
 {
+    if(fhsLikeMode == true){
+        /* In FHS-like mode, we assume that there will be a desktop file
+         * and icon file that appimagetool will be able to pick up */
+        return true;
+    }
+
     QDirIterator iter(appDirPath, QStringList() << QString::fromLatin1("*.desktop"),
             QDir::Files, QDirIterator::Subdirectories);
     if (!iter.hasNext()) {
