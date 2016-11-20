@@ -8,7 +8,8 @@ before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
   - sudo apt-get update -qq
   - git clone https://github.com/NixOS/patchelf.git
-  - cd patchelf 
+  - cd patchelf
+  - bash ./bootstrap.sh
   - ./configure
   - make -j7
   - sudo make install
