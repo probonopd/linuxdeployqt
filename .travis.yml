@@ -27,7 +27,8 @@ script:
   - mkdir -p linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/appimagetool linuxdeployqt.AppDir/usr/bin/
-  - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
+  - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt
+  - find linuxdeployqt.AppDir/
   - export VERSION=continuous
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
