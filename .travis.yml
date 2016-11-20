@@ -29,7 +29,7 @@ script:
   - cp /usr/local/bin/appimagetool linuxdeployqt.AppDir/usr/bin/
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
   - export VERSION=continuous
-  - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt -verbose=3 -appimage
+  - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash ./upload.sh ./linuxdeployqt-*.AppImage
