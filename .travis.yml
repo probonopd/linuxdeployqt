@@ -7,9 +7,8 @@ os: linux
 before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
   - sudo apt-get update -qq
-  - wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2
-  - tar xf patchelf-0.9.tar.bz2
-  - cd patchelf-*/ 
+  - git clone https://github.com/NixOS/patchelf.git
+  - cd patchelf 
   - ./configure
   - make -j7
   - sudo make install
