@@ -100,6 +100,10 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/chkmue/qttravisCI_1
 - https://github.com/eteran/edb-debugger
 
+This project on GitLab uses linuxdeployqt:
+
+- https://gitlab.com/rpdev/opentodolist
+
 These can be bundled successfully using linuxdeployqt:
 
 - https://github.com/eteran/edb-debugger/pull/458
