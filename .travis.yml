@@ -11,7 +11,7 @@ before_install:
   - tar xf patchelf-0.9.tar.bz2
   - cd patchelf-*/ 
   - ./configure
-  - make -j7
+  - make -j2
   - sudo make install
   - cd -
   - ID=$(wget -q https://api.travis-ci.org/repos/probonopd/appimagetool/builds -O - | head -n 1 | sed -e 's|}|\n|g' | grep '"result":0' | head -n 1 | sed -e 's|,|\n|g' | grep '"id"' | cut -d ":" -f 2)
