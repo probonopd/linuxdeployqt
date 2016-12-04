@@ -826,8 +826,9 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
                     pluginList.append(QStringLiteral("imageformats/") + plugin);
                 }
+            } else {
                 pluginList.append(QStringLiteral("imageformats/") + plugin);
-            }
+	    }
         }
     }
 
