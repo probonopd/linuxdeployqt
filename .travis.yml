@@ -11,7 +11,7 @@ before_install:
   - cd patchelf
   - bash ./bootstrap.sh
   - ./configure
-  - make -j7
+  - make -j2
   - sudo make install
   - cd -
   - sudo wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O /usr/local/bin/appimagetool
@@ -23,13 +23,13 @@ install:
 script:
   - source /opt/qt57/bin/qt57-env.sh
   - /opt/qt57/bin/qmake linuxdeployqt.pro
-  - make -j7
+  - make -j2
   - mkdir -p linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/appimagetool linuxdeployqt.AppDir/usr/bin/
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt
-  - find linuxdeployqt.AppDir/
-  - export VERSION=continuous
+  - strip linuxdeployqt.AppDir/usr/bin/* || continue
+  - export VERSION=continuousfhs
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
