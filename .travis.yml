@@ -32,6 +32,7 @@ script:
   - export VERSION=continuous
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
+  - find *.AppDir
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash ./upload.sh ./linuxdeployqt-*.AppImage
 
