@@ -894,23 +894,23 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         sourcePath = pluginSourcePath + "/../libexec/QtWebEngineProcess";
         destinationPath = pluginDestinationPath + "/../libexec/QtWebEngineProcess";
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources.pak";
+        sourcePath = pluginSourcePath + "/../resources/qtwebengine_resources.pak";
         destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources.pak";
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_devtools_resources.pak";
+        sourcePath = pluginSourcePath + "/../resources/qtwebengine_devtools_resources.pak";
         destinationPath = pluginDestinationPath + "/../resources/qtwebengine_devtools_resources.pak";
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources_100p.pak";
+        sourcePath = pluginSourcePath + "/../resources/qtwebengine_resources_100p.pak";
         destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources_100p.pak";
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources_200p.pak";
+        sourcePath = pluginSourcePath + "/../resources/qtwebengine_resources_200p.pak";
         destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources_200p.pak";
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/icudtl.dat";
+        sourcePath = pluginSourcePath + "/../resources/icudtl.dat";
         destinationPath = pluginDestinationPath + "/../resources/icudtl.dat";
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_locales";
-        destinationPath = pluginDestinationPath + "/../resources/";
+        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_locales"; // TODO: this is actually here ../translations/qtwebengine_locales
+        destinationPath = pluginDestinationPath + "/../resources/"; // TODO: find where to put it
         recursiveCopy(sourcePath, destinationPath);
     }
     
