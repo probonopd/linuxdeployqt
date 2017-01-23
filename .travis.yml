@@ -5,7 +5,7 @@ dist: trusty
 os: linux
 
 before_install:
-  - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
   - sudo apt-get update -qq
   - git clone https://github.com/NixOS/patchelf.git
   - cd patchelf
@@ -18,11 +18,11 @@ before_install:
   - sudo chmod a+x /usr/local/bin/appimagetool
   
 install:
-  - sudo apt-get -y install qt57base binutils
+  - sudo apt-get -y install qt58base binutils
 
 script:
-  - source /opt/qt57/bin/qt57-env.sh
-  - /opt/qt57/bin/qmake linuxdeployqt.pro
+  - source /opt/qt*/bin/qt*-env.sh
+  - /opt/qt*/bin/qmake linuxdeployqt.pro
   - make -j7
   - mkdir -p linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
