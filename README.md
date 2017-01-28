@@ -100,6 +100,7 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/chkmue/qttravisCI_1
 - https://github.com/eteran/edb-debugger
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
+- https://github.com/bjorn/tiled/
 
 This project on GitLab uses linuxdeployqt:
 
