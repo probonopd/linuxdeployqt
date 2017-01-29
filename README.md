@@ -22,7 +22,7 @@ __This may not be fully working yet.__ Use with care, run with maximum verbosity
 sudo apt-get -y install git g++ libgl1-mesa-dev
 git clone https://github.com/probonopd/linuxdeployqt.git
 # Then build in Qt Creator, or use
-export PATH=/tmp/.mount_QtCreator-5.7.0-x86_64/5.7/gcc_64/bin/:$PATH
+export PATH=/tmp/.mount_QtCreator-*-x86_64/5.7/gcc_64/bin/:$PATH
 cd linuxdeployqt
 qmake linuxdeployqt.pro
 make
