@@ -92,8 +92,6 @@ These are my first steps with Qt and with C++ for that matter, and it is stil ve
 ## Projects using linuxdeployqt
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
-
-- Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
 - https://github.com/Blinkinlabs/PatternPaint
 - https://github.com/fathomssen/redtimer
 - https://github.com/coryo/amphetype2
@@ -101,6 +99,10 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/chkmue/qttravisCI_1
 - https://github.com/eteran/edb-debugger
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
+
+
+These projects are already using linuxdeployqt:
+- Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
 - https://github.com/bjorn/tiled/
 - https://github.com/evpo/EncryptPad
 - https://github.com/grahamrow/Muview2
