@@ -93,6 +93,7 @@ These are my first steps with Qt and with C++ for that matter, and it is stil ve
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
 
+- Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
 - https://github.com/Blinkinlabs/PatternPaint
 - https://github.com/fathomssen/redtimer
 - https://github.com/coryo/amphetype2
