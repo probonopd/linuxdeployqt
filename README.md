@@ -101,6 +101,9 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/eteran/edb-debugger
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
 - https://github.com/bjorn/tiled/
+- https://github.com/evpo/EncryptPad
+- https://github.com/grahamrow/Muview2
+- https://github.com/freemountain/quark/
 
 This project on GitLab uses linuxdeployqt:
 
