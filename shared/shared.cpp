@@ -257,8 +257,8 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
         With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
         Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
         */
-
-        if (! trimmed.contains("libicu")) {
+        // Manual make of Qt deploys it to /usr/local/Qt-x.x.x so we cannot remove this path just like that, so let's allow known libs of Qt.
+        if (!trimmed.contains("libicu") && !trimmed.contains("lib/libQt") && !trimmed.contains("lib/libqgsttools")) {
             if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
                 return info;
             }
