@@ -1109,7 +1109,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         QString path = import["path"].toString();
         QString type = import["type"].toString();
 
-        if (import["name"] == "QtQuick.Controls")
+        if (import["name"].toString() == "QtQuick.Controls")
             qtQuickContolsInUse = true;
 
         LogNormal() << "Deploying QML import" << name;
