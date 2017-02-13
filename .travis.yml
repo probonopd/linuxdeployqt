@@ -5,33 +5,38 @@ dist: trusty
 os: linux
 
 before_install:
-  - sudo add-apt-repository --yes ppa:beineri/opt-qt57-trusty
+  - sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
   - sudo apt-get update -qq
-  - git clone https://github.com/NixOS/patchelf.git
-  - cd patchelf
-  - bash ./bootstrap.sh
-  - ./configure
-  - make -j2
-  - sudo make install
-  - cd -
+  - wget -c "http://archive.ubuntu.com/ubuntu/pool/universe/p/patchelf/patchelf_0.8.orig.tar.gz"
+  - tar xf patchelf_0.8.orig.tar.gz
+  - ( cd patchelf-0.8/ && ./configure  && make j2 && sudo make install )
+#  - git clone https://github.com/NixOS/patchelf.git
+#  - cd patchelf
+#  - bash ./bootstrap.sh
+#  - ./configure
+#  - make -j2
+#  - sudo make install
+#  - cd -
   - sudo wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O /usr/local/bin/appimagetool
   - sudo chmod a+x /usr/local/bin/appimagetool
   
 install:
-  - sudo apt-get -y install qt57base binutils
+  - sudo apt-get -y install qt58base binutils
 
 script:
-  - source /opt/qt57/bin/qt57-env.sh
-  - /opt/qt57/bin/qmake linuxdeployqt.pro
+  - source /opt/qt*/bin/qt*-env.sh
+  - /opt/qt*/bin/qmake linuxdeployqt.pro
   - make -j2
   - mkdir -p linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/appimagetool linuxdeployqt.AppDir/usr/bin/
-  - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt
-  - strip linuxdeployqt.AppDir/usr/bin/* || continue
+  - find linuxdeployqt.AppDir/
   - export VERSION=continuousfhs
+  - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
+  - strip linuxdeployqt.AppDir/usr/bin/* || continue
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
+  - find *.AppDir
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash ./upload.sh ./linuxdeployqt-*.AppImage
 
