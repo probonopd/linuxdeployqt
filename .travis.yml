@@ -9,7 +9,7 @@ before_install:
   - sudo apt-get update -qq
   - wget -c "http://archive.ubuntu.com/ubuntu/pool/universe/p/patchelf/patchelf_0.8.orig.tar.gz"
   - tar xf patchelf_0.8.orig.tar.gz
-  - ( cd patchelf-0.8/ && ./configure  && make j2 && sudo make install )
+  - ( cd patchelf-0.8/ && ./configure  && make -j2 && sudo make install )
 #  - git clone https://github.com/NixOS/patchelf.git
 #  - cd patchelf
 #  - bash ./bootstrap.sh
