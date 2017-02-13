@@ -33,7 +33,7 @@ script:
   - find linuxdeployqt.AppDir/
   - export VERSION=continuousfhs
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
-  - strip linuxdeployqt.AppDir/usr/bin/* || continue
+#  - strip linuxdeployqt.AppDir/usr/bin/* || continue
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
   - find *.AppDir
