@@ -618,6 +618,36 @@ void runStrip(const QString &binaryPath)
     // Since we might have a symlink, we need to find its target first
     QString resolvedPath = QFileInfo(binaryPath).canonicalFilePath();
 
+    LogDebug() << "Determining whether to run strip:";
+    LogDebug() << " checking whether" << resolvedPath << "has an rpath set";
+    LogDebug() << "patchelf" << "--print-rpath" << resolvedPath;
+    QProcess patchelfread;
+    patchelfread.start("patchelf", QStringList() << "--print-rpath" << resolvedPath);
+    if (!patchelfread.waitForStarted()) {
+        if(patchelfread.errorString().contains("execvp: No such file or directory")){
+            LogError() << "Could not start patchelf.";
+            LogError() << "Make sure it is installed on your $PATH.";
+        } else {
+            LogError() << "Could not start patchelf. Process error is" << patchelfread.errorString();
+        }
+        exit(1);
+    }
+    patchelfread.waitForFinished();
+
+    if (patchelfread.exitCode() != 0){
+        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardError();
+        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardOutput();
+        exit(1);
+    }
+
+    QString rpath = patchelfread.readAllStandardOutput();
+
+    if (rpath.startsWith("$")){
+        LogDebug() << "Already contains rpath starting with $, hence not stripping";
+        LogDebug() << patchelfread.readAllStandardOutput();
+        return;
+    }
+
     LogDebug() << "Using strip:";
     LogDebug() << " stripping" << resolvedPath;
     QProcess strip;
