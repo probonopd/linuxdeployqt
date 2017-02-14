@@ -30,7 +30,7 @@ script:
   - cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
   - cp /usr/local/bin/appimagetool linuxdeployqt.AppDir/usr/bin/
   - find linuxdeployqt.AppDir/
-  - export VERSION=continuousfhs
+  - export VERSION=continuous
   - cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
