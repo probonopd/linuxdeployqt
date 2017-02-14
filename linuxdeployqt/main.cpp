@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
-    QString appBinaryPath;
+    extern QString appBinaryPath;
 
     if (argc > 1) {
         appBinaryPath = QString::fromLocal8Bit(argv[1]);
@@ -91,33 +91,53 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    QDir dir;
-    // QString appDir = QDir::cleanPath(appFile + "/../" + appName + ".AppDir");
     QString appDir = QDir::cleanPath(appBinaryPath + "/../");
-
     if (QDir().exists(appDir) == false) {
         qDebug() << "Error: Could not find AppDir" << appDir;
         return 1;
     }
 
-    QString appDirPath = appDir;
-
-    QFile appRun(appDir + "/AppRun");
-
-    if(appRun.exists()){
-        appRun.remove();
-    }
-    QFile::link(appName, appDir + "/AppRun");
-
     bool plugins = true;
     bool appimage = false;
     extern bool runStripEnabled;
     extern bool bundleAllButCoreLibs;
+    extern bool fhsLikeMode;
+    extern QString fhsPrefix;
     extern bool alwaysOwerwriteEnabled;
     extern QStringList librarySearchPath;
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     QStringList qmlDirs;
+
+    /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
+     * In this case, we want to construct an AppDir in /path/to. */
+    if (QDir().exists((QDir::cleanPath(appBinaryPath + "/../../bin"))) == true) {
+        fhsPrefix = QDir::cleanPath(appBinaryPath + "/../../");
+        qDebug() << "FHS-like mode with PREFIX, fhsPrefix:" << fhsPrefix;
+        fhsLikeMode = true;
+    } else {
+        qDebug() << "Not using FHS-like mode, appBinaryPath:" << appBinaryPath;
+    }
+
+    QString appDirPath;
+    QString relativeBinPath;
+    if(fhsLikeMode == false){
+        appDirPath = appDir;
+        relativeBinPath = appName;
+    } else {
+        appDirPath = QDir::cleanPath(fhsPrefix + "/../");
+        QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
+        relativeBinPath = relativePrefix + "/bin/" + appName;
+    }
+    qDebug() << "appDirPath:" << appDirPath;
+    qDebug() << "relativeBinPath:" << relativeBinPath;
+
+    QFile appRun(appDirPath + "/AppRun");
+    if(appRun.exists()){
+        appRun.remove();
+    }
+
+    QFile::link(relativeBinPath, appDirPath + "/AppRun");
 
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
@@ -175,8 +195,10 @@ int main(int argc, char **argv)
      }
 
     if (appimage) {
-        if(checkAppImagePrerequisites(appDirPath) == false)
+        if(checkAppImagePrerequisites(appDirPath) == false){
+            LogError() << "checkAppImagePrerequisites failed\n";
             return 1;
+        }
     }
 
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables);

@@ -44,9 +44,11 @@
 #include <QRegularExpression>
 #include "shared.h"
 
-
+QString appBinaryPath;
 bool runStripEnabled = true;
 bool bundleAllButCoreLibs = false;
+bool fhsLikeMode = false;
+QString fhsPrefix;
 bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
@@ -81,7 +83,7 @@ QDebug operator<<(QDebug debug, const LibraryInfo &info)
     return debug;
 }
 
-const QString bundleLibraryDirectory = "lib"; // the same directory as the main executable; could define a relative subdirectory here
+QString bundleLibraryDirectory;
 
 inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
 {
@@ -217,6 +219,14 @@ int containsHowOften(QStringList haystack, QString needle) {
 
 LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths)
 {
+    if(fhsLikeMode == false){
+        bundleLibraryDirectory= "lib"; // relative to bundle
+    } else {
+        QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
+        bundleLibraryDirectory = relativePrefix + "/lib/";
+    }
+    LogDebug() << "bundleLibraryDirectory:" << bundleLibraryDirectory;
+
     LibraryInfo info;
     QString trimmed = line.trimmed();
 
@@ -336,21 +346,6 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     }
 
     return info;
-}
-
-QString findAppBinary(const QString &appDirPath)
-{
-    QString binaryPath;
-
-    // FIXME: Do without the need for an AppRun symlink
-    // by passing appBinaryPath from main.cpp here
-    binaryPath = appDirPath + "/" + "AppRun";
-
-    if (QFile::exists(binaryPath))
-        return binaryPath;
-
-    LogError() << "Could not find bundle binary for" << appDirPath << "at" << binaryPath;
-    exit(1);
 }
 
 QStringList findAppLibraries(const QString &appDirPath)
@@ -678,7 +673,7 @@ void runStrip(const QString &binaryPath)
 
 void stripAppBinary(const QString &bundlePath)
 {
-    runStrip(findAppBinary(bundlePath));
+    runStrip(appBinaryPath);
 }
 
 /*
@@ -772,7 +767,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
    applicationBundle.path = appDirPath;
    LogDebug() << "applicationBundle.path:" << applicationBundle.path;
-   applicationBundle.binaryPath = findAppBinary(appDirPath);
+   applicationBundle.binaryPath = appBinaryPath;
    LogDebug() << "applicationBundle.binaryPath:" << applicationBundle.binaryPath;
 
    // Determine the location of the Qt to be bundled
@@ -804,7 +799,11 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
    }
 
-   changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+   if(fhsLikeMode == false){
+       changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+   } else {
+       changeIdentification("$ORIGIN/../lib/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+   }
    applicationBundle.libraryPaths = findAppLibraries(appDirPath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
 
@@ -986,7 +985,7 @@ void createQtConf(const QString &appDirPath)
                           "Qml2Imports = qml\n";
 
     QString filePath = appDirPath + "/"; // Is picked up when placed next to the main executable
-    QString fileName = filePath + "qt.conf";
+    QString fileName = appBinaryPath + "/../qt.conf";
 
     QDir().mkpath(filePath);
 
@@ -1036,7 +1035,7 @@ void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo)
 {
     AppDirInfo applicationBundle;
     applicationBundle.path = appDirPath;
-    applicationBundle.binaryPath = findAppBinary(appDirPath);
+    applicationBundle.binaryPath = appBinaryPath;
 
     const QString pluginDestinationPath = appDirPath + "/" + "plugins";
     deployPlugins(applicationBundle, deploymentInfo.pluginPath, pluginDestinationPath, deploymentInfo);
@@ -1104,7 +1103,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     LogDebug() << qmlImportScannerPath << argumentList;
     qmlImportScanner.start(qmlImportScannerPath, argumentList);
     if (!qmlImportScanner.waitForStarted()) {
-        LogError() << "Could not start qmlimpoortscanner. Process error is" << qmlImportScanner.errorString();
+        LogError() << "Could not start qmlimportscanner. Process error is" << qmlImportScanner.errorString();
         return false;
     }
     qmlImportScanner.waitForFinished();
@@ -1208,7 +1207,6 @@ void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &bi
 
 void changeQtLibraries(const QString appPath, const QString &qtPath)
 {
-    const QString appBinaryPath = findAppBinary(appPath);
     const QStringList libraryPaths = findAppLibraries(appPath);
     const QList<LibraryInfo> libraries = getQtLibrariesForPaths(QStringList() << appBinaryPath << libraryPaths, appPath, getBinaryRPaths(appBinaryPath, true));
     if (libraries.isEmpty()) {
@@ -1223,6 +1221,12 @@ void changeQtLibraries(const QString appPath, const QString &qtPath)
 
 bool checkAppImagePrerequisites(const QString &appDirPath)
 {
+    if(fhsLikeMode == true){
+        /* In FHS-like mode, we assume that there will be a desktop file
+         * and icon file that appimagetool will be able to pick up */
+        return true;
+    }
+
     QDirIterator iter(appDirPath, QStringList() << QString::fromLatin1("*.desktop"),
             QDir::Files, QDirIterator::Subdirectories);
     if (!iter.hasNext()) {

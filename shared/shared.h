@@ -40,8 +40,11 @@ extern int logLevel;
 #define LogNormal()     if (logLevel < 2) {} else qDebug() << "Log:"
 #define LogDebug()      if (logLevel < 3) {} else qDebug() << "Log:"
 
+extern QString appBinaryPath;
 extern bool runStripEnabled;
 extern bool bundleAllButCoreLibs;
+extern bool fhsLikeMode;
+extern QString fhsPrefix;
 
 class LibraryInfo
 {
