@@ -646,7 +646,7 @@ void runStrip(const QString &binaryPath)
     LogDebug() << "Using strip:";
     LogDebug() << " stripping" << resolvedPath;
     QProcess strip;
-    strip.start("strip", QStringList() << "-x" << resolvedPath);
+    strip.start("strip", QStringList() << resolvedPath);
     if (!strip.waitForStarted()) {
         if(strip.errorString().contains("execvp: No such file or directory")){
             LogError() << "Could not start strip.";
