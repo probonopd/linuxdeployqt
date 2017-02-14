@@ -267,8 +267,8 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
         With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
         Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
         */
-
-        if (! trimmed.contains("libicu")) {
+        // Manual make of Qt deploys it to /usr/local/Qt-x.x.x so we cannot remove this path just like that, so let's allow known libs of Qt.
+        if (!trimmed.contains("libicu") && !trimmed.contains("lib/libQt") && !trimmed.contains("lib/libqgsttools")) {
             if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
                 return info;
             }
@@ -918,28 +918,42 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // especially since stuff that is supposed to come from resources actually
     // seems to come in libexec in the upstream Qt binary distribution
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5WebEngineCore")) {
-        QDir().mkpath(appDirInfo.path + "/resources");
-        QDir().mkpath(appDirInfo.path + "/libexec");
-        sourcePath = pluginSourcePath + "/../libexec/QtWebEngineProcess";
-        destinationPath = pluginDestinationPath + "/../libexec/QtWebEngineProcess";
+        // Find directories with needed files:
+        QString qtLibexecPath = qtToBeBundledInfo.value("QT_INSTALL_LIBEXECS");
+        QString qtDataPath = qtToBeBundledInfo.value("QT_INSTALL_DATA");
+        QString qtTranslationsPath = qtToBeBundledInfo.value("QT_INSTALL_TRANSLATIONS");
+        // create destination directories:
+        QString dstLibexec = appDirInfo.path + "/libexec";
+        QString dstResources = appDirInfo.path + "/resources";
+        QString dstTranslations = appDirInfo.path + "/translations";
+        QDir().mkpath(dstLibexec);
+        QDir().mkpath(dstResources);
+        QDir().mkpath(dstTranslations);
+        // WebEngine executable:
+        sourcePath = QDir::cleanPath(qtLibexecPath + "/QtWebEngineProcess");
+        destinationPath = QDir::cleanPath(dstLibexec + "/QtWebEngineProcess");
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources.pak";
-        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources.pak";
+        // put qt.conf file next to browser process so it can also make use of our local Qt resources
+        createQtConfForQtWebEngineProcess(dstLibexec);
+        // Resources:
+        sourcePath = QDir::cleanPath(qtDataPath + "/resources/qtwebengine_resources.pak");
+        destinationPath = QDir::cleanPath(dstResources + "/qtwebengine_resources.pak");
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_devtools_resources.pak";
-        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_devtools_resources.pak";
+        sourcePath = QDir::cleanPath(qtDataPath + "/resources/qtwebengine_devtools_resources.pak");
+        destinationPath = QDir::cleanPath(dstResources + "/qtwebengine_devtools_resources.pak");
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources_100p.pak";
-        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources_100p.pak";
+        sourcePath = QDir::cleanPath(qtDataPath + "/resources/qtwebengine_resources_100p.pak");
+        destinationPath = QDir::cleanPath(dstResources + "/qtwebengine_resources_100p.pak");
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_resources_200p.pak";
-        destinationPath = pluginDestinationPath + "/../resources/qtwebengine_resources_200p.pak";
+        sourcePath = QDir::cleanPath(qtDataPath + "/resources/qtwebengine_resources_200p.pak");
+        destinationPath = QDir::cleanPath(dstResources + "/qtwebengine_resources_200p.pak");
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/icudtl.dat";
-        destinationPath = pluginDestinationPath + "/../resources/icudtl.dat";
+        sourcePath = QDir::cleanPath(qtDataPath + "/resources/icudtl.dat");
+        destinationPath = QDir::cleanPath(dstResources + "/icudtl.dat");
         copyFilePrintStatus(sourcePath, destinationPath);
-        sourcePath = pluginSourcePath + "/../libexec/qtwebengine_locales";
-        destinationPath = pluginDestinationPath + "/../resources/";
+        // Translations:
+        sourcePath = QDir::cleanPath(qtTranslationsPath + "/qtwebengine_locales");
+        destinationPath = QDir::cleanPath(dstTranslations + "/qtwebengine_locales");
         recursiveCopy(sourcePath, destinationPath);
     }
     
@@ -990,6 +1004,30 @@ void createQtConf(const QString &appDirPath)
     if (qtconf.write(contents) != -1) {
         LogNormal() << "Created configuration file:" << fileName;
         LogNormal() << "This file sets the plugin search path to" << appDirPath + "/plugins";
+    }
+}
+
+void createQtConfForQtWebEngineProcess(const QString &appDirPath)
+{
+    QByteArray contents = "# Generated by linuxdeployqt\n"
+                          "# https://github.com/probonopd/linuxdeployqt/\n"
+                          "[Paths]\n"
+                          "Prefix = ../\n";
+    QString filePath = appDirPath + "/";
+    QString fileName = filePath + "qt.conf";
+
+    QDir().mkpath(filePath);
+
+    QFile qtconf(fileName);
+    if (qtconf.exists() && !alwaysOwerwriteEnabled) {
+        LogWarning() << fileName << "already exists, will not overwrite.";
+        return;
+    }
+
+    qtconf.open(QIODevice::WriteOnly);
+    if (qtconf.write(contents) != -1) {
+        LogNormal() << "Created configuration file for Qt WebEngine process:" << fileName;
+        LogNormal() << "This file sets the prefix option to parent directory of browser process executable";
     }
 }
 
@@ -1100,7 +1138,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         QString path = import["path"].toString();
         QString type = import["type"].toString();
 
-        if (import["name"] == "QtQuick.Controls")
+        if (import["name"].toString() == "QtQuick.Controls")
             qtQuickContolsInUse = true;
 
         LogNormal() << "Deploying QML import" << name;

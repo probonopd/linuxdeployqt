@@ -22,7 +22,7 @@ __This may not be fully working yet.__ Use with care, run with maximum verbosity
 sudo apt-get -y install git g++ libgl1-mesa-dev
 git clone https://github.com/probonopd/linuxdeployqt.git
 # Then build in Qt Creator, or use
-export PATH=/tmp/.mount_QtCreator-5.7.0-x86_64/5.7/gcc_64/bin/:$PATH
+export PATH=/tmp/.mount_QtCreator-*-x86_64/5.7/gcc_64/bin/:$PATH
 cd linuxdeployqt
 qmake linuxdeployqt.pro
 make
@@ -91,13 +91,25 @@ These are my first steps with Qt and with C++ for that matter, and it is stil ve
 ## Projects using linuxdeployqt
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
-
-- https://github.com/probonopd/linuxdeployqt/ obviously ;-)
+- https://github.com/Blinkinlabs/PatternPaint
 - https://github.com/fathomssen/redtimer
 - https://github.com/coryo/amphetype2
 - https://github.com/chkmue/MyQtTravisTemplateProject
 - https://github.com/chkmue/qttravisCI_1
 - https://github.com/eteran/edb-debugger
+- https://github.com/probonopd/linuxdeployqt/ obviously ;-)
+
+
+These projects are already using linuxdeployqt:
+- Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
+- https://github.com/bjorn/tiled/
+- https://github.com/evpo/EncryptPad
+- https://github.com/grahamrow/Muview2
+- https://github.com/freemountain/quark/
+
+This project on GitLab uses linuxdeployqt:
+
+- https://gitlab.com/rpdev/opentodolist
 
 These can be bundled successfully using linuxdeployqt:
 
