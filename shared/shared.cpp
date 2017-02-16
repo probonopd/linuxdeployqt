@@ -985,7 +985,7 @@ void createQtConf(const QString &appDirPath)
                           "Qml2Imports = qml\n";
 
     QString filePath = appDirPath + "/"; // Is picked up when placed next to the main executable
-    QString fileName = appBinaryPath + "/../qt.conf";
+    QString fileName = QDir::cleanPath(appBinaryPath + "/../qt.conf");
 
     QDir().mkpath(filePath);
 
