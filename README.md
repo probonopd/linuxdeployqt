@@ -97,7 +97,10 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/chkmue/qttravisCI_1
 - https://github.com/eteran/edb-debugger
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
+- https://github.com/xdgurl/xdgurl
 
+This project is already using linuxdeployqt in a custom Jenkins workflow:
+- https://github.com/appimage-packages/
 
 These projects are already using linuxdeployqt:
 - Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
@@ -105,6 +108,7 @@ These projects are already using linuxdeployqt:
 - https://github.com/evpo/EncryptPad
 - https://github.com/grahamrow/Muview2
 - https://github.com/freemountain/quark/
+- https://github.com/Mr0815/geraetepruefung/
 
 This project on GitLab uses linuxdeployqt:
 
@@ -112,6 +116,5 @@ This project on GitLab uses linuxdeployqt:
 
 These can be bundled successfully using linuxdeployqt:
 
-- https://github.com/eteran/edb-debugger/pull/458
 - https://github.com/probonopd/tiled/blob/patch-1/.travis.yml
 - https://gitlab.com/rpdev/opentodolist/issues/96
