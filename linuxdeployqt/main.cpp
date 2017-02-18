@@ -55,7 +55,6 @@ int main(int argc, char **argv)
         qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
         qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
-        qDebug() << "   -libpath=<path>     : Add the given path to the library search path";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
@@ -178,13 +177,6 @@ int main(int argc, char **argv)
                 LogError() << "Missing qml directory path";
             else
                 qmlDirs << argument.mid(index+1);
-        } else if (argument.startsWith(QByteArray("-libpath"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf('=');
-            if (index == -1)
-                LogError() << "Missing library search path";
-            else
-                librarySearchPath << argument.mid(index+1);
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
