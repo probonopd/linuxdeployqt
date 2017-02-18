@@ -1261,7 +1261,7 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
 
 int createAppImage(const QString &appDirPath)
 {
-    QString appImageCommand = "appimagetool '" + appDirPath + "' --verbose"; // +"' '" + appImagePath + "'";
+    QString appImageCommand = "appimagetool '" + appDirPath + "' --verbose -n"; // +"' '" + appImagePath + "'";
     int ret = system(appImageCommand.toUtf8().constData());
     LogNormal() << "ret" << ret;
     LogNormal() << "WEXITSTATUS(ret)" << WEXITSTATUS(ret);
