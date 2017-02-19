@@ -44,7 +44,6 @@ unset QTDIR
 ###############################################################################
 
 cd tests/QtWidgetsApplication/build/
-rm *.o *.cpp *.h Makefile
 mkdir -p nonfhs fhs/usr/bin
 
 cp QtWidgetsApplication nonfhs/
@@ -52,7 +51,7 @@ cp QtWidgetsApplication nonfhs/
 ldd nonfhs/QtWidgetsApplication
 find nonfhs/
 LD_DEBUG=libs nonfhs/QtWidgetsApplication &
-sleep 10
+sleep 5
 killall QtWidgetsApplication && echo "SUCCESS"
 
 cp QtWidgetsApplication fhs/usr/bin/
@@ -60,7 +59,7 @@ cp QtWidgetsApplication fhs/usr/bin/
 ldd fhs/usr/bin/QtWidgetsApplication
 find fhs/
 LD_DEBUG=libs fhs/usr/bin/QtWidgetsApplication &
-sleep 10
+sleep 5
 killall QtWidgetsApplication && echo "SUCCESS"
 
 cd ../../../
@@ -70,7 +69,6 @@ cd ../../../
 ###############################################################################
 
 cd tests/QtQuickControls2Application/build/
-rm *.o *.cpp *.h Makefile
 mkdir -p nonfhs fhs/usr/bin
 
 cp QtQuickControls2Application nonfhs/
@@ -78,7 +76,7 @@ cp QtQuickControls2Application nonfhs/
 ldd nonfhs/QtWidgetsApplication
 find nonfhs/
 LD_DEBUG=libs nonfhs/QtQuickControls2Application &
-sleep 10
+sleep 5
 killall QtQuickControls2Application && echo "SUCCESS"
 
 cp QtQuickControls2Application fhs/usr/bin/
@@ -86,7 +84,7 @@ cp QtQuickControls2Application fhs/usr/bin/
 ldd fhs/usr/bin/QtQuickControls2Application
 find fhs/
 LD_DEBUG=libs fhs/usr/bin/QtQuickControls2Application &
-sleep 10
+sleep 5
 killall QtQuickControls2Application && echo "SUCCESS"
 
 cd ../../../
