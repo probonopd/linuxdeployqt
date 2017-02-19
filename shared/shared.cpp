@@ -604,9 +604,8 @@ void changeIdentification(const QString &id, const QString &binaryPath)
     // qt_prfxpath:
     if (binaryPath.contains("libQt5Core")) {
         LogDebug() << "libQt5Core detected, patching its qt_prfxpath";
-        QString* errorMessage;
-        if (!patchQtCore(binaryPath, errorMessage)){
-            LogError() << errorMessage;
+
+        if (!patchQtCore(binaryPath)){
             return;
         }
     }
@@ -1198,20 +1197,20 @@ void changeQtLibraries(const QString appPath, const QString &qtPath)
 
 /* https://codereview.qt-project.org/gitweb?p=qt/qttools.git;a=blob_plain;f=src/windeployqt/utils.cpp;h=e89496ea1f371ed86f6937284c1c801daf576572;hb=7be81b804da102b374c2089aac38353a0383c254
  * Search for "qt_prfxpath=<xxx>" in a path, and replace it with "qt_prfxpath=." or "qt_prfxpath=.." */
-bool patchQtCore(const QString &path, QString *errorMessage)
+bool patchQtCore(const QString &path)
 {
     LogNormal() << "Patching " << QFileInfo(path).fileName() << "...\n";
 
     QFile file(path);
     if (!file.open(QIODevice::ReadWrite)) {
-        *errorMessage = QString::fromLatin1("Unable to patch %1: %2").arg(
+        LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
                     QDir::toNativeSeparators(path), file.errorString());
         return false;
     }
     QByteArray content = file.readAll();
 
     if (content.isEmpty()) {
-        *errorMessage = QString::fromLatin1("Unable to patch %1: Could not read file content").arg(
+        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not read file content").arg(
                     QDir::toNativeSeparators(path));
         return false;
     }
@@ -1219,7 +1218,7 @@ bool patchQtCore(const QString &path, QString *errorMessage)
     QByteArray prfxpath("qt_prfxpath=");
     int startPos = content.indexOf(prfxpath);
     if (startPos == -1) {
-        *errorMessage = QString::fromLatin1(
+        LogWarning() << QString::fromLatin1(
                     "Unable to patch %1: Could not locate pattern \"qt_prfxpath=\"").arg(
                     QDir::toNativeSeparators(path));
         return false;
@@ -1227,7 +1226,7 @@ bool patchQtCore(const QString &path, QString *errorMessage)
     startPos += prfxpath.length();
     int endPos = content.indexOf(char(0), startPos);
     if (endPos == -1) {
-        *errorMessage = QString::fromLatin1("Unable to patch %1: Internal error").arg(
+        LogWarning() << QString::fromLatin1("Unable to patch %1: Internal error").arg(
                     QDir::toNativeSeparators(path));
         return false;
     }
@@ -1241,12 +1240,42 @@ bool patchQtCore(const QString &path, QString *errorMessage)
     }
     content.replace(startPos, endPos - startPos, replacement);
 
-    if (!file.seek(0)
-            || (file.write(content) != content.size())) {
-        *errorMessage = QString::fromLatin1("Unable to patch %1: Could not write to file").arg(
+    if (!file.seek(0) || (file.write(content) != content.size())) {
+        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not write to file").arg(
                     QDir::toNativeSeparators(path));
         return false;
     }
+
+    /* Clear qt_plugpath which may exist and may be set to /usr/... in distro Qt packages,
+     * https://github.com/probonopd/linuxdeployqt/issues/75#issuecomment-280952612 */
+
+    QByteArray plugpath("qt_plugpath=");
+    int startPos2 = content.indexOf(plugpath);
+
+    if (startPos2 == -1) {
+
+        LogDebug() << QString::fromLatin1("Unable to patch %1: Could not locate pattern \"qt_plugpath=\"").arg(QDir::toNativeSeparators(path));
+    } else {
+
+        startPos2 += plugpath.length();
+        int endPos2 = content.indexOf(char(0), startPos2);
+        if (endPos2 == -1) {
+            LogWarning() << QString::fromLatin1("Unable to patch %1: Internal error").arg(
+                        QDir::toNativeSeparators(path));
+            return false;
+        }
+
+        QByteArray replacement2 = QByteArray(endPos2 - startPos2, char(0));
+
+        content.replace(startPos2, endPos2 - startPos2, replacement2);
+
+        if (!file.seek(0) || (file.write(content) != content.size())) {
+            LogWarning() << QString::fromLatin1("Unable to patch %1: Could not write to file").arg(
+                        QDir::toNativeSeparators(path));
+            return false;
+        }
+    }
+
     return true;
 }
 
