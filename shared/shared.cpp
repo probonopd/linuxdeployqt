@@ -930,9 +930,19 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         QString qtDataPath = qtToBeBundledInfo.value("QT_INSTALL_DATA");
         QString qtTranslationsPath = qtToBeBundledInfo.value("QT_INSTALL_TRANSLATIONS");
         // create destination directories:
-        QString dstLibexec = appDirInfo.path + "/libexec";
-        QString dstResources = appDirInfo.path + "/resources";
-        QString dstTranslations = appDirInfo.path + "/translations";
+        QString dstLibexec;
+        QString dstResources;
+        QString dstTranslations;
+        if(fhsLikeMode){
+            // FIXME - do not hardcode "usr/" but take the directory above the main executable
+            dstLibexec = appDirInfo.path + "/usr/libexec";
+            dstResources = appDirInfo.path + "/usr/resources";
+            dstTranslations = appDirInfo.path + "/usr/translations";
+        } else {
+            dstLibexec = appDirInfo.path + "/libexec";
+            dstResources = appDirInfo.path + "/resources";
+            dstTranslations = appDirInfo.path + "/translations";
+        }
         QDir().mkpath(dstLibexec);
         QDir().mkpath(dstResources);
         QDir().mkpath(dstTranslations);
@@ -985,7 +995,13 @@ void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo)
     applicationBundle.path = appDirPath;
     applicationBundle.binaryPath = appBinaryPath;
 
-    const QString pluginDestinationPath = appDirPath + "/" + "plugins";
+   QString pluginDestinationPath;
+    if(fhsLikeMode){
+        // FIXME - do not hardcode "usr/" but take the directory above the main executable
+        pluginDestinationPath = appDirPath + "/usr/" + "plugins";
+    } else {
+        pluginDestinationPath = appDirPath + "/" + "plugins";
+    }
     deployPlugins(applicationBundle, deploymentInfo.pluginPath, pluginDestinationPath, deploymentInfo);
 }
 
@@ -1144,8 +1160,7 @@ void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &bi
     LogNormal() << "Qt in" << absoluteQtPath;
     QString finalQtPath = absoluteQtPath;
 
-    if (!absoluteQtPath.startsWith("/Library/Libraries"))
-        finalQtPath += "/lib/";
+    finalQtPath += "/lib/";
 
     foreach (LibraryInfo library, libraries) {
         const QString oldBinaryId = library.installName;
