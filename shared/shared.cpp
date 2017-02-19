@@ -1239,7 +1239,7 @@ void changeQtLibraries(const QString appPath, const QString &qtPath)
 }
 
 /* https://codereview.qt-project.org/gitweb?p=qt/qttools.git;a=blob_plain;f=src/windeployqt/utils.cpp;h=e89496ea1f371ed86f6937284c1c801daf576572;hb=7be81b804da102b374c2089aac38353a0383c254
- * Search for "qt_prfxpath=<xxx>" in a path, and replace it with "qt_prfxpath=." or "qt_prfxpath=../../" */
+ * Search for "qt_prfxpath=<xxx>" in a path, and replace it with "qt_prfxpath=." or "qt_prfxpath=.." */
 bool patchQtCore(const QString &path, QString *errorMessage)
 {
     LogNormal() << "Patching " << QFileInfo(path).fileName() << "...\n";
@@ -1278,10 +1278,6 @@ bool patchQtCore(const QString &path, QString *errorMessage)
     if(fhsLikeMode == true){
         replacement[0] = '.';
         replacement[1] = '.';
-        replacement[2] = '/';
-        replacement[3] = '.';
-        replacement[4] = '.';
-        replacement[5] = '/';
     } else {
         replacement[0] = '.';
     }
