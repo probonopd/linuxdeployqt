@@ -22,7 +22,7 @@ before_install:
   - sudo chmod a+x /usr/local/bin/appimagetool
   
 install:
-  - sudo apt-get -y install qt58base binutils xpra
+  - sudo apt-get -y install qt58base qt58declarative binutils xpra
 
 script:
   - source /opt/qt*/bin/qt*-env.sh
