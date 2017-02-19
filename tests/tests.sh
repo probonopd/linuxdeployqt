@@ -77,7 +77,7 @@ cp QtQuickControls2Application nonfhs/
 ldd nonfhs/QtQuickControls2Application
 find nonfhs/
 LD_DEBUG=libs nonfhs/QtQuickControls2Application &
-sleep 5
+sleep 10
 killall QtQuickControls2Application && echo "SUCCESS"
 
 cp QtQuickControls2Application fhs/usr/bin/
@@ -86,7 +86,7 @@ cp QtQuickControls2Application fhs/usr/bin/
 ldd fhs/usr/bin/QtQuickControls2Application
 find fhs/
 LD_DEBUG=libs fhs/usr/bin/QtQuickControls2Application &
-sleep 5
+sleep 10
 killall QtQuickControls2Application && echo "SUCCESS"
 
 cd ../../../
