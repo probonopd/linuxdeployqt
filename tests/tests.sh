@@ -73,7 +73,7 @@ mkdir -p nonfhs fhs/usr/bin
 
 cp QtQuickControls2Application nonfhs/
 ../../../linuxdeployqt-*-x86_64.AppImage nonfhs/QtQuickControls2Application -qmldir=../
-ldd nonfhs/QtWidgetsApplication
+ldd nonfhs/QtQuickControls2Application
 find nonfhs/
 LD_DEBUG=libs nonfhs/QtQuickControls2Application &
 sleep 5
