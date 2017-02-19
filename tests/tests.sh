@@ -40,7 +40,7 @@ unset LD_LIBRARY_PATH
 unset QTDIR
 
 ###############################################################################
-# Test the sample Qt Widgets Application that comes with Qt Creator
+# Test bundling the sample Qt Widgets Application that comes with Qt Creator
 ###############################################################################
 
 cd tests/QtWidgetsApplication/build/
@@ -66,7 +66,7 @@ killall QtWidgetsApplication && echo "SUCCESS"
 cd ../../../
 
 ###############################################################################
-# Test the sample Qt Quick Controls 2 Application that comes with Qt Creator
+# Test bundling the sample Qt Quick Controls 2 Application that comes with Qt Creator
 ###############################################################################
 
 cd tests/QtQuickControls2Application/build/
