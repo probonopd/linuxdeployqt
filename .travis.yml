@@ -4,6 +4,10 @@ dist: trusty
 
 os: linux
 
+env:
+  global:
+    - DISPLAY=:99
+
 before_install:
   - sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
   - sudo apt-get update -qq
@@ -18,7 +22,7 @@ before_install:
   - sudo chmod a+x /usr/local/bin/appimagetool
   
 install:
-  - sudo apt-get -y install qt58base binutils
+  - sudo apt-get -y install qt58base binutils xpra
 
 script:
   - source /opt/qt*/bin/qt*-env.sh
@@ -35,9 +39,13 @@ script:
   - ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/linuxdeployqt -verbose=3 -appimage
   - ls -lh
   - find *.AppDir
+  - xpra start :99
   - bash -e tests/tests.sh
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash ./upload.sh ./linuxdeployqt-*.AppImage
+
+after_script:
+  - "xpra stop :99"
 
 branches:
   except:

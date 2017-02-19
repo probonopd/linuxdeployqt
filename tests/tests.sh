@@ -15,10 +15,18 @@ mkdir -p nonfhs fhs/usr/bin
 
 cp QtWidgetsApplication nonfhs/
 ../../../linuxdeployqt-*-x86_64.AppImage nonfhs/QtWidgetsApplication
+ldd nonfhs/QtWidgetsApplication
 find nonfhs/
+nonfhs/QtWidgetsApplication &
+sleep 10
+killall QtWidgetsApplication
 
 cp QtWidgetsApplication fhs/usr/bin/
 ../../../linuxdeployqt-*-x86_64.AppImage fhs/usr/bin/QtWidgetsApplication
+ldd fhs/usr/bin/QtWidgetsApplication
 find fhs/
+fhs/usr/bin/QtWidgetsApplication &
+sleep 10
+killall QtWidgetsApplication
 
 cd ../../../
