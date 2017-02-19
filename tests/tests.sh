@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Workaround for:
-# https://github.com/probonopd/linuxdeployqt/issues/65
-unset QT_PLUGIN_PATH
-unset LD_LIBRARY_PATH
-unset QTDIR
-
 ###############################################################################
 # Build the sample Qt Widgets Application that comes with Qt Creator
 ###############################################################################
@@ -18,6 +12,38 @@ mkdir build
 cd build/
 qmake ../QtWidgetsApplication.pro
 make -j2
+
+cd ../../../
+
+###############################################################################
+# Build the sample Qt Quick Controls 2 Application that comes with Qt Creator
+###############################################################################
+
+cd tests/QtQuickControls2Application/
+if [ -e build/ ] ; then
+  rm -rf build/
+fi
+mkdir build
+cd build/
+qmake ../QtQuickControls2Application.pro
+make -j2
+
+cd ../../../
+
+###############################################################################
+# Workaround for:
+# https://github.com/probonopd/linuxdeployqt/issues/65
+###############################################################################
+
+unset QT_PLUGIN_PATH
+unset LD_LIBRARY_PATH
+unset QTDIR
+
+###############################################################################
+# Test the sample Qt Widgets Application that comes with Qt Creator
+###############################################################################
+
+cd tests/QtWidgetsApplication/build/
 rm *.o *.cpp *.h Makefile
 mkdir -p nonfhs fhs/usr/bin
 
@@ -40,17 +66,10 @@ killall QtWidgetsApplication && echo "SUCCESS"
 cd ../../../
 
 ###############################################################################
-# Build the sample Qt Quick Controls 2 Application that comes with Qt Creator
+# Test the sample Qt Quick Controls 2 Application that comes with Qt Creator
 ###############################################################################
 
-cd tests/QtQuickControls2Application/
-if [ -e build/ ] ; then
-  rm -rf build/
-fi
-mkdir build
-cd build/
-qmake ../QtQuickControls2Application.pro
-make -j2
+cd tests/QtQuickControls2Application/build/
 rm *.o *.cpp *.h Makefile
 mkdir -p nonfhs fhs/usr/bin
 
