@@ -605,9 +605,10 @@ void changeIdentification(const QString &id, const QString &binaryPath)
     if (binaryPath.contains("libQt5Core")) {
         LogDebug() << "libQt5Core detected, patching its qt_prfxpath";
         QString* errorMessage;
-        if (!patchQtCore(binaryPath, errorMessage))
+        if (!patchQtCore(binaryPath, errorMessage)){
             LogError() << errorMessage;
             return;
+        }
     }
 
 }
