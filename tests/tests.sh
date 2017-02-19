@@ -17,7 +17,8 @@ cp QtWidgetsApplication nonfhs/
 ../../../linuxdeployqt-*-x86_64.AppImage nonfhs/QtWidgetsApplication
 ldd nonfhs/QtWidgetsApplication
 find nonfhs/
-nonfhs/QtWidgetsApplication &
+LD_DEBUG=libs nonfhs/QtWidgetsApplication &
+echo $?
 sleep 10
 killall QtWidgetsApplication
 
@@ -25,7 +26,8 @@ cp QtWidgetsApplication fhs/usr/bin/
 ../../../linuxdeployqt-*-x86_64.AppImage fhs/usr/bin/QtWidgetsApplication
 ldd fhs/usr/bin/QtWidgetsApplication
 find fhs/
-fhs/usr/bin/QtWidgetsApplication &
+LD_DEBUG=libs fhs/usr/bin/QtWidgetsApplication &
+echo $?
 sleep 10
 killall QtWidgetsApplication
 
