@@ -934,10 +934,11 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         QString dstResources;
         QString dstTranslations;
         if(fhsLikeMode){
-            // FIXME - do not hardcode "usr/" but take the directory above the main executable
-            dstLibexec = appDirInfo.path + "/usr/libexec";
-            dstResources = appDirInfo.path + "/usr/resources";
-            dstTranslations = appDirInfo.path + "/usr/translations";
+            QFileInfo qfi(appDirInfo.binaryPath);
+            QString qtTargetDir = qfi.absoluteDir().absolutePath() + "/../";
+            dstLibexec = qtTargetDir + "/libexec";
+            dstResources = qtTargetDir + "/resources";
+            dstTranslations = qtTargetDir + "/translations";
         } else {
             dstLibexec = appDirInfo.path + "/libexec";
             dstResources = appDirInfo.path + "/resources";
@@ -997,8 +998,9 @@ void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo)
 
    QString pluginDestinationPath;
     if(fhsLikeMode){
-        // FIXME - do not hardcode "usr/" but take the directory above the main executable
-        pluginDestinationPath = appDirPath + "/usr/" + "plugins";
+        QFileInfo qfi(applicationBundle.binaryPath);
+        QString qtTargetDir = qfi.absoluteDir().absolutePath() + "/../";
+        pluginDestinationPath = qtTargetDir + "/plugins";
     } else {
         pluginDestinationPath = appDirPath + "/" + "plugins";
     }
@@ -1007,7 +1009,18 @@ void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo)
 
 void deployQmlImport(const QString &appDirPath, const QSet<QString> &rpaths, const QString &importSourcePath, const QString &importName)
 {
-    QString importDestinationPath = appDirPath + "/qml/" + importName;
+    AppDirInfo applicationBundle;
+    applicationBundle.path = appDirPath;
+    applicationBundle.binaryPath = appBinaryPath;
+
+    QString importDestinationPath;
+    if(fhsLikeMode){
+        QFileInfo qfi(applicationBundle.binaryPath);
+        QString qtTargetDir = qfi.absoluteDir().absolutePath() + "/../";
+        importDestinationPath = qtTargetDir + "/qml/" + importName;
+    } else {
+        importDestinationPath = appDirPath + "/qml/" + importName;
+    }
 
     // Skip already deployed imports. This can happen in cases like "QtQuick.Controls.Styles",
     // where deploying QtQuick.Controls will also deploy the "Styles" sub-import.
