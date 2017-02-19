@@ -807,7 +807,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    }
 
    if(fhsLikeMode == false){
-       changeIdentification("$ORIGIN/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+       changeIdentification("$ORIGIN/lib/" + bundleLibraryDirectory, applicationBundle.binaryPath);
    } else {
        changeIdentification("$ORIGIN/../lib/" + bundleLibraryDirectory, applicationBundle.binaryPath);
    }
