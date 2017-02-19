@@ -24,17 +24,16 @@ cp QtWidgetsApplication nonfhs/
 ldd nonfhs/QtWidgetsApplication
 find nonfhs/
 LD_DEBUG=libs nonfhs/QtWidgetsApplication &
-echo $?
 sleep 10
-killall QtWidgetsApplication
+killall QtWidgetsApplication && echo "SUCCESS"
 
 cp QtWidgetsApplication fhs/usr/bin/
 ../../../linuxdeployqt-*-x86_64.AppImage fhs/usr/bin/QtWidgetsApplication
+mv fhs/plugins fhs/usr/ # FIXME, quick and dirty workaround for https://github.com/probonopd/linuxdeployqt/issues/75
 ldd fhs/usr/bin/QtWidgetsApplication
 find fhs/
 LD_DEBUG=libs fhs/usr/bin/QtWidgetsApplication &
-echo $?
 sleep 10
-killall QtWidgetsApplication
+killall QtWidgetsApplication && echo "SUCCESS"
 
 cd ../../../
