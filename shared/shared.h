@@ -124,6 +124,7 @@ void runStrip(const QString &binaryPath);
 void stripAppBinary(const QString &bundlePath);
 QString findAppBinary(const QString &appDirPath);
 QStringList findAppLibraries(const QString &appDirPath);
+bool patchQtCore(const QString &path, QString *errorMessage);
 int createAppImage(const QString &appBundlePath);
 bool checkAppImagePrerequisites(const QString &appBundlePath);
 
