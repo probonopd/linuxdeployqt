@@ -2,6 +2,12 @@
 
 # Build the sample Qt Widgets Application that comes with Qt Creator
 
+# Workaround for:
+# https://github.com/probonopd/linuxdeployqt/issues/65
+unset QT_PLUGIN_PATH
+unset LD_LIBRARY_PATH
+unset QTDIR
+
 cd tests/QtWidgetsApplication/
 if [ -e build/ ] ; then
   rm -rf build/
