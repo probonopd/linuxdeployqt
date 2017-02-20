@@ -31,6 +31,21 @@ make -j2
 cd ../../../
 
 ###############################################################################
+# Build the sample Qt WebEngine Application
+###############################################################################
+
+cd tests/QtWebEngineApplication/
+if [ -e build/ ] ; then
+  rm -rf build/
+fi
+mkdir build
+cd build/
+qmake ../QtWebEngineApplication.pro
+make -j2
+
+cd ../../../
+
+###############################################################################
 # Workaround for:
 # https://github.com/probonopd/linuxdeployqt/issues/65
 ###############################################################################
@@ -88,5 +103,32 @@ find fhs/
 LD_DEBUG=libs fhs/usr/bin/QtQuickControls2Application &
 sleep 10
 killall QtQuickControls2Application && echo "SUCCESS"
+
+cd ../../../
+
+###############################################################################
+# Test bundling the sample Qt WebEngine Application
+###############################################################################
+
+cd tests/QtWebEngineApplication/build/
+mkdir -p nonfhs fhs/usr/bin
+
+cp QtWebEngineApplication nonfhs/
+../../../linuxdeployqt-*-x86_64.AppImage nonfhs/QtWebEngineApplication -qmldir=../
+../../../linuxdeployqt-*-x86_64.AppImage nonfhs/QtWebEngineApplication -qmldir=../ # FIXME, Workaround for: https://github.com/probonopd/linuxdeployqt/issues/25
+ldd nonfhs/QtWebEngineApplication
+find nonfhs/
+LD_DEBUG=libs nonfhs/QtWebEngineApplication &
+sleep 10
+killall QtWebEngineApplication && echo "SUCCESS"
+
+cp QtWebEngineApplication fhs/usr/bin/
+../../../linuxdeployqt-*-x86_64.AppImage fhs/usr/bin/QtWebEngineApplication -qmldir=../
+../../../linuxdeployqt-*-x86_64.AppImage fhs/usr/bin/QtWebEngineApplication -qmldir=../ # FIXME, Workaround for: https://github.com/probonopd/linuxdeployqt/issues/25
+ldd fhs/usr/bin/QtWebEngineApplication
+find fhs/
+LD_DEBUG=libs fhs/usr/bin/QtWebEngineApplication &
+sleep 10
+killall QtWebEngineApplication && echo "SUCCESS"
 
 cd ../../../
