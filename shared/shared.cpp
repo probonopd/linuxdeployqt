@@ -1266,16 +1266,13 @@ bool patchQtCore(const QString &path)
         }
 
         QByteArray replacement2 = QByteArray(endPos2 - startPos2, char(0));
-        replacement2[0] = '.';
-        replacement2[1] = '.';
-        replacement2[2] = '/';
-        replacement2[3] = 'p';
-        replacement2[4] = 'l';
-        replacement2[5] = 'u';
-        replacement2[6] = 'g';
-        replacement2[7] = 'i';
-        replacement2[8] = 'n';
-        replacement2[9] = 's';
+        replacement2[0] = 'p';
+        replacement2[1] = 'l';
+        replacement2[2] = 'u';
+        replacement2[3] = 'g';
+        replacement2[4] = 'i';
+        replacement2[5] = 'n';
+        replacement2[6] = 's';
 
         content.replace(startPos2, endPos2 - startPos2, replacement2);
 
