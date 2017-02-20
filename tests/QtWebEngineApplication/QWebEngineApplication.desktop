@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=QWebEngineApplication
+Type=Application
+Exec=QWebEngineApplication
+Icon=qt
+Categories=Development;
