@@ -90,6 +90,9 @@ These are my first steps with Qt and with C++ for that matter, and it is stil ve
 ## Projects using linuxdeployqt
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
+- https://github.com/dannagle/PacketSender
+- https://github.com/nuttyartist/notes
+- https://github.com/leozide/leocad/
 - https://github.com/Blinkinlabs/PatternPaint
 - https://github.com/fathomssen/redtimer
 - https://github.com/coryo/amphetype2
@@ -98,7 +101,6 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/eteran/edb-debugger
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
 - https://github.com/xdgurl/xdgurl
-- https://github.com/dannagle/PacketSender
 
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
