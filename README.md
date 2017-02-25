@@ -98,6 +98,7 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/eteran/edb-debugger
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
 - https://github.com/xdgurl/xdgurl
+- https://github.com/dannagle/PacketSender
 
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
