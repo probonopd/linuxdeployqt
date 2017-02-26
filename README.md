@@ -10,7 +10,7 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 ## Known issues
 
-__This may not be fully working yet.__ Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated
+__This may not be fully working yet.__ See [GitHub Issues](https://github.com/probonopd/linuxdeployqt/issues) for known issues. Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated.
 
 ## Installation
 
