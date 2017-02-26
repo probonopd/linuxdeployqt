@@ -90,6 +90,7 @@ These are my first steps with Qt and with C++ for that matter, and it is stil ve
 ## Projects using linuxdeployqt
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
+- https://github.com/neuro-sys/tumblr-downloader-client
 - https://github.com/dannagle/PacketSender
 - https://github.com/nuttyartist/notes
 - https://github.com/leozide/leocad/
