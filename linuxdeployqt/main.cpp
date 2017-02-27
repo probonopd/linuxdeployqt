@@ -88,7 +88,7 @@ int main(int argc, char **argv)
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
             qDebug() << "desktopExecEntry:" << desktopExecEntry;
             desktopFile = firstArgument;
-            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().trimmed();
+            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().split('.').first().trimmed();
             qDebug() << "desktopIconEntry:" << desktopIconEntry;
 
             QString candidateBin = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + desktopExecEntry); // Not FHS-like
@@ -216,6 +216,28 @@ int main(int argc, char **argv)
         if(QFileInfo(destination).isFile() == false){
             LogError() << destination << "does not exist and could not be copied there\n";
             return 1;
+        }
+    }
+
+    /* To make an AppDir, we need to find the icon and copy it in place */
+    QStringList candidates;
+    QString iconToBeUsed = "";
+    if(desktopIconEntry != ""){
+        QDirIterator it3(appDirPath, QDirIterator::Subdirectories);
+        while (it3.hasNext()) {
+            it3.next();
+            if((it3.fileName().startsWith(desktopIconEntry)) && ((it3.fileName().endsWith(".png")) || (it3.fileName().endsWith(".svg")) || (it3.fileName().endsWith(".svgz")) || (it3.fileName().endsWith(".xpm")))){
+                candidates.append(it3.filePath());
+            }
+        }
+        qDebug() << "Found icons from desktop file:" << candidates;
+        if(candidates.length() == 1){
+            iconToBeUsed = candidates.at(0); // The only choice
+        }
+
+        /* Copy in place */
+        if(iconToBeUsed != ""){
+            /* Check if there is already an icon and only if there is not, copy it to the AppDir */
         }
     }
 
