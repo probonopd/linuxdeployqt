@@ -31,6 +31,7 @@
 #include "../shared/shared.h"
 #include <QRegularExpression>
 #include <stdlib.h>
+#include <QSettings>
 
 int main(int argc, char **argv)
 {
@@ -38,12 +39,40 @@ int main(int argc, char **argv)
 
     extern QString appBinaryPath;
 
+    QString firstArgument = QString::fromLocal8Bit(argv[1]);
+
+    QString desktopExecEntry = "";
+    QString desktopIconEntry = "";
+
     if (argc > 1) {
-        appBinaryPath = QString::fromLocal8Bit(argv[1]);
-        appBinaryPath = QDir::cleanPath(appBinaryPath).trimmed();
+        /* If we got a desktop file as the argument, try to figure out the application binary from it.
+         * This has the advantage that we can also figure out the icon file this way, and have less work
+         * to do when using linuxdeployqt. */
+        if (firstArgument.endsWith(".desktop")){
+            qDebug() << "Desktop file as first argument:" << firstArgument;
+            QSettings * settings = 0;
+            settings = new QSettings(firstArgument, QSettings::IniFormat);
+            desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
+            qDebug() << "desktopExecEntry:" << desktopExecEntry;
+            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().trimmed();
+            qDebug() << "desktopIconEntry:" << desktopIconEntry;
+            QString candidateBin1 = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../bin/" + desktopExecEntry); // FHS-like
+            QString candidateBin2 = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + desktopExecEntry); // Not FHS-like
+            if(QFileInfo(candidateBin1).isExecutable()) {
+                appBinaryPath = candidateBin1;
+            } else if(QFileInfo(candidateBin2).isExecutable()) {
+                appBinaryPath = candidateBin1;
+            } else {
+                LogError() << "Could not determine the path to the executable based on the desktop file\n";
+                return 1;
+            }
+        } else {
+            appBinaryPath = firstArgument;
+            appBinaryPath = QDir::cleanPath(appBinaryPath);
+        }
     }
 
-    if (argc < 2 || appBinaryPath.startsWith("-")) {
+    if (argc < 2 || firstArgument.startsWith("-")) {
         qDebug() << "Usage: linuxdeployqt app-binary [options]";
         qDebug() << "";
         qDebug() << "Options:";
@@ -76,19 +105,12 @@ int main(int argc, char **argv)
     // Allow binaries next to linuxdeployqt to be found; this is useful for bundling
     // this application itself together with helper binaries such as patchelf
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString oldPath = env.value("PATH");
+    QString oldPath = env.value("PATH");    
     QString newPath = QCoreApplication::applicationDirPath() + ":" + oldPath;
-    qDebug() << newPath;
+    LogDebug() << newPath;
     setenv("PATH",newPath.toUtf8().constData(),1);
 
     QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).completeBaseName());
-
-    if (QDir().exists(appBinaryPath)) {
-        qDebug() << "app-binary:" << appBinaryPath;
-    } else {
-        qDebug() << "Error: Could not find app-binary" << appBinaryPath;
-        return 1;
-    }
 
     QString appDir = QDir::cleanPath(appBinaryPath + "/../");
     if (QDir().exists(appDir) == false) {
@@ -115,7 +137,14 @@ int main(int argc, char **argv)
         qDebug() << "FHS-like mode with PREFIX, fhsPrefix:" << fhsPrefix;
         fhsLikeMode = true;
     } else {
-        qDebug() << "Not using FHS-like mode, appBinaryPath:" << appBinaryPath;
+        qDebug() << "Not using FHS-like mode";
+    }
+
+    if (QDir().exists(appBinaryPath)) {
+        qDebug() << "app-binary:" << appBinaryPath;
+    } else {
+        qDebug() << "Error: Could not find app-binary" << appBinaryPath;
+        return 1;
     }
 
     QString appDirPath;
