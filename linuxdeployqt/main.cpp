@@ -41,6 +41,7 @@ int main(int argc, char **argv)
 
     QString firstArgument = QString::fromLocal8Bit(argv[1]);
 
+    QString desktopFile = "";
     QString desktopExecEntry = "";
     QString desktopIconEntry = "";
 
@@ -54,6 +55,7 @@ int main(int argc, char **argv)
             settings = new QSettings(firstArgument, QSettings::IniFormat);
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
             qDebug() << "desktopExecEntry:" << desktopExecEntry;
+            desktopFile = firstArgument;
             desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().trimmed();
             qDebug() << "desktopIconEntry:" << desktopIconEntry;
             QString candidateBin1 = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../bin/" + desktopExecEntry); // FHS-like
@@ -166,6 +168,20 @@ int main(int argc, char **argv)
     }
 
     QFile::link(relativeBinPath, appDirPath + "/AppRun");
+
+    /* Copy the desktop file in place, into the top level of the AppDir */
+    if(desktopFile != ""){
+        QString destination = QDir::cleanPath(appDirPath + QFileInfo(desktopFile).fileName());
+        if(QFileInfo(destination).exists() == false){
+            if (QFile::copy(desktopFile, destination)){
+                qDebug() << "Copied" << desktopFile << "to" << destination;
+            }
+        }
+        if(QFileInfo(destination).isFile() == false){
+            LogError() << destination << "does not exist\n";
+            return 1;
+        }
+    }
 
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
