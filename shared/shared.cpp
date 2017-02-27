@@ -806,6 +806,15 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
    }
 
+   if(qtLibsPath.startsWith("/usr/")){
+       LogError() << "Bundling Qt provided by distributions is not yet supported by this tool.";
+       LogError() << "Please see https://github.com/probonopd/linuxdeployqt/issues/79 and";
+       LogError() << "submit a Pull Request to implement this.";
+       LogError() << "In the meantime, use Qt from the Qt Company";
+       LogError() << "or Qt for /opt from https://launchpad.net/~beineri";
+       exit(1);
+   }
+
    if(fhsLikeMode == false){
        changeIdentification("$ORIGIN/lib/" + bundleLibraryDirectory, applicationBundle.binaryPath);
    } else {
