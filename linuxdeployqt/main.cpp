@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     QString firstArgument = QString::fromLocal8Bit(argv[1]);
 
     if (argc < 2 || firstArgument.startsWith("-")) {
-        qDebug() << "Usage: linuxdeployqt app-binary [options]";
+        qDebug() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
         qDebug() << "";
         qDebug() << "Options:";
         qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
