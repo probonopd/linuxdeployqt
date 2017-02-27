@@ -38,9 +38,40 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
-    QString appBinaryPath = "";
+    extern QString appBinaryPath;
+    appBinaryPath = ""; // Cannot do it in one go due to "extern"
 
     QString firstArgument = QString::fromLocal8Bit(argv[1]);
+
+    if (argc < 2 || firstArgument.startsWith("-")) {
+        qDebug() << "Usage: linuxdeployqt app-binary [options]";
+        qDebug() << "";
+        qDebug() << "Options:";
+        qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
+        qDebug() << "   -no-plugins         : Skip plugin deployment";
+        qDebug() << "   -appimage           : Create an AppImage (implies -bundle-non-qt-libs)";
+        qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
+        qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
+        qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
+        qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
+        qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
+        qDebug() << "";
+        qDebug() << "linuxdeployqt takes an application as input and makes it";
+        qDebug() << "self-contained by copying in the Qt libraries and plugins that";
+        qDebug() << "the application uses.";
+        qDebug() << "";
+        qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
+        qDebug() << "so make sure that it is the correct one.";
+        qDebug() << "";
+        qDebug() << "Plugins related to a Qt library are copied in with the";
+        qDebug() << "library. The accessibility, image formats, and text codec";
+        qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
+        qDebug() << "";
+        qDebug() << "See the \"Deploying Applications on Linux\" topic in the";
+        qDebug() << "documentation for more information about deployment on Linux.";
+
+        return 1;
+    }
 
     QString desktopFile = "";
     QString desktopExecEntry = "";
@@ -74,7 +105,6 @@ int main(int argc, char **argv)
                     appBinaryPath = it.fileInfo().absoluteFilePath();
                     break;
                 }
-
             }
 
             /* Only if we could not find it below the directory in which the desktop file resides, search above */
@@ -95,7 +125,6 @@ int main(int argc, char **argv)
                 }
             }
 
-
             if(appBinaryPath == ""){
                 if(QFileInfo(candidateBin).isExecutable()) {
                     appBinaryPath = QFileInfo(candidateBin).absoluteFilePath();
@@ -109,36 +138,6 @@ int main(int argc, char **argv)
             appBinaryPath = firstArgument;
             appBinaryPath = QFileInfo(QDir::cleanPath(appBinaryPath)).absoluteFilePath();
         }
-    }
-
-    if (argc < 2 || firstArgument.startsWith("-")) {
-        qDebug() << "Usage: linuxdeployqt app-binary [options]";
-        qDebug() << "";
-        qDebug() << "Options:";
-        qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
-        qDebug() << "   -no-plugins         : Skip plugin deployment";
-        qDebug() << "   -appimage           : Create an AppImage (implies -bundle-non-qt-libs)";
-        qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
-        qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
-        qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
-        qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
-        qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
-        qDebug() << "";
-        qDebug() << "linuxdeployqt takes an application as input and makes it";
-        qDebug() << "self-contained by copying in the Qt libraries and plugins that";
-        qDebug() << "the application uses.";
-        qDebug() << "";
-        qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
-        qDebug() << "so make sure that it is the correct one.";
-        qDebug() << "";
-        qDebug() << "Plugins related to a Qt library are copied in with the";
-        qDebug() << "library. The accessibility, image formats, and text codec";
-        qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
-        qDebug() << "";
-        qDebug() << "See the \"Deploying Applications on Linux\" topic in the";
-        qDebug() << "documentation for more information about deployment on Linux.";
-
-        return 1;
     }
 
     // Allow binaries next to linuxdeployqt to be found; this is useful for bundling
