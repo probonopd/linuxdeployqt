@@ -231,13 +231,80 @@ int main(int argc, char **argv)
             }
         }
         qDebug() << "Found icons from desktop file:" << candidates;
+
+        /* Select the main icon from the candidates */
         if(candidates.length() == 1){
             iconToBeUsed = candidates.at(0); // The only choice
+        } else if(candidates.length() > 1){
+            foreach(QString current, candidates) {
+                if(current.contains("256")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("128")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("svg")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("svgz")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("512")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("1024")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("64")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("48")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+                if(current.contains("xpm")){
+                    iconToBeUsed = current;
+                    continue;
+                }
+            }
         }
 
         /* Copy in place */
         if(iconToBeUsed != ""){
             /* Check if there is already an icon and only if there is not, copy it to the AppDir */
+            QString preExistingToplevelIcon = "";
+            if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".xpm").exists() == true){
+                preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".xpm";
+            }
+            if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svgz").exists() == true){
+                preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svgz";
+            }
+            if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svg").exists() == true){
+                preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svg";
+            }
+            if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".png").exists() == true){
+                preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".png";
+            }
+
+            if(preExistingToplevelIcon != ""){
+                qDebug() << "preExistingToplevelIcon:" << preExistingToplevelIcon;
+            } else {
+                qDebug() << "iconToBeUsed:" << iconToBeUsed;
+                QString targetIconPath = appDirPath + "/" + QFileInfo(iconToBeUsed).fileName();
+                if (QFile::copy(iconToBeUsed, targetIconPath)){
+                    qDebug() << "Copied" << iconToBeUsed << "to" << targetIconPath;
+                } else {
+                    LogError() << "Could not copy" << iconToBeUsed << "to" << targetIconPath << "\n";
+                    exit(1);
+                }
+            }
         }
     }
 
