@@ -278,19 +278,24 @@ int main(int argc, char **argv)
 
         /* Copy in place */
         if(iconToBeUsed != ""){
-            /* Check if there is already an icon and only if there is not, copy it to the AppDir */
+            /* Check if there is already an icon and only if there is not, copy it to the AppDir.
+             * As per the ROX AppDir spec, also copying to .DirIcon. */
             QString preExistingToplevelIcon = "";
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".xpm").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".xpm";
+                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svgz").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svgz";
+                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svg").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svg";
+                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".png").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".png";
+                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
 
             if(preExistingToplevelIcon != ""){
@@ -300,6 +305,7 @@ int main(int argc, char **argv)
                 QString targetIconPath = appDirPath + "/" + QFileInfo(iconToBeUsed).fileName();
                 if (QFile::copy(iconToBeUsed, targetIconPath)){
                     qDebug() << "Copied" << iconToBeUsed << "to" << targetIconPath;
+                    QFile::copy(targetIconPath, appDirPath + "/.DirIcon");
                 } else {
                     LogError() << "Could not copy" << iconToBeUsed << "to" << targetIconPath << "\n";
                     exit(1);
