@@ -32,12 +32,13 @@
 #include <QRegularExpression>
 #include <stdlib.h>
 #include <QSettings>
+#include <QDirIterator>
 
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
-    extern QString appBinaryPath;
+    QString appBinaryPath = "";
 
     QString firstArgument = QString::fromLocal8Bit(argv[1]);
 
@@ -58,16 +59,38 @@ int main(int argc, char **argv)
             desktopFile = firstArgument;
             desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().trimmed();
             qDebug() << "desktopIconEntry:" << desktopIconEntry;
-            QString candidateBin1 = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../bin/" + desktopExecEntry); // FHS-like
+            // QString candidateBin1 = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../bin/" + desktopExecEntry); // FHS-like
             QString candidateBin2 = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + desktopExecEntry); // Not FHS-like
-            if(QFileInfo(candidateBin1).isExecutable()) {
-                appBinaryPath = candidateBin1;
-            } else if(QFileInfo(candidateBin2).isExecutable()) {
-                appBinaryPath = candidateBin1;
+
+            /* Search directory for an executable with the name in the Exec= key */
+            QString directoryToBeSearched;
+            if(QFileInfo(QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/" + desktopExecEntry)).exists()){
+                directoryToBeSearched = QDir::cleanPath(QFileInfo(firstArgument).absolutePath());
+            } else if(QFileInfo(QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../bin/" + desktopExecEntry)).exists()){
+                directoryToBeSearched = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../");
             } else {
-                LogError() << "Could not determine the path to the executable based on the desktop file\n";
-                return 1;
+                directoryToBeSearched = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../");
             }
+            QDirIterator it(directoryToBeSearched, QDirIterator::Subdirectories);
+            while (it.hasNext()) {
+                it.next();
+                if((it.fileName() == desktopExecEntry) && (it.fileInfo().isExecutable())){
+                    qDebug() << "Found binary from desktop file:" << it.fileInfo().canonicalFilePath();
+                    appBinaryPath = it.fileInfo().canonicalFilePath();
+                    break;
+                }
+
+            }
+
+            if(appBinaryPath == ""){
+                if(QFileInfo(candidateBin2).isExecutable()) {
+                    appBinaryPath = candidateBin2;
+                } else {
+                    LogError() << "Could not determine the path to the executable based on the desktop file\n";
+                    return 1;
+                }
+            }
+
         } else {
             appBinaryPath = firstArgument;
             appBinaryPath = QDir::cleanPath(appBinaryPath);
@@ -171,14 +194,14 @@ int main(int argc, char **argv)
 
     /* Copy the desktop file in place, into the top level of the AppDir */
     if(desktopFile != ""){
-        QString destination = QDir::cleanPath(appDirPath + QFileInfo(desktopFile).fileName());
+        QString destination = QDir::cleanPath(appDirPath + "/" + QFileInfo(desktopFile).fileName());
         if(QFileInfo(destination).exists() == false){
             if (QFile::copy(desktopFile, destination)){
                 qDebug() << "Copied" << desktopFile << "to" << destination;
             }
         }
         if(QFileInfo(destination).isFile() == false){
-            LogError() << destination << "does not exist\n";
+            LogError() << destination << "does not exist and could not be copied there\n";
             return 1;
         }
     }
