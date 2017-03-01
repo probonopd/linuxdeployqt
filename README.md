@@ -36,7 +36,7 @@ Before running linuxdeployqt it may be wise to delete unneeded files that you do
 find $HOME/build-*-*_Qt_* \( -name "moc_*" -or -name "*.o" -or -name "qrc_*" -or -name "Makefile*" -or -name "*.a" \) -exec rm {} \;
 ```
 
-Alternatively, you could use `$DESTIDIR`.
+Alternatively, you could use `$DESTDIR`.
 
 ```
 Usage: linuxdeployqt app-binary [options]
@@ -58,7 +58,7 @@ the application uses.
 
 ## Contributing
 
-These are my first steps with Qt and with C++ for that matter, and it is stil very young, so I'd appreciate your testing, comments, and (ideally) code review. Please discuss in the [forum](http://discourse.appimage.org/t/linuxdeployqt-new-linux-deployment-tool-for-qt/57) or using GitHub issues and pull requests.
+These are my first steps with Qt and with C++ for that matter, and it is still very young, so I'd appreciate your testing, comments, and (ideally) code review. Please discuss in the [forum](http://discourse.appimage.org/t/linuxdeployqt-new-linux-deployment-tool-for-qt/57) or using GitHub issues and pull requests.
 
 ## Projects using linuxdeployqt
 
