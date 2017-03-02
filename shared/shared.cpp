@@ -219,6 +219,8 @@ int containsHowOften(QStringList haystack, QString needle) {
 
 LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths)
 {
+    (void)rpaths;
+
     if(fhsLikeMode == false){
         bundleLibraryDirectory= "lib"; // relative to bundle
     } else {
@@ -680,6 +682,8 @@ void runStrip(const QString &binaryPath)
 
 void stripAppBinary(const QString &bundlePath)
 {
+    (void)bundlePath;
+
     runStrip(appBinaryPath);
 }
 
