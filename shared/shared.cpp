@@ -592,7 +592,7 @@ void runPatchelf(QStringList options)
     if (patchelftool.exitCode() != 0) {
         LogError() << "runPatchelf:" << patchelftool.readAllStandardError();
         LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
-        exit(1);
+        // exit(1); // Do not exit because this could be a script that patchelf can't work on
     }
 }
 
@@ -634,7 +634,7 @@ void runStrip(const QString &binaryPath)
         } else {
             LogError() << "Could not start patchelf. Process error is" << patchelfread.errorString();
         }
-        exit(1);
+        // exit(1); // Do not exit because this could be a script that patchelf can't work on
     }
     patchelfread.waitForFinished();
 
