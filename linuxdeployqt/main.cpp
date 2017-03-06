@@ -117,7 +117,7 @@ int main(int argc, char **argv)
                 QDirIterator it2(directoryToBeSearched, QDirIterator::Subdirectories);
                 while (it2.hasNext()) {
                     it2.next();
-                    if((it2.fileName() == desktopExecEntry) && (it.fileInfo().isFile()) && (it2.fileInfo().isExecutable())){
+                    if((it2.fileName() == desktopExecEntry) && (it2.fileInfo().isFile()) && (it2.fileInfo().isExecutable())){
                         qDebug() << "Found binary from desktop file:" << it2.fileInfo().canonicalFilePath();
                         appBinaryPath = it2.fileInfo().absoluteFilePath();
                         break;
