@@ -100,7 +100,7 @@ int main(int argc, char **argv)
             QDirIterator it(directoryToBeSearched, QDirIterator::Subdirectories);
             while (it.hasNext()) {
                 it.next();
-                if((it.fileName() == desktopExecEntry) && (it.fileInfo().isExecutable())){
+                if((it.fileName() == desktopExecEntry) && (it.fileInfo().isFile()) && (it.fileInfo().isExecutable())){
                     qDebug() << "Found binary from desktop file:" << it.fileInfo().canonicalFilePath();
                     appBinaryPath = it.fileInfo().absoluteFilePath();
                     break;
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
                 QDirIterator it2(directoryToBeSearched, QDirIterator::Subdirectories);
                 while (it2.hasNext()) {
                     it2.next();
-                    if((it2.fileName() == desktopExecEntry) && (it2.fileInfo().isExecutable())){
+                    if((it2.fileName() == desktopExecEntry) && (it.fileInfo().isFile()) && (it2.fileInfo().isExecutable())){
                         qDebug() << "Found binary from desktop file:" << it2.fileInfo().canonicalFilePath();
                         appBinaryPath = it2.fileInfo().absoluteFilePath();
                         break;
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
             }
 
             if(appBinaryPath == ""){
-                if(QFileInfo(candidateBin).isExecutable()) {
+                if((QFileInfo(candidateBin).isFile()) && (QFileInfo(candidateBin).isExecutable())) {
                     appBinaryPath = QFileInfo(candidateBin).absoluteFilePath();
                 } else {
                     LogError() << "Could not determine the path to the executable based on the desktop file\n";
