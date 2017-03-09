@@ -66,6 +66,7 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/labsquare/fastQt/
 - https://github.com/sqlitebrowser/sqlitebrowser/
 - https://github.com/neuro-sys/tumblr-downloader-client
+- https://github.com/LongSoft/UEFITool
 - https://github.com/dannagle/PacketSender
 - https://github.com/nuttyartist/notes
 - https://github.com/leozide/leocad/
