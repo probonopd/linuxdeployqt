@@ -1074,20 +1074,15 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         argumentList.append("-rootPath");
         argumentList.append(qmlDir);
     }
-    QString qmlImportsPath = qtToBeBundledInfo.value("QT_INSTALL_QML");
-    LogDebug() << "qmlImportsPath candidate:" << qmlImportsPath;
 
-    // Verify that we found a valid qmlImportsPath
-    if (!QFile(qmlImportsPath + "/QtQml").exists()) {
-        LogError() << "Valid qmlImportsPath not found at" << qmlImportsPath;
-        LogError() << "Possibly your Qt library has the wrong information in qt_prfxpath, e.g., because it was moved since it was compiled";
-        return false;
-    }
-
-    LogDebug() << "qmlImportsPath:" << qmlImportsPath;
     argumentList.append( "-importPath");
     argumentList.append(qmlImportsPath);
 
+    argumentList.append( "-importPath");
+    argumentList.append(qtToBeBundledInfo.value("QT_INSTALL_QML "));
+
+    LogDebug() << "qmlImportsPath:" << qmlImportsPath;
+	
     // run qmlimportscanner
     QProcess qmlImportScanner;
     LogDebug() << qmlImportScannerPath << argumentList;
