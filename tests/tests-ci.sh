@@ -16,4 +16,13 @@ cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
 ls -lh
 find *.AppDir
 xpra start :99
+
+export DISPLAY=:99
+
+until xset -q
+do
+        echo "Waiting for X server to start..."
+        sleep 1;
+done
+
 bash -e tests/tests.sh
