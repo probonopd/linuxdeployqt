@@ -1076,9 +1076,9 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     }
 
     argumentList.append( "-importPath");
-    argumentList.append(qtToBeBundledInfo.value("QT_INSTALL_QML "));
+    argumentList.append(qtToBeBundledInfo.value("QT_INSTALL_QML"));
 
-    LogDebug() << "qmlImportsPath (QT_INSTALL_QML):" << qtToBeBundledInfo.value("QT_INSTALL_QML ");
+    LogDebug() << "qmlImportsPath (QT_INSTALL_QML):" << qtToBeBundledInfo.value("QT_INSTALL_QML");
 	
     // run qmlimportscanner
     QProcess qmlImportScanner;
@@ -1165,7 +1165,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     if (deploymentInfo.deployedLibraries.contains("QtWidgets") && qtQuickContolsInUse) {
         LogNormal() << "Deploying QML import QtQuick/PrivateWidgets";
         QString name = "QtQuick/PrivateWidgets";
-        QString path = qtToBeBundledInfo.value("QT_INSTALL_QML ") + QLatin1Char('/') + name;
+        QString path = qtToBeBundledInfo.value("QT_INSTALL_QML") + QLatin1Char('/') + name;
         deployQmlImport(appDirPath, deploymentInfo.rpathsUsed, path, name);
         LogNormal() << "";
     }
