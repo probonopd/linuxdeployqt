@@ -810,7 +810,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
    }
 
-   if(qtLibsPath.startsWith("/usr/")){
+   if(qtLibsPath.startsWith("/usr/") && !qtLibsPath.startsWith("/usr/local")){
        LogError() << "Bundling Qt provided by distributions is not yet supported by this tool.";
        LogError() << "Please see https://github.com/probonopd/linuxdeployqt/issues/79 and";
        LogError() << "submit a Pull Request to implement this.";
@@ -1076,12 +1076,9 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     }
 
     argumentList.append( "-importPath");
-    argumentList.append(qmlImportsPath);
+    argumentList.append(qtToBeBundledInfo.value("QT_INSTALL_QML"));
 
-    argumentList.append( "-importPath");
-    argumentList.append(qtToBeBundledInfo.value("QT_INSTALL_QML "));
-
-    LogDebug() << "qmlImportsPath:" << qmlImportsPath;
+    LogDebug() << "qmlImportsPath (QT_INSTALL_QML):" << qtToBeBundledInfo.value("QT_INSTALL_QML");
 	
     // run qmlimportscanner
     QProcess qmlImportScanner;
@@ -1168,7 +1165,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     if (deploymentInfo.deployedLibraries.contains("QtWidgets") && qtQuickContolsInUse) {
         LogNormal() << "Deploying QML import QtQuick/PrivateWidgets";
         QString name = "QtQuick/PrivateWidgets";
-        QString path = qmlImportsPath + QLatin1Char('/') + name;
+        QString path = qtToBeBundledInfo.value("QT_INSTALL_QML") + QLatin1Char('/') + name;
         deployQmlImport(appDirPath, deploymentInfo.rpathsUsed, path, name);
         LogNormal() << "";
     }
