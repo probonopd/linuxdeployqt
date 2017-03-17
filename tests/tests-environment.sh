@@ -16,3 +16,5 @@ cd -
 
 sudo wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O /usr/local/bin/appimagetool
 sudo chmod a+x /usr/local/bin/appimagetool
+
+sudo apt-get -y install qt58base qt58declarative qt58webengine binutils xpra

@@ -10,9 +10,6 @@ env:
 
 before_install:
   - ./tests/tests-environment.sh
-  
-install:
-  - sudo apt-get -y install qt58base qt58declarative qt58webengine binutils xpra
 
 script:
  - ./tests/tests-ci.sh
