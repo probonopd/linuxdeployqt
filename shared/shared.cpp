@@ -539,6 +539,9 @@ void recursiveCopyAndDeploy(const QString &appDirPath, const QSet<QString> &rpat
         QString fileDestinationPath = destinationPath + QLatin1Char('/') + file;
         copyFilePrintStatus(fileSourcePath, fileDestinationPath);
 
+        if(fileDestinationPath.endsWith(".so")){
+            LogError() << "TODO: Deploy library properly (i.e., set rpath and deploy its dependencies)" << fileDestinationPath;
+        }
     }
 
     QStringList subdirs = QDir(sourcePath).entryList(QStringList() << QStringLiteral("*"), QDir::Dirs | QDir::NoDotAndDotDot);
@@ -837,7 +840,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         const QString &bundlePath, const QStringList &binaryPaths,
                                   bool useLoaderPath)
 {
-    LogNormal() << "Deploying libraries found inside:" << binaryPaths;
+    LogNormal() << "Deploying the following libraries:" << binaryPaths;
     QStringList copiedLibraries;
     DeploymentInfo deploymentInfo;
     deploymentInfo.useLoaderPath = useLoaderPath;
@@ -852,7 +855,6 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
             LogNormal() << "Setting deploymentInfo.qtPath to:" << library.libraryDirectory;
             deploymentInfo.qtPath = library.libraryDirectory;
         }
-
 
         if (library.libraryDirectory.startsWith(bundlePath)) {
             LogNormal()  << library.libraryName << "already deployed, skipping.";
@@ -1125,9 +1127,10 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         deploymentInfo.deployedLibraries += findAppLibraries(destinationPath);
         deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
 
+        QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
+        LogDebug() << "Deploying plugin" << sourcePath;
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
-            QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
             deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
         }
     }
