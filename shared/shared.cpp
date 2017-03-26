@@ -618,7 +618,7 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
     int startPos = content.indexOf(searchStringQByteArray);
     if (startPos != -1) {
         LogNormal() << QString::fromLatin1(
-                    "Patching %2 in %1 to '%3'").arg(QDir::toNativeSeparators(path), variable, value);
+                    "Patching value of %2 in %1 to '%3'").arg(QDir::toNativeSeparators(path), variable, value);
     }
     startPos += searchStringQByteArray.length();
     int endPos = content.indexOf(char(0), startPos);
@@ -671,8 +671,9 @@ bool patchString(const QString &path, const QString &searchString, const QString
 
     int startPos = content.indexOf(searchStringQByteArray);
     if (startPos != -1) {
+        LogNormal() << "startPos:" << startPos;
         LogNormal() << QString::fromLatin1(
-                    "Patching %2 in %1 to '%3'").arg(QDir::toNativeSeparators(path), searchString, replacementString);
+                    "Patching string %2 in %1 to '%3'").arg(QDir::toNativeSeparators(path), searchString, replacementString);
     }
     int endPos = content.indexOf(char(0), startPos);
     if (endPos == -1) {
@@ -681,10 +682,10 @@ bool patchString(const QString &path, const QString &searchString, const QString
         return false;
     }
 
-    QByteArray replacement = QByteArray(endPos - startPos, char(0));
+    QByteArray replacement = QByteArray(searchString.length(), char(0));
     QByteArray replacementBegin = replacementString.toLatin1().data();
     replacement.prepend(replacementBegin);
-    replacement.truncate(endPos - startPos);
+    replacement.truncate(searchString.length());
 
     content.replace(startPos, endPos - startPos, replacement);
 
@@ -871,7 +872,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         runStrip(deployedBinaryPath);
 
         if (!library.rpathUsed.length()) {
-            changeIdentification(library.deployedInstallName, deployedBinaryPath);
+            changeIdentification(library.deployedInstallName, QFileInfo(deployedBinaryPath).canonicalFilePath());
         }
 
         // Check for library dependencies
@@ -949,9 +950,9 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    }
 
    if(fhsLikeMode == false){
-       changeIdentification("$ORIGIN/lib/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+       changeIdentification("$ORIGIN/lib/" + bundleLibraryDirectory, QFileInfo(applicationBundle.binaryPath).canonicalFilePath());
    } else {
-       changeIdentification("$ORIGIN/../lib/" + bundleLibraryDirectory, applicationBundle.binaryPath);
+       changeIdentification("$ORIGIN/../lib/" + bundleLibraryDirectory, QFileInfo(applicationBundle.binaryPath).canonicalFilePath());
    }
    applicationBundle.libraryPaths = findAppLibraries(appDirPath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
