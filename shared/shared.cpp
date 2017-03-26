@@ -596,6 +596,53 @@ void runPatchelf(QStringList options)
     }
 }
 
+bool patchQtCore(const QString &path, const QString &variable, const QString &value)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadWrite)) {
+        LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
+                    QDir::toNativeSeparators(path), file.errorString());
+        return false;
+    }
+    QByteArray content = file.readAll();
+
+    if (content.isEmpty()) {
+        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not read file content").arg(
+                    QDir::toNativeSeparators(path));
+        return false;
+    }
+
+    QString searchString = QString::fromLatin1("%1=").arg(variable);
+    QByteArray searchStringQByteArray = searchString.toLatin1().data();
+
+    int startPos = content.indexOf(searchStringQByteArray);
+    if (startPos != -1) {
+        LogNormal() << QString::fromLatin1(
+                    "Patching %2 in %1 to '%3'").arg(QDir::toNativeSeparators(path), variable, value);
+    }
+    startPos += searchStringQByteArray.length();
+    int endPos = content.indexOf(char(0), startPos);
+    if (endPos == -1) {
+        LogWarning() << QString::fromLatin1("Unable to patch %1: Internal error").arg(
+                    QDir::toNativeSeparators(path));
+        return false;
+    }
+
+    QByteArray replacement = QByteArray(endPos - startPos, char(0));
+    QByteArray replacementBegin = value.toLatin1().data();
+    replacement.prepend(replacementBegin);
+    replacement.truncate(endPos - startPos);
+
+    content.replace(startPos, endPos - startPos, replacement);
+
+    if (!file.seek(0) || (file.write(content) != content.size())) {
+        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not write to file").arg(
+                    QDir::toNativeSeparators(path));
+        return false;
+    }
+    return true;
+}
+
 void changeIdentification(const QString &id, const QString &binaryPath)
 {
     LogDebug() << "Using patchelf:";
@@ -605,11 +652,35 @@ void changeIdentification(const QString &id, const QString &binaryPath)
 
     // qt_prfxpath:
     if (binaryPath.contains("libQt5Core")) {
-        LogDebug() << "libQt5Core detected, patching its qt_prfxpath";
+        LogDebug() << "libQt5Core detected, patching its qt_* strings";
 
-        if (!patchQtCore(binaryPath)){
-            return;
+        /* https://codereview.qt-project.org/gitweb?p=qt/qttools.git;a=blob_plain;f=src/windeployqt/utils.cpp;h=e89496ea1f371ed86f6937284c1c801daf576572;hb=7be81b804da102b374c2089aac38353a0383c254
+         * Search for "qt_prfxpath=<xxx>" in a path, and replace it with "qt_prfxpath=." or "qt_prfxpath=.." */
+
+        if(fhsLikeMode == true){
+            patchQtCore(binaryPath, "qt_prfxpath", "..");
+        } else {
+            patchQtCore(binaryPath, "qt_prfxpath", ".");
         }
+
+        patchQtCore(binaryPath, "qt_adatpath", ".");
+        patchQtCore(binaryPath, "qt_docspath", "doc");
+        patchQtCore(binaryPath, "qt_hdrspath", "include");
+        patchQtCore(binaryPath, "qt_libspath", "lib");
+        patchQtCore(binaryPath, "qt_lbexpath", "libexec");
+        patchQtCore(binaryPath, "qt_binspath", "bin");
+        patchQtCore(binaryPath, "qt_plugpath", "plugins");
+        patchQtCore(binaryPath, "qt_impspath", "imports");
+        patchQtCore(binaryPath, "qt_qml2path", "qml");
+        patchQtCore(binaryPath, "qt_datapath", ".");
+        patchQtCore(binaryPath, "qt_trnspath", "translations");
+        patchQtCore(binaryPath, "qt_xmplpath", "examples");
+        patchQtCore(binaryPath, "qt_demopath", "demos");
+        patchQtCore(binaryPath, "qt_tstspath", "tests");
+        patchQtCore(binaryPath, "qt_hpfxpath", ".");
+        patchQtCore(binaryPath, "qt_hbinpath", "bin");
+        patchQtCore(binaryPath, "qt_hdatpath", ".");
+
     }
 
 }
@@ -808,15 +879,6 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        // FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
        LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
        setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
-   }
-
-   if(qtLibsPath.startsWith("/usr/") && !qtLibsPath.startsWith("/usr/local")){
-       LogError() << "Bundling Qt provided by distributions is not yet supported by this tool.";
-       LogError() << "Please see https://github.com/probonopd/linuxdeployqt/issues/79 and";
-       LogError() << "submit a Pull Request to implement this.";
-       LogError() << "In the meantime, use Qt from the Qt Company";
-       LogError() << "or Qt for /opt from https://launchpad.net/~beineri";
-       exit(1);
    }
 
    if(fhsLikeMode == false){
@@ -1198,97 +1260,6 @@ void changeQtLibraries(const QString appPath, const QString &qtPath)
         const QString absoluteQtPath = QDir(qtPath).absolutePath();
         changeQtLibraries(libraries, QStringList() << appBinaryPath << libraryPaths, absoluteQtPath);
     }
-}
-
-/* https://codereview.qt-project.org/gitweb?p=qt/qttools.git;a=blob_plain;f=src/windeployqt/utils.cpp;h=e89496ea1f371ed86f6937284c1c801daf576572;hb=7be81b804da102b374c2089aac38353a0383c254
- * Search for "qt_prfxpath=<xxx>" in a path, and replace it with "qt_prfxpath=." or "qt_prfxpath=.." */
-bool patchQtCore(const QString &path)
-{
-    LogNormal() << "Patching " << QFileInfo(path).fileName() << "...\n";
-
-    QFile file(path);
-    if (!file.open(QIODevice::ReadWrite)) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
-                    QDir::toNativeSeparators(path), file.errorString());
-        return false;
-    }
-    QByteArray content = file.readAll();
-
-    if (content.isEmpty()) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not read file content").arg(
-                    QDir::toNativeSeparators(path));
-        return false;
-    }
-
-    QByteArray prfxpath("qt_prfxpath=");
-    int startPos = content.indexOf(prfxpath);
-    if (startPos == -1) {
-        LogWarning() << QString::fromLatin1(
-                    "Unable to patch %1: Could not locate pattern \"qt_prfxpath=\"").arg(
-                    QDir::toNativeSeparators(path));
-        return false;
-    }
-    startPos += prfxpath.length();
-    int endPos = content.indexOf(char(0), startPos);
-    if (endPos == -1) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: Internal error").arg(
-                    QDir::toNativeSeparators(path));
-        return false;
-    }
-
-    QByteArray replacement = QByteArray(endPos - startPos, char(0));
-    if(fhsLikeMode == true){
-        replacement[0] = '.';
-        replacement[1] = '.';
-    } else {
-        replacement[0] = '.';
-    }
-    content.replace(startPos, endPos - startPos, replacement);
-
-    if (!file.seek(0) || (file.write(content) != content.size())) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not write to file").arg(
-                    QDir::toNativeSeparators(path));
-        return false;
-    }
-
-    /* Clear qt_plugpath which may exist and may be set to /usr/... in distro Qt packages,
-     * https://github.com/probonopd/linuxdeployqt/issues/75#issuecomment-280952612 */
-
-    QByteArray plugpath("qt_plugpath=");
-    int startPos2 = content.indexOf(plugpath);
-
-    if (startPos2 == -1) {
-
-        LogDebug() << QString::fromLatin1("Unable to patch %1: Could not locate pattern \"qt_plugpath=\"").arg(QDir::toNativeSeparators(path));
-    } else {
-
-        startPos2 += plugpath.length();
-        int endPos2 = content.indexOf(char(0), startPos2);
-        if (endPos2 == -1) {
-            LogWarning() << QString::fromLatin1("Unable to patch %1: Internal error").arg(
-                        QDir::toNativeSeparators(path));
-            return false;
-        }
-
-        QByteArray replacement2 = QByteArray(endPos2 - startPos2, char(0));
-        replacement2[0] = 'p';
-        replacement2[1] = 'l';
-        replacement2[2] = 'u';
-        replacement2[3] = 'g';
-        replacement2[4] = 'i';
-        replacement2[5] = 'n';
-        replacement2[6] = 's';
-
-        content.replace(startPos2, endPos2 - startPos2, replacement2);
-
-        if (!file.seek(0) || (file.write(content) != content.size())) {
-            LogWarning() << QString::fromLatin1("Unable to patch %1: Could not write to file").arg(
-                        QDir::toNativeSeparators(path));
-            return false;
-        }
-    }
-
-    return true;
 }
 
 bool checkAppImagePrerequisites(const QString &appDirPath)
