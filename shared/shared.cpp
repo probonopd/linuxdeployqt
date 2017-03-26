@@ -680,7 +680,7 @@ void changeIdentification(const QString &id, const QString &binaryPath)
         patchQtCore(binaryPath, "qt_hpfxpath", ".");
         patchQtCore(binaryPath, "qt_hbinpath", "bin");
         patchQtCore(binaryPath, "qt_hdatpath", ".");
-
+	patchQtCore(binaryPath, "qt_stngpath", "."); // e.g., /opt/qt53/etc/xdg; does it load Trolltech.conf from there?
     }
 
 }
