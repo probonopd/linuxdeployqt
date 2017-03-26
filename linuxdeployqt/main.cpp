@@ -63,9 +63,11 @@ int main(int argc, char **argv)
         qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
         qDebug() << "so make sure that it is the correct one.";
         qDebug() << "";
-        qDebug() << "Plugins related to a Qt library are copied in with the";
-        qDebug() << "library. The accessibility, image formats, and text codec";
+        qDebug() << "Plugins related to a Qt library are copied in with the library.";
+        /* TODO: To be implemented
+        qDebug() << "The accessibility, image formats, and text codec";
         qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
+        */
         qDebug() << "";
         qDebug() << "See the \"Deploying Applications on Linux\" topic in the";
         qDebug() << "documentation for more information about deployment on Linux.";
