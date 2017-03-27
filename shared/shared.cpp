@@ -646,61 +646,6 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
     return true;
 }
 
-/* Replace searchString string with replacementString string, filling with 0x00s
- * replacementString must not be longer than searchString */
-
-bool patchString(const QString &path, const QString &searchString, const QString &replacementString)
-{
-    if(replacementString.length() > searchString.length()){
-        LogWarning() << QString::fromLatin1("%1 is longer than %2").arg(
-                    replacementString, searchString);
-        return false;
-    }
-    QFile file(path);
-    if (!file.open(QIODevice::ReadWrite)) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
-                    QDir::toNativeSeparators(path), file.errorString());
-        return false;
-    }
-    QByteArray content = file.readAll();
-
-    if (content.isEmpty()) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not read file content").arg(
-                    QDir::toNativeSeparators(path));
-        return false;
-    }
-
-    QByteArray searchStringQByteArray = searchString.toLatin1().data();
-    int startPos = content.indexOf(searchStringQByteArray);
-    LogDebug() << "startPos:" << startPos;
-    if (startPos != -1) {
-        LogNormal() << QString::fromLatin1(
-                    "Patching string %2 in %1 to '%3'").arg(QDir::toNativeSeparators(path), searchString, replacementString);
-    } else {
-        return false;
-    }
-    int endPos = content.indexOf(char(0), startPos);
-    if (endPos == -1) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: Internal error").arg(
-                    QDir::toNativeSeparators(path));
-        return false;
-    }
-
-    QByteArray replacement = QByteArray(searchString.length(), char(0));
-    QByteArray replacementBegin = replacementString.toLatin1().data();
-    replacement.prepend(replacementBegin);
-    replacement.truncate(searchString.length());
-
-    content.replace(startPos, endPos - startPos, replacement);
-
-    if (!file.seek(0) || (file.write(content) != content.size())) {
-        LogWarning() << QString::fromLatin1("Unable to patch %1: Could not write to file").arg(
-                    QDir::toNativeSeparators(path));
-        return false;
-    }
-    return true;
-}
-
 void changeIdentification(const QString &id, const QString &binaryPath)
 {
     LogDebug() << "Using patchelf:";
@@ -741,18 +686,18 @@ void changeIdentification(const QString &id, const QString &binaryPath)
         patchQtCore(binaryPath, "qt_stngpath", "."); // e.g., /opt/qt53/etc/xdg; does it load Trolltech.conf from there?
 
         /* Qt on Arch Linux comes with more hardcoded paths
-         * https://github.com/probonopd/linuxdeployqt/issues/98 */
-
+         * https://github.com/probonopd/linuxdeployqt/issues/98
         patchString(binaryPath, "lib/qt/libexec", "libexec");
         patchString(binaryPath, "lib/qt/plugins", "plugins");
         patchString(binaryPath, "lib/qt/imports", "imports");
         patchString(binaryPath, "lib/qt/qml", "qml");
         patchString(binaryPath, "lib/qt", "");
         patchString(binaryPath, "share/doc/qt", "doc");
-        // patchString(binaryPath, "include/qt", "include"); // FIXME: Destroys OBS builds; something more intelligent is needed
-        // patchString(binaryPath, "share/qt", ""); // FIXME: Destroys OBS builds; something more intelligent is needed
+        patchString(binaryPath, "include/qt", "include");
+        patchString(binaryPath, "share/qt", "");
         patchString(binaryPath, "share/qt/translations", "translations");
         patchString(binaryPath, "share/doc/qt/examples", "examples");
+        */
     }
 
 }
