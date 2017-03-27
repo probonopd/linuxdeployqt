@@ -120,7 +120,7 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
         if (alwaysOwerwriteEnabled) {
             QFile(to).remove();
         } else {
-            LogNormal() << "File exists, skip copy:" << to;
+            LogNormal() << QFileInfo(to).fileName() << "already deployed, skipping.";
             return false;
         }
     }
@@ -671,12 +671,13 @@ bool patchString(const QString &path, const QString &searchString, const QString
     }
 
     QByteArray searchStringQByteArray = searchString.toLatin1().data();
-
     int startPos = content.indexOf(searchStringQByteArray);
+    LogDebug() << "startPos:" << startPos;
     if (startPos != -1) {
-        LogNormal() << "startPos:" << startPos;
         LogNormal() << QString::fromLatin1(
                     "Patching string %2 in %1 to '%3'").arg(QDir::toNativeSeparators(path), searchString, replacementString);
+    } else {
+        return false;
     }
     int endPos = content.indexOf(char(0), startPos);
     if (endPos == -1) {
@@ -748,8 +749,8 @@ void changeIdentification(const QString &id, const QString &binaryPath)
         patchString(binaryPath, "lib/qt/qml", "qml");
         patchString(binaryPath, "lib/qt", "");
         patchString(binaryPath, "share/doc/qt", "doc");
-        patchString(binaryPath, "include/qt", "include");
-        patchString(binaryPath, "share/qt", "");
+        // patchString(binaryPath, "include/qt", "include"); // FIXME: Destroys OBS builds; something more intelligent is needed
+        // patchString(binaryPath, "share/qt", ""); // FIXME: Destroys OBS builds; something more intelligent is needed
         patchString(binaryPath, "share/qt/translations", "translations");
         patchString(binaryPath, "share/doc/qt/examples", "examples");
     }
