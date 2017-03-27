@@ -63,6 +63,7 @@ These are my first steps with Qt and with C++ for that matter, and it is still v
 ## Projects using linuxdeployqt
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
+- https://travis-ci.org/NeoTheFox/RepRaptor
 - https://github.com/electronpass/electronpass-desktop
 - https://github.com/lirios/browser
 - https://github.com/jeena/FeedTheMonkey
