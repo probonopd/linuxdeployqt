@@ -285,26 +285,26 @@ int main(int argc, char **argv)
             QString preExistingToplevelIcon = "";
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".xpm").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".xpm";
-                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
+                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svgz").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svgz";
-                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
+                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svg").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svg";
-                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
+                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".png").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".png";
-                QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
+                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
 
             if(preExistingToplevelIcon != ""){
                 qDebug() << "preExistingToplevelIcon:" << preExistingToplevelIcon;
             } else {
                 qDebug() << "iconToBeUsed:" << iconToBeUsed;
-                QString targetIconPath = appDirPath + "/" + QFileInfo(iconToBeUsed).fileName();
+                QString targetIconPath = appDirPath + "/" + QFileInfo(iconToBeUsed).fileName(); 
                 if (QFile::copy(iconToBeUsed, targetIconPath)){
                     qDebug() << "Copied" << iconToBeUsed << "to" << targetIconPath;
                     QFile::copy(targetIconPath, appDirPath + "/.DirIcon");
