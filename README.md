@@ -132,12 +132,11 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - No unpacking or installation necessary
 - No root needed
 - No system libraries changed
-- Just one format for all major distributions
-- Works out of the box, no installation of runtimes needed (unlike Snap and Flatpak)
+- Works out of the box, no installation of runtimes needed
 - Optional desktop integration with `appimaged`
 - Optional binary delta updates, e.g., for continuous builds (only download the binary diff) using AppImageUpdate
 - Can optionally GPG2-sign your AppImages (inside the file)
-- Works on Live ISOs (unlike Flatpak)
+- Works on Live ISOs
 - Can use the same AppImages when dual-booting multiple distributions
 
 [Here is an overview](https://github.com/probonopd/AppImageKit/wiki/AppImages) of projects that are already distributing upstream-provided, official AppImages.
