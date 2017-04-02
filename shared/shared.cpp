@@ -1073,10 +1073,9 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         deploymentInfo.deployedLibraries += findAppLibraries(destinationPath);
         deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
 
-        QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
-        LogDebug() << "Deploying plugin" << sourcePath;
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
+            QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
             deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
         }
     }
