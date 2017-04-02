@@ -104,7 +104,7 @@ __CMake__ wants `DESTDIR` instead:
 
 ```
   - cmake . -DCMAKE_INSTALL_PREFIX=/usr
-  - sudo make DESTIDR=appdir install ; sudo chown -R $USER appdir ; find appdir/
+  - sudo make DESTDIR=appdir install ; sudo chown -R $USER appdir ; find appdir/
 ```
 
 Caution if you encounter
