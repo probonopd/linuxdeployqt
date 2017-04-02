@@ -58,7 +58,7 @@ the application uses.
 
 ## Using linuxdeployqt with Travis CI
 
-A common use case for `linuxdeployqt` is to use it on Travis CI after the `make` command. The following example illuastrates how to use `linuxdeployqt` with Travis CI. Create a `.travis.yml` file similar to this one (be sure to customize it, e.g., change `APPNAME` to the name of your application as it is spelled in the `Name=` entry of the `.desktop` file):
+A common use case for `linuxdeployqt` is to use it on Travis CI after the `make` command. The following example illustrates how to use `linuxdeployqt` with Travis CI. Create a `.travis.yml` file similar to this one (be sure to customize it, e.g., change `APPNAME` to the name of your application as it is spelled in the `Name=` entry of the `.desktop` file):
 
 ```
 language: cpp
