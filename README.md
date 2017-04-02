@@ -72,7 +72,7 @@ before_install:
     
 install: 
     - sudo apt-get -y install qt58base
-    - source /opt/qt58/bin/qt58-env.sh
+    - source /opt/qt*/bin/qt*-env.sh
 
 script:
   - qmake PREFIX=/usr
