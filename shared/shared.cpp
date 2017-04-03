@@ -1093,13 +1093,13 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
             deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
-            /*
+            /* See whether this makes any difference */
             // Find out the relative path to the lib/ directory and set it as the rpath
             QDir dir(destinationPath);
             QString relativePath = dir.relativeFilePath(appDirInfo.path + "/" + libraries[0].libraryDestinationDirectory);
             relativePath.remove(0, 3); // remove initial '../'
             changeIdentification("$ORIGIN/" + relativePath, QFileInfo(destinationPath).canonicalFilePath());
-            */
+            
         }
     }
 }
