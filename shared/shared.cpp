@@ -120,7 +120,7 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
         if (alwaysOwerwriteEnabled) {
             QFile(to).remove();
         } else {
-            LogNormal() << QFileInfo(to).fileName() << "already deployed, skipping.";
+            LogDebug() << QFileInfo(to).fileName() << "already deployed, skipping.";
             return false;
         }
     }
@@ -179,7 +179,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     }
 
     foreach (QString outputLine, outputLines) {
-        LogDebug() << "ldd outputLine:" << outputLine;
+        // LogDebug() << "ldd outputLine:" << outputLine;
         if (outputLine.contains("not found")){
             LogError() << "ldd outputLine:" << outputLine;
         }
@@ -540,7 +540,26 @@ void recursiveCopyAndDeploy(const QString &appDirPath, const QSet<QString> &rpat
         copyFilePrintStatus(fileSourcePath, fileDestinationPath);
 
         if(fileDestinationPath.endsWith(".so")){
-            LogError() << "TODO: Deploy library properly (i.e., set rpath and deploy its dependencies)" << fileDestinationPath;
+
+            LogDebug() << "Deploying .so in QML import" << fileSourcePath;
+            runStrip(fileDestinationPath);
+
+            // Find out the relative path to the lib/ directory and set it as the rpath
+            // FIXME: remove code duplication - the next few lines exist elsewhere already
+            if(fhsLikeMode == false){
+                bundleLibraryDirectory= "lib"; // relative to bundle
+            } else {
+                QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
+                bundleLibraryDirectory = relativePrefix + "/lib/";
+            }
+
+            QDir dir(QFileInfo(fileDestinationPath).canonicalFilePath());
+            QString relativePath = dir.relativeFilePath(appDirPath + "/" + bundleLibraryDirectory);
+            relativePath.remove(0, 3); // remove initial '../'
+            changeIdentification("$ORIGIN:$ORIGIN/" + relativePath, QFileInfo(fileDestinationPath).canonicalFilePath());
+
+            QList<LibraryInfo> libraries = getQtLibraries(fileSourcePath, appDirPath, QSet<QString>());
+            deployQtLibraries(libraries, appDirPath, QStringList() << destinationPath, false);
         }
     }
 
@@ -648,9 +667,7 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
 
 void changeIdentification(const QString &id, const QString &binaryPath)
 {
-    LogDebug() << "Using patchelf:";
-    LogDebug() << " change rpath in" << binaryPath;
-    LogDebug() << " to" << id;
+    LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
     runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
 
     // qt_prfxpath:
@@ -1064,19 +1081,25 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         recursiveCopy(sourcePath, destinationPath);
     }
     
-    LogDebug() << "pluginList after having detected hopefully all required plugins:" << pluginList;
+    LogNormal() << "pluginList after having detected hopefully all required plugins:" << pluginList;
+
     foreach (const QString &plugin, pluginList) {
         sourcePath = pluginSourcePath + "/" + plugin;
         destinationPath = pluginDestinationPath + "/" + plugin;
         QDir dir;
         dir.mkpath(QFileInfo(destinationPath).path());
-        deploymentInfo.deployedLibraries += findAppLibraries(destinationPath);
-        deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
-
+        QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
+        LogDebug() << "Deploying plugin" << sourcePath;
         if (copyFilePrintStatus(sourcePath, destinationPath)) {
             runStrip(destinationPath);
-            QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
             deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
+            /*
+            // Find out the relative path to the lib/ directory and set it as the rpath
+            QDir dir(destinationPath);
+            QString relativePath = dir.relativeFilePath(appDirInfo.path + "/" + libraries[0].libraryDestinationDirectory);
+            relativePath.remove(0, 3); // remove initial '../'
+            changeIdentification("$ORIGIN/" + relativePath, QFileInfo(destinationPath).canonicalFilePath());
+            */
         }
     }
 }
