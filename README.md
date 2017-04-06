@@ -77,7 +77,7 @@ install:
 script:
   - qmake PREFIX=/usr
   - make -j4
-  - sudo make INSTALL_ROOT=appdir install ; sudo chown -R $USER appdir ; find appdir/
+  - make INSTALL_ROOT=appdir install ; find appdir/
 
 after_success:
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" 
