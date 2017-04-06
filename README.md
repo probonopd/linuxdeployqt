@@ -97,7 +97,7 @@ For this to work, you need to enable Travis CI for your repository as [described
 Note that if `qmake` does not allow for `make install` or does not install the desktop file and icon, then change it similar to https://github.com/probonopd/FeedTheMonkey/blob/master/FeedTheMonkey.pro.
 
 ```
-  - sudo make INSTALL_ROOT=appdir install ; sudo chown -R $USER appdir ; find appdir/
+  - make INSTALL_ROOT=appdir install ; find appdir/
 ```
 
 __CMake__ wants `DESTDIR` instead:
