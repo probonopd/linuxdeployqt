@@ -42,6 +42,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QRegularExpression>
+#include <QStandardPaths>
 #include "shared.h"
 
 QString appBinaryPath;
@@ -181,7 +182,9 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     foreach (QString outputLine, outputLines) {
         // LogDebug() << "ldd outputLine:" << outputLine;
         if (outputLine.contains("not found")){
-            LogError() << "ldd outputLine:" << outputLine;
+            LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
+            LogError() << "Please ensure that all libraries can be found by ldd. Aborting.";
+            exit(1);
         }
     }
 
@@ -885,33 +888,74 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    applicationBundle.binaryPath = appBinaryPath;
    LogDebug() << "applicationBundle.binaryPath:" << applicationBundle.binaryPath;
 
-   // Determine the location of the Qt to be bundled
-   LogDebug() << "Using qmake to determine the location of the Qt to be bundled";
-   QString output = captureOutput("qmake -query");
-   QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
-   foreach (const QString &outputLine, outputLines) {
-       int colonIndex = outputLine.indexOf(QLatin1Char(':'));
-       if (colonIndex != -1) {
-           QString name = outputLine.left(colonIndex);
-           QString value = outputLine.mid(colonIndex + 1);
-           qtToBeBundledInfo.insert(name, value);
+   // Find out whether Qt is a dependency of the application to be bundled
+   int qtDetected = 0;
+   LddInfo lddInfo = findDependencyInfo(appBinaryPath);
+   foreach (const DylibInfo dep, lddInfo.dependencies) {
+       LogDebug() << "dep.binaryPath" << dep.binaryPath;
+       if(dep.binaryPath.contains("libQt5")){
+               qtDetected = 5;
+       }
+       if(dep.binaryPath.contains("libQtCore.so.4")){
+               qtDetected = 4;
        }
    }
 
-   QString qtLibsPath = qtToBeBundledInfo.value("QT_INSTALL_LIBS");
+   if(qtDetected != 0){
 
-   if (qtLibsPath.isEmpty() || !QFile::exists(qtLibsPath)) {
-       LogError() << "Qt path could not be determined from qmake on the $PATH";
-       LogError() << "Make sure you have the correct Qt on your $PATH";
-       LogError() << "You can check this with qmake -v";
-   } else {
-       LogDebug() << "Qt libs path determined from qmake:" << qtLibsPath;
-       QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-       QString oldPath = env.value("LD_LIBRARY_PATH");
-       QString newPath = qtLibsPath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
-       // FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
-       LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
-       setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
+       // Determine the location of the Qt to be bundled
+       LogDebug() << "Using qmake to determine the location of the Qt to be bundled";
+
+       QString qmakePath = "";
+
+       // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
+       qmakePath = QStandardPaths::findExecutable("qmake");
+
+       // But openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
+       // Qt 4 on Fedora comes with suffix -qt4
+       // http://www.geopsy.org/wiki/index.php/Installing_Qt_binary_packages
+       if(qmakePath == ""){
+           if(qtDetected == 5){
+               qmakePath = QStandardPaths::findExecutable("qmake-qt5");
+           }
+           if(qtDetected == 4){
+               qmakePath = QStandardPaths::findExecutable("qmake-qt4");
+           }
+       }
+
+       if(qmakePath == ""){
+           LogError() << "qmake not found on the $PATH";
+           exit(1);
+       }
+
+       QString output = captureOutput(qmakePath + " -query");
+
+       QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
+       foreach (const QString &outputLine, outputLines) {
+           int colonIndex = outputLine.indexOf(QLatin1Char(':'));
+           if (colonIndex != -1) {
+               QString name = outputLine.left(colonIndex);
+               QString value = outputLine.mid(colonIndex + 1);
+               qtToBeBundledInfo.insert(name, value);
+           }
+       }
+
+       QString qtLibsPath = qtToBeBundledInfo.value("QT_INSTALL_LIBS");
+
+       if (qtLibsPath.isEmpty() || !QFile::exists(qtLibsPath)) {
+           LogError() << "Qt path could not be determined from qmake on the $PATH";
+           LogError() << "Make sure you have the correct Qt on your $PATH";
+           LogError() << "You can check this with qmake -v";
+           exit(1);
+       } else {
+           LogDebug() << "Qt libs path determined from qmake:" << qtLibsPath;
+           QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+           QString oldPath = env.value("LD_LIBRARY_PATH");
+           QString newPath = qtLibsPath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
+           // FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
+           LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
+           setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
+       }
    }
 
    if(fhsLikeMode == false){
