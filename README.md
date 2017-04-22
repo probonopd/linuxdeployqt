@@ -107,6 +107,14 @@ __CMake__ wants `DESTDIR` instead:
   - make DESTDIR=appdir install ; find appdir/
 ```
 
+__autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
+
+```
+    - ./configure --prefix=/usr
+    - make -j4
+    - make install DESTDIR=$(readlink -f appdir) ; find appdir/
+```
+
 Caution if you encounter
 
 ```
