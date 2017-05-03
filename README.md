@@ -177,6 +177,7 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/chkmue/MyQtTravisTemplateProject
 - https://github.com/chkmue/qttravisCI_1
 - https://github.com/eteran/edb-debugger
+- https://github.com/crapp/labpowerqt/
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
 - https://github.com/xdgurl/xdgurl
 
