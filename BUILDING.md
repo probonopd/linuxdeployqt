@@ -10,7 +10,7 @@ So, if you still think you would like to compile from source, here are the steps
 sudo apt-get -y install git g++ libgl1-mesa-dev
 git clone https://github.com/probonopd/linuxdeployqt.git
 # Then build in Qt Creator, or use
-export PATH=/tmp/.mount_QtCreator-*-x86_64/*/gcc_64/bin/:$PATH
+export PATH=$(readlink -f /tmp/.mount_QtCreator-*-x86_64/*/gcc_64/bin/):$PATH
 cd linuxdeployqt
 qmake linuxdeployqt.pro
 make
