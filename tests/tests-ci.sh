@@ -7,8 +7,7 @@ source /opt/qt*/bin/qt*-env.sh
 make -j2
 
 mkdir -p linuxdeployqt.AppDir/usr/bin/
-cp /usr/local/bin/patchelf linuxdeployqt.AppDir/usr/bin/
-cp /usr/local/bin/appimagetool linuxdeployqt.AppDir/usr/bin/
+cp /usr/local/bin/{appimagetool,mksquashfs,patchelf,zsyncmake} linuxdeployqt.AppDir/usr/bin/
 find linuxdeployqt.AppDir/
 export VERSION=continuous
 cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
