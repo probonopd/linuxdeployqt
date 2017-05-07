@@ -24,6 +24,4 @@ do
         sleep 1;
 done
 
-# For now skip the tests, since we are getting an unexplainable segfault (even when re-running
-# old linuxdeployqt builds that used to work) FIXME
-# bash -e tests/tests.sh
+bash -e tests/tests.sh
