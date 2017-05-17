@@ -55,13 +55,15 @@ int main(int argc, char **argv)
         qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
         qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
+        qDebug() << "   -qmake=<path>       : The qmake executable to use";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
         qDebug() << "the application uses.";
         qDebug() << "";
-        qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
-        qDebug() << "so make sure that it is the correct one.";
+        qDebug() << "By default it deploys the Qt instance that qmake on the $PATH points to.";
+        qDebug() << "The '-qmake' option can be used to point to the qmake executable";
+        qDebug() << "to be used instead.";
         qDebug() << "";
         qDebug() << "Plugins related to a Qt library are copied in with the library.";
         /* TODO: To be implemented
@@ -145,7 +147,7 @@ int main(int argc, char **argv)
     // Allow binaries next to linuxdeployqt to be found; this is useful for bundling
     // this application itself together with helper binaries such as patchelf
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString oldPath = env.value("PATH");    
+    QString oldPath = env.value("PATH");
     QString newPath = QCoreApplication::applicationDirPath() + ":" + oldPath;
     LogDebug() << newPath;
     setenv("PATH",newPath.toUtf8().constData(),1);
@@ -169,6 +171,7 @@ int main(int argc, char **argv)
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     QStringList qmlDirs;
+    QString qmakeExecutable;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -304,7 +307,7 @@ int main(int argc, char **argv)
                 qDebug() << "preExistingToplevelIcon:" << preExistingToplevelIcon;
             } else {
                 qDebug() << "iconToBeUsed:" << iconToBeUsed;
-                QString targetIconPath = appDirPath + "/" + QFileInfo(iconToBeUsed).fileName(); 
+                QString targetIconPath = appDirPath + "/" + QFileInfo(iconToBeUsed).fileName();
                 if (QFile::copy(iconToBeUsed, targetIconPath)){
                     qDebug() << "Copied" << iconToBeUsed << "to" << targetIconPath;
                     QFile::copy(targetIconPath, appDirPath + "/.DirIcon");
@@ -358,6 +361,10 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
+        } else if (argument.startsWith("-qmake=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            qmakeExecutable = argument.mid(index+1);
         } else if (argument.startsWith("-")) {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
@@ -371,7 +378,8 @@ int main(int argc, char **argv)
         }
     }
 
-    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables);
+    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
+                                                      qmakeExecutable);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {
