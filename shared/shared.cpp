@@ -809,6 +809,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
     LogNormal() << "Deploying the following libraries:" << binaryPaths;
     QStringList copiedLibraries;
     DeploymentInfo deploymentInfo;
+    deploymentInfo.requiresQtWidgetsLibrary = false;
     deploymentInfo.useLoaderPath = useLoaderPath;
     deploymentInfo.pluginPath = qtToBeBundledInfo.value("QT_INSTALL_PLUGINS");
     QSet<QString> rpathsUsed;
@@ -820,6 +821,10 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         if(library.libraryName.contains("libQt") and library.libraryName.contains("Core.so")) {
             LogNormal() << "Setting deploymentInfo.qtPath to:" << library.libraryDirectory;
             deploymentInfo.qtPath = library.libraryDirectory;
+        }
+	    
+	if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets.so")) {
+            deploymentInfo.requiresQtWidgetsLibrary = true;
         }
 
         if (library.libraryDirectory.startsWith(bundlePath)) {
@@ -1307,7 +1312,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     //      2) QtQuick.Controls is used
     // The intended failure mode is that libwidgetsplugin.dylib will be present
     // in the app bundle but not used at run-time.
-    if (deploymentInfo.deployedLibraries.contains("QtWidgets") && qtQuickContolsInUse) {
+    if (deploymentInfo.requiresQtWidgetsLibrary && qtQuickContolsInUse) {
         LogNormal() << "Deploying QML import QtQuick/PrivateWidgets";
         QString name = "QtQuick/PrivateWidgets";
         QString path = qtToBeBundledInfo.value("QT_INSTALL_QML") + QLatin1Char('/') + name;
