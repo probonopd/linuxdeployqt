@@ -96,6 +96,7 @@ public:
     QString qtPath;
     QString pluginPath;
     QStringList deployedLibraries;
+    quint64 usedModulesMask;
     QSet<QString> rpathsUsed;
     bool useLoaderPath;
     bool isLibrary;
@@ -126,5 +127,8 @@ QStringList findAppLibraries(const QString &appDirPath);
 bool patchQtCore(const QString &path, const QString &variable, const QString &value);
 int createAppImage(const QString &appBundlePath);
 bool checkAppImagePrerequisites(const QString &appBundlePath);
+void findUsedModules(DeploymentInfo &info);
+void deployTranslations(const QString &appDirPath, quint64 usedQtModules);
+bool deployTranslations(const QString &sourcePath, const QString &target, quint64 usedQtModules);
 
 #endif
