@@ -25,6 +25,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+
 #include <QCoreApplication>
 #include <QString>
 #include <QStringList>
@@ -43,6 +44,7 @@
 #include <QJsonValue>
 #include <QRegularExpression>
 #include <QStandardPaths>
+
 #include "shared.h"
 
 QString appBinaryPath;
@@ -99,20 +101,20 @@ inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
 // on architecture. See "vDSO names" in the notes section of vdso(7)
 // for more information.
 static bool lddOutputContainsLinuxVDSO(const QString &lddOutput) {
-	// aarch64, arm, mips, x86_64, x86/x32
-	if (lddOutput.contains(QStringLiteral("linux-vdso.so.1"))) {
-		return true;
-	// ppc32, s390
-	} else if (lddOutput.contains(QStringLiteral("linux-vdso32.so.1"))) {
-		return true;
-	// ppc64, s390x
-	} else if (lddOutput.contains(QStringLiteral("linux-vdso64.so.1"))) {
-		return true;
-	// ia64, sh, i386
-	} else if (lddOutput.contains(QStringLiteral("linux-gate.so.1"))) {
-		return true;
-	}
-	return false;
+    // aarch64, arm, mips, x86_64, x86/x32
+    if (lddOutput.contains(QStringLiteral("linux-vdso.so.1"))) {
+        return true;
+    // ppc32, s390
+    } else if (lddOutput.contains(QStringLiteral("linux-vdso32.so.1"))) {
+        return true;
+    // ppc64, s390x
+    } else if (lddOutput.contains(QStringLiteral("linux-vdso64.so.1"))) {
+        return true;
+    // ia64, sh, i386
+    } else if (lddOutput.contains(QStringLiteral("linux-gate.so.1"))) {
+        return true;
+    }
+    return false;
 }
 
 bool copyFilePrintStatus(const QString &from, const QString &to)
@@ -1016,7 +1018,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 }
             } else {
                 pluginList.append(QStringLiteral("imageformats/") + plugin);
-	    }
+        }
         }
     }
 
@@ -1026,8 +1028,8 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         foreach (const QString &plugin, xcbglintegrationPlugins) {
             pluginList.append(QStringLiteral("xcbglintegrations/") + plugin);
         }
-    }    
-    
+    }
+
     // Also deploy plugins/iconengines/libqsvgicon.so whenever libQt5Svg.so.* is about to be deployed,
     // https://github.com/probonopd/linuxdeployqt/issues/36
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
@@ -1069,7 +1071,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 
     QString sourcePath;
     QString destinationPath;
-    
+
     // Qt WebEngine if libQt5WebEngineCore is in use
     // https://doc-snapshots.qt.io/qt5-5.7/qtwebengine-deploying.html
     // TODO: Rather than hardcode the source paths, somehow get them dynamically
@@ -1124,7 +1126,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         destinationPath = QDir::cleanPath(dstTranslations + "/qtwebengine_locales");
         recursiveCopy(sourcePath, destinationPath);
     }
-    
+
     LogNormal() << "pluginList after having detected hopefully all required plugins:" << pluginList;
 
     foreach (const QString &plugin, pluginList) {
@@ -1143,7 +1145,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
             QString relativePath = dir.relativeFilePath(appDirInfo.path + "/" + libraries[0].libraryDestinationDirectory);
             relativePath.remove(0, 3); // remove initial '../'
             changeIdentification("$ORIGIN/" + relativePath, QFileInfo(destinationPath).canonicalFilePath());
-            
+
         }
     }
 }
@@ -1224,7 +1226,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     argumentList.append(qtToBeBundledInfo.value("QT_INSTALL_QML"));
 
     LogDebug() << "qmlImportsPath (QT_INSTALL_QML):" << qtToBeBundledInfo.value("QT_INSTALL_QML");
-	
+
     // run qmlimportscanner
     QProcess qmlImportScanner;
     LogDebug() << qmlImportScannerPath << argumentList;
