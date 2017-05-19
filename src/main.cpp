@@ -27,12 +27,10 @@
 ****************************************************************************/
 
 #include <QCoreApplication>
-#include <QDir>
 #include <QProcessEnvironment>
-#include <QRegularExpression>
-#include <stdlib.h>
 #include <QSettings>
 #include <QDirIterator>
+#include <QCommandLineParser>
 
 #include "shared.h"
 
@@ -40,48 +38,105 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
 
+    QCommandLineParser cliParser;
+
+    // Even with ParseAsLongOptions set, -h option still show the options as
+    // double dash, but the parser interpret it correctly. It seems to be a bug
+    // related to Qt.
+    cliParser.addHelpOption();
+    cliParser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
+
+    cliParser.setApplicationDescription(QObject::tr(
+        "linuxdeployqt takes an application as input and makes it "
+        "self-contained by copying in the Qt libraries and plugins that "
+        "the application uses.\n"
+        "\n"
+        "It deploys the Qt instance that qmake on the $PATH points to, "
+        "so make sure that it is the correct one.\n"
+        "\n"
+        "Plugins related to a Qt library are copied in with the library.\n"
+        "\n"
+        "See the \"Deploying Applications on Linux\" topic in the "
+        "documentation for more information about deployment on Linux."
+    ));
+
+    cliParser.addPositionalArgument("file",
+                                    "Deploy libraries for this file",
+                                    "<app-binary|desktop file>");
+
+    QCommandLineOption verboseOpt(
+        "verbose",
+        QObject::tr("0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug"),
+        "0-3", "1"
+    );
+    cliParser.addOption(verboseOpt);
+
+    QCommandLineOption noPluginsOpt(
+        "no-plugins",
+        QObject::tr("Skip plugin deployment"));
+    cliParser.addOption(noPluginsOpt);
+
+    QCommandLineOption appimageOpt(
+        "appimage",
+        QObject::tr("Create an AppImage (implies -bundle-non-qt-libs)"));
+    cliParser.addOption(appimageOpt);
+
+    QCommandLineOption noStripOpt(
+        "no-strip",
+        QObject::tr("Don't run 'strip' on the binaries"));
+    cliParser.addOption(noStripOpt);
+
+    QCommandLineOption bundleNonQtLibsOpt(
+        "bundle-non-qt-libs",
+        QObject::tr("Also bundle non-core, non-Qt libraries"));
+    cliParser.addOption(bundleNonQtLibsOpt);
+
+    QCommandLineOption executableOpt(
+        "executable",
+        QObject::tr("Let the given executable use the deployed libraries too"),
+        "path", ""
+    );
+    cliParser.addOption(executableOpt);
+
+    QCommandLineOption qmldirOpt(
+        "qmldir",
+        QObject::tr("Scan for QML imports in the given path"),
+        "path", ""
+    );
+    cliParser.addOption(qmldirOpt);
+
+    QCommandLineOption alwaysOverwriteOpt(
+        "always-overwrite",
+        QObject::tr("Copy files even if the target file exists"));
+    cliParser.addOption(alwaysOverwriteOpt);
+    /*
+     * TODO: Proposed option set. -scan-bin-paths and -scan-qml-paths
+     * options may subtitute -executable and -qmldir.
+     *
+     * -library-blacklist: When deploying required libraries, avoid including
+     *                     libraries listed here.
+     * -extra-plugins    : Also deploy this plugins.
+     * -extra-files      : Also copy these files to the deploy folder (useful for
+     *                     including extra required utilities).
+     * -qmake            : Use this alternative binary as qmake.
+     * -scan-bin-paths   : Scan this paths for binaries and dynamic libraries.
+     * -scan-qml-paths   : Scan this directories for Qml imports.
+     * -scan-recursive   : Scan directories recursively.
+     * -bins-dest        : Destination path for executables.
+     * -libs-dest        : Destination path for libraries.
+     */
+    cliParser.process(app);
+
     extern QString appBinaryPath;
     appBinaryPath = ""; // Cannot do it in one go due to "extern"
-
-    QString firstArgument = QString::fromLocal8Bit(argv[1]);
-
-    if (argc < 2 || firstArgument.startsWith("-")) {
-        qDebug() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
-        qDebug() << "";
-        qDebug() << "Options:";
-        qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
-        qDebug() << "   -no-plugins         : Skip plugin deployment";
-        qDebug() << "   -appimage           : Create an AppImage (implies -bundle-non-qt-libs)";
-        qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
-        qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
-        qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
-        qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
-        qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
-        qDebug() << "";
-        qDebug() << "linuxdeployqt takes an application as input and makes it";
-        qDebug() << "self-contained by copying in the Qt libraries and plugins that";
-        qDebug() << "the application uses.";
-        qDebug() << "";
-        qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
-        qDebug() << "so make sure that it is the correct one.";
-        qDebug() << "";
-        qDebug() << "Plugins related to a Qt library are copied in with the library.";
-        /* TODO: To be implemented
-        qDebug() << "The accessibility, image formats, and text codec";
-        qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
-        */
-        qDebug() << "";
-        qDebug() << "See the \"Deploying Applications on Linux\" topic in the";
-        qDebug() << "documentation for more information about deployment on Linux.";
-
-        return 1;
-    }
 
     QString desktopFile = "";
     QString desktopExecEntry = "";
     QString desktopIconEntry = "";
 
-    if (argc > 1) {
+    QString firstArgument = cliParser.positionalArguments().value(0, "");
+
+    if (!firstArgument.isEmpty()) {
         /* If we got a desktop file as the argument, try to figure out the application binary from it.
          * This has the advantage that we can also figure out the icon file this way, and have less work
          * to do when using linuxdeployqt. */
@@ -167,7 +222,6 @@ int main(int argc, char **argv)
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
     extern bool alwaysOwerwriteEnabled;
-    extern QStringList librarySearchPath;
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     QStringList qmlDirs;
@@ -318,53 +372,64 @@ int main(int argc, char **argv)
         }
     }
 
-    for (int i = 2; i < argc; ++i) {
-        QByteArray argument = QByteArray(argv[i]);
-        if (argument == QByteArray("-no-plugins")) {
-            LogDebug() << "Argument found:" << argument;
-            plugins = false;
-        } else if (argument == QByteArray("-appimage")) {
-            LogDebug() << "Argument found:" << argument;
-            appimage = true;
-            bundleAllButCoreLibs = true;
-        } else if (argument == QByteArray("-no-strip")) {
-            LogDebug() << "Argument found:" << argument;
-            runStripEnabled = false;
-        } else if (argument == QByteArray("-bundle-non-qt-libs")) {
-            LogDebug() << "Argument found:" << argument;
-            bundleAllButCoreLibs = true;
-        } else if (argument.startsWith(QByteArray("-verbose"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            bool ok = false;
-            int number = argument.mid(index+1).toInt(&ok);
-            if (!ok)
-                LogError() << "Could not parse verbose level";
-            else
-                logLevel = number;
-        } else if (argument.startsWith(QByteArray("-executable"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf('=');
-            if (index == -1)
-                LogError() << "Missing executable path";
-            else
-                additionalExecutables << argument.mid(index+1);
-        } else if (argument.startsWith(QByteArray("-qmldir"))) {
-            LogDebug() << "Argument found:" << argument;
-            qmldirArgumentUsed = true;
-            int index = argument.indexOf('=');
-            if (index == -1)
-                LogError() << "Missing qml directory path";
-            else
-                qmlDirs << argument.mid(index+1);
-        } else if (argument == QByteArray("-always-overwrite")) {
-            LogDebug() << "Argument found:" << argument;
-            alwaysOwerwriteEnabled = true;
-        } else if (argument.startsWith("-")) {
-            LogError() << "Unknown argument" << argument << "\n";
-            return 1;
-        }
-     }
+    // Set options from command line
+    if (cliParser.isSet(noPluginsOpt)) {
+        LogDebug() << "Argument found:" << noPluginsOpt.valueName();
+        plugins = false;
+    }
+
+    if (cliParser.isSet(appimageOpt)) {
+        LogDebug() << "Argument found:" << appimageOpt.valueName();
+        appimage = true;
+        bundleAllButCoreLibs = true;
+    }
+
+    if (cliParser.isSet(noStripOpt)) {
+        LogDebug() << "Argument found:" << noStripOpt.valueName();
+        runStripEnabled = false;
+    }
+
+    if (cliParser.isSet(bundleNonQtLibsOpt)) {
+        LogDebug() << "Argument found:" << bundleNonQtLibsOpt.valueName();
+        bundleAllButCoreLibs = true;
+    }
+
+    if (cliParser.isSet(verboseOpt)) {
+        LogDebug() << "Argument found:" << verboseOpt.valueName();
+        bool ok = false;
+        int number = cliParser.value(verboseOpt).toInt(&ok);
+
+        if (ok)
+            logLevel = number;
+        else
+            LogError() << "Could not parse verbose level";
+    }
+
+    if (cliParser.isSet(executableOpt)) {
+        LogDebug() << "Argument found:" << executableOpt.valueName();
+        QString executables = cliParser.value(executableOpt).trimmed();
+
+        if (!executables.isEmpty())
+            additionalExecutables << executables;
+        else
+            LogError() << "Missing executable path";
+    }
+
+    if (cliParser.isSet(qmldirOpt)) {
+        LogDebug() << "Argument found:" << qmldirOpt.valueName();
+        QString dirs = cliParser.value(qmldirOpt).trimmed();
+        qmldirArgumentUsed = true;
+
+        if (!dirs.isEmpty())
+            qmlDirs << dirs;
+        else
+            LogError() << "Missing qml directory path";
+    }
+
+    if (cliParser.isSet(alwaysOverwriteOpt)) {
+        LogDebug() << "Argument found:" << alwaysOverwriteOpt.valueName();
+        alwaysOwerwriteEnabled = true;
+    }
 
     if (appimage) {
         if(checkAppImagePrerequisites(appDirPath) == false){
@@ -407,5 +472,6 @@ int main(int argc, char **argv)
         LogDebug() << "result:" << result;
         exit(result);
     }
-    exit(0);
+
+    return 0;
 }
