@@ -929,6 +929,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        }
 
        QString output = captureOutput(qmakePath + " -query");
+       LogDebug() << "-query output from qmake:" << output;
 
        QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
        foreach (const QString &outputLine, outputLines) {
