@@ -180,6 +180,7 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/crapp/labpowerqt/
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
 - https://github.com/xdgurl/xdgurl
+- https://github.com/QNapi/qnapi
 
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
