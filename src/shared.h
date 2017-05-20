@@ -29,54 +29,39 @@
 #ifndef LINUX_DEPLOMYMENT_SHARED_H
 #define LINUX_DEPLOMYMENT_SHARED_H
 
-#include <QString>
-#include <QStringList>
 #include <QDebug>
-#include <QSet>
-
-extern int logLevel;
-#define LogError()      if (logLevel < 0) {} else qDebug() << "ERROR:"
-#define LogWarning()    if (logLevel < 1) {} else qDebug() << "WARNING:"
-#define LogNormal()     if (logLevel < 2) {} else qDebug() << "Log:"
-#define LogDebug()      if (logLevel < 3) {} else qDebug() << "Log:"
-
-extern QString appBinaryPath;
-extern bool runStripEnabled;
-extern bool bundleAllButCoreLibs;
-extern bool fhsLikeMode;
-extern QString fhsPrefix;
 
 class LibraryInfo
 {
-public:
-    bool isDylib;
-    QString libraryDirectory;
-    QString libraryName;
-    QString libraryPath;
-    QString binaryDirectory;
-    QString binaryName;
-    QString binaryPath;
-    QString rpathUsed;
-    QString version;
-    QString installName;
-    QString deployedInstallName;
-    QString sourceFilePath;
-    QString libraryDestinationDirectory;
-    QString binaryDestinationDirectory;
+    public:
+        bool isDylib;
+        QString libraryDirectory;
+        QString libraryName;
+        QString libraryPath;
+        QString binaryDirectory;
+        QString binaryName;
+        QString binaryPath;
+        QString rpathUsed;
+        QString version;
+        QString installName;
+        QString deployedInstallName;
+        QString sourceFilePath;
+        QString libraryDestinationDirectory;
+        QString binaryDestinationDirectory;
 };
 
 class DylibInfo
 {
-public:
-    QString binaryPath;
+    public:
+        QString binaryPath;
 };
 
 class LddInfo
 {
-public:
-    QString installName;
-    QString binaryPath;
-    QList<DylibInfo> dependencies;
+    public:
+        QString installName;
+        QString binaryPath;
+        QList<DylibInfo> dependencies;
 };
 
 bool operator==(const LibraryInfo &a, const LibraryInfo &b);
@@ -85,45 +70,111 @@ QDebug operator<<(QDebug debug, const LibraryInfo &info);
 class AppDirInfo
 {
     public:
-    QString path;
-    QString binaryPath;
-    QStringList libraryPaths;
+        QString path;
+        QString binaryPath;
+        QStringList libraryPaths;
 };
 
 class DeploymentInfo
 {
-public:
-    QString qtPath;
-    QString pluginPath;
-    QStringList deployedLibraries;
-    QSet<QString> rpathsUsed;
-    bool useLoaderPath;
-    bool isLibrary;
+    public:
+        QString qtPath;
+        QString pluginPath;
+        QStringList deployedLibraries;
+        QSet<QString> rpathsUsed;
+        bool useLoaderPath;
+        bool isLibrary;
 };
 
 inline QDebug operator<<(QDebug debug, const AppDirInfo &info);
 
-void changeQtLibraries(const QString appPath, const QString &qtPath);
-void changeQtLibraries(const QList<LibraryInfo> libraries, const QStringList &binaryPaths, const QString &qtPath);
+class Deploy
+{
+    public:
+        QString appBinaryPath;
+        QString fhsPrefix;
+        bool fhsLikeMode;
+        bool bundleAllButCoreLibs;
+        bool runStripEnabled;
+        bool alwaysOwerwriteEnabled;
+        int logLevel;
 
-LddInfo findDependencyInfo(const QString &binaryPath);
-LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, const QSet<QString> &rpaths);
-QString findAppBinary(const QString &appDirPath);
-QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appDirPath, const QSet<QString> &rpaths);
-QList<LibraryInfo> getQtLibraries(const QStringList &lddLines, const QString &appDirPath, const QSet<QString> &rpaths);
-QString copyLibrary(const LibraryInfo &library, const QString path);
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables);
-DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useLoaderPath);
-void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo);
-bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs);
-void changeIdentification(const QString &id, const QString &binaryPath);
-void changeInstallName(const QString &oldName, const QString &newName, const QString &binaryPath);
-void runStrip(const QString &binaryPath);
-void stripAppBinary(const QString &bundlePath);
-QString findAppBinary(const QString &appDirPath);
-QStringList findAppLibraries(const QString &appDirPath);
-bool patchQtCore(const QString &path, const QString &variable, const QString &value);
-int createAppImage(const QString &appBundlePath);
-bool checkAppImagePrerequisites(const QString &appBundlePath);
+        explicit Deploy();
+        ~Deploy();
+
+        void changeQtLibraries(const QString appPath,
+                               const QString &qtPath);
+        void changeQtLibraries(const QList<LibraryInfo> libraries,
+                               const QStringList &binaryPaths,
+                               const QString &qtPath);
+        LddInfo findDependencyInfo(const QString &binaryPath);
+        LibraryInfo parseLddLibraryLine(const QString &line,
+                                        const QString &appDirPath,
+                                        const QSet<QString> &rpaths);
+        QList<LibraryInfo> getQtLibraries(const QString &path,
+                                          const QString &appDirPath,
+                                          const QSet<QString> &rpaths);
+        QList<LibraryInfo> getQtLibraries(const QList<DylibInfo> &dependencies,
+                                          const QString &appDirPath,
+                                          const QSet<QString> &rpaths);
+        DeploymentInfo deployQtLibraries(const QString &appDirPath,
+                                         const QStringList &additionalExecutables);
+        DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
+                                         const QString &bundlePath,
+                                         const QStringList &binaryPaths,
+                                         bool useLoaderPath);
+        void deployPlugins(const QString &appDirPath,
+                           DeploymentInfo deploymentInfo);
+        void deployPlugins(const AppDirInfo &appDirInfo,
+                           const QString &pluginSourcePath,
+                           const QString pluginDestinationPath,
+                           DeploymentInfo deploymentInfo);
+        bool deployQmlImports(const QString &appDirPath,
+                              DeploymentInfo deploymentInfo,
+                              QStringList &qmlDirs);
+        void changeIdentification(const QString &id, const QString &binaryPath);
+        void runStrip(const QString &binaryPath);
+        void stripAppBinary(const QString &bundlePath);
+        QStringList findAppLibraries(const QString &appDirPath);
+        bool patchQtCore(const QString &path, const QString &variable,
+                         const QString &value);
+        int createAppImage(const QString &appBundlePath);
+        bool checkAppImagePrerequisites(const QString &appBundlePath);
+
+        QDebug LogError();
+        QDebug LogWarning();
+        QDebug LogNormal();
+        QDebug LogDebug();
+
+    private:
+        QString m_bundleLibraryDirectory;
+        QStringList m_librarySearchPath;
+        QMap<QString,QString> m_qtToBeBundledInfo;
+        QString m_log;
+        bool m_appstoreCompliant;
+        bool m_deployLibrary;
+
+        bool lddOutputContainsLinuxVDSO(const QString &lddOutput);
+        bool copyFilePrintStatus(const QString &from, const QString &to);
+        int containsHowOften(QStringList haystack, QString needle);
+        QSet<QString> getBinaryRPaths(const QString &path,
+                                      bool resolve = true,
+                                      QString executablePath = QString());
+        QList<LibraryInfo> getQtLibrariesForPaths(const QStringList &paths,
+                                                  const QString &appDirPath,
+                                                  const QSet<QString> &rpaths);
+        bool recursiveCopy(const QString &sourcePath, const QString &destinationPath);
+        void recursiveCopyAndDeploy(const QString &appDirPath,
+                                    const QSet<QString> &rpaths,
+                                    const QString &sourcePath,
+                                    const QString &destinationPath);
+        QString copyDylib(const LibraryInfo &library, const QString path);
+        void runPatchelf(QStringList options);
+        QString captureOutput(const QString &command);
+        void deployQmlImport(const QString &appDirPath,
+                             const QSet<QString> &rpaths,
+                             const QString &importSourcePath,
+                             const QString &importName);
+};
 
 #endif
