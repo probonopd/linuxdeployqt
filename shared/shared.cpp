@@ -54,6 +54,7 @@ bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
 int logLevel = 1;
+int qtDetected = 0;
 bool deployLibrary = false;
 
 using std::cout;
@@ -889,7 +890,6 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    LogDebug() << "applicationBundle.binaryPath:" << applicationBundle.binaryPath;
 
    // Find out whether Qt is a dependency of the application to be bundled
-   int qtDetected = 0;
    LddInfo lddInfo = findDependencyInfo(appBinaryPath);
    foreach (const DylibInfo dep, lddInfo.dependencies) {
        LogDebug() << "dep.binaryPath" << dep.binaryPath;
@@ -1260,6 +1260,11 @@ void deployQmlImport(const QString &appDirPath, const QSet<QString> &rpaths, con
 // Scan qml files in qmldirs for import statements, deploy used imports from Qml2ImportsPath to ./qml.
 bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs)
 {
+    if(!qtDetected){
+        LogDebug() << "Skipping QML imports since no Qt detected";
+        return false;
+    }
+
     LogNormal() << "";
     LogNormal() << "Deploying QML imports ";
     LogNormal() << "Application QML file search path(s) is" << qmlDirs;
