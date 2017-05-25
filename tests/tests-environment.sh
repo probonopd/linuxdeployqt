@@ -2,7 +2,7 @@
 
 set -e
 
-sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
+sudo add-apt-repository --yes ppa:beineri/opt-qt571-trusty
 sudo apt-get update -qq
 
 git clone -o 44b7f95 https://github.com/NixOS/patchelf.git
@@ -21,4 +21,4 @@ chmod +x appimagetool*AppImage
 sudo cp squashfs-root/usr/bin/* /usr/local/bin
 cd -
 
-sudo apt-get -y install qt58base qt58declarative qt58webengine binutils xpra
+sudo apt-get -y install qt57base qt57declarative qt57webengine binutils xpra
