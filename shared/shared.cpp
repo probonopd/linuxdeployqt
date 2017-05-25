@@ -1282,8 +1282,8 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     // Verify that we found a qmlimportscanner binary
     if (!QFile(qmlImportScannerPath).exists()) {
         LogError() << "qmlimportscanner not found at" << qmlImportScannerPath;
-        LogError() << "Rebuild qtdeclarative/tools/qmlimportscanner";
-        return false;
+        LogError() << "Please install it if you want to bundle QML based applications.";
+        return true;
     }
 
     // build argument list for qmlimportsanner: "-rootPath foo/ -rootPath bar/ -importPath path/to/qt/qml"
