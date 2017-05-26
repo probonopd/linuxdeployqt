@@ -22,3 +22,6 @@ TARGET = $${COMMONS_TARGET}
 
 INSTALLS += target
 target.path = $${BINDIR}
+
+RESOURCES += \
+    linuxdeployqt.qrc

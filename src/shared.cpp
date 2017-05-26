@@ -39,12 +39,12 @@
 
 #include "shared.h"
 
-bool operator==(const LibraryInfo &a, const LibraryInfo &b)
+bool operator ==(const LibraryInfo &a, const LibraryInfo &b)
 {
     return ((a.libraryPath == b.libraryPath) && (a.binaryPath == b.binaryPath));
 }
 
-QDebug operator<<(QDebug debug, const LibraryInfo &info)
+QDebug operator <<(QDebug debug, const LibraryInfo &info)
 {
     debug << "Library name" << info.libraryName << "\n";
     debug << "Library directory" << info.libraryDirectory << "\n";
@@ -62,7 +62,7 @@ QDebug operator<<(QDebug debug, const LibraryInfo &info)
     return debug;
 }
 
-inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
+inline QDebug operator <<(QDebug debug, const AppDirInfo &info)
 {
     debug << "Application bundle path" << info.path << "\n";
     debug << "Binary path" << info.binaryPath << "\n";
@@ -194,11 +194,11 @@ LibraryInfo Deploy::parseLddLibraryLine(const QString &line,
 {
     Q_UNUSED(rpaths);
 
-    if (fhsLikeMode == false) {
+    if (fhsLikeMode) {
+        this->m_bundleLibraryDirectory= "lib"; // relative to bundle
+    } else {
         QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
         this->m_bundleLibraryDirectory = relativePrefix + "/lib/";
-    } else {
-        this->m_bundleLibraryDirectory= "lib"; // relative to bundle
     }
 
     LogDebug() << "bundleLibraryDirectory:" << this->m_bundleLibraryDirectory;
@@ -225,8 +225,26 @@ LibraryInfo Deploy::parseLddLibraryLine(const QString &line,
         done
         */
 
+        QFile excludelistFile(":/excludelist");
+
+        if (!excludelistFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            return info;
+
         QStringList excludelist;
-        excludelist << "libasound.so.2" << "libcom_err.so.2" << "libcrypt.so.1" << "libc.so.6" << "libdl.so.2" << "libdrm.so.2" << "libexpat.so.1" << "libfontconfig.so.1" << "libgcc_s.so.1" << "libgdk_pixbuf-2.0.so.0" << "libgdk-x11-2.0.so.0" << "libgio-2.0.so.0" << "libglib-2.0.so.0" << "libGL.so.1" << "libgobject-2.0.so.0" << "libgpg-error.so.0" << "libgssapi_krb5.so.2" << "libgtk-x11-2.0.so.0" << "libhcrypto.so.4" << "libhx509.so.5" << "libICE.so.6" << "libidn.so.11" << "libk5crypto.so.3" << "libkeyutils.so.1" << "libkrb5.so.26" << "libkrb5.so.3" << "libkrb5support.so.0" << "libm.so.6" << "libnss3.so" << "libnssutil3.so" << "libp11-kit.so.0" << "libpcre.so.3" << "libpthread.so.0" << "libresolv.so.2" << "libroken.so.18" << "librt.so.1" << "libselinux.so.1" << "libSM.so.6" << "libstdc++.so.6" << "libusb-1.0.so.0" << "libuuid.so.1" << "libwind.so.0" << "libX11.so.6" << "libxcb.so.1" << "libz.so.1";
+
+        for (auto line = excludelistFile.readLine().trimmed(); !excludelistFile.atEnd();) {
+            if (line.startsWith("#"))
+                continue;
+            else {
+                int comment = line.indexOf("#");
+
+                if (comment > 0)
+                    line = line.left(comment);
+            }
+
+            excludelist << line;
+        }
+
         LogDebug() << "excludelist:" << excludelist;
 
         if (!trimmed.contains("libicu")) {
@@ -446,8 +464,13 @@ DeploymentInfo Deploy::deployQtLibraries(const QString &appDirPath,
            LogDebug() << "Qt libs path determined from qmake:" << qtLibsPath;
            QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
            QString oldPath = env.value("LD_LIBRARY_PATH");
-           QString newPath = qtLibsPath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
-           // FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
+
+           // FIXME: If we use a ldd replacement, we still need to observe this
+           // path
+           QString newPath = qtLibsPath + ":" + oldPath;
+
+           // FIXME: Directory layout might be different for system Qt;
+           // cannot assume lib/ to always be inside the Qt directory
            LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
            setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
        }
@@ -884,8 +907,10 @@ void Deploy::changeIdentification(const QString &id, const QString &binaryPath)
     LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
     runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
 
-    // NOTE: Code below make no sense, Qt can already find paths relative to
-    // the executable, and pathching this way can break the binary.
+    /* NOTE: Code below make no sense, Qt can already find paths relative to
+     * the executable, and can be configured through environment variables in
+     * the deployed project, and pathching this way can break the binary.
+     */
 
     // qt_prfxpath:
     if (binaryPath.contains("libQt5Core")) {
@@ -961,8 +986,14 @@ void Deploy::runStrip(const QString &binaryPath)
     patchelfread.waitForFinished();
 
     if (patchelfread.exitCode() != 0) {
-        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardError();
-        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardOutput();
+        LogError() << "Error reading rpath with patchelf"
+                   << QFileInfo(resolvedPath).completeBaseName()
+                   << ":"
+                   << patchelfread.readAllStandardError();
+        LogError() << "Error reading rpath with patchelf"
+                   << QFileInfo(resolvedPath).completeBaseName()
+                   << ":"
+                   << patchelfread.readAllStandardOutput();
         exit(1);
     }
 
@@ -1351,7 +1382,9 @@ void Deploy::recursiveCopyAndDeploy(const QString &appDirPath,
 
     LogNormal() << "copy:" << sourcePath << destinationPath;
 
-    QStringList files = QDir(sourcePath).entryList(QStringList() << QStringLiteral("*"), QDir::Files | QDir::NoDotAndDotDot);
+    auto files =
+            QDir(sourcePath).entryList(QStringList() << QStringLiteral("*"),
+                                       QDir::Files | QDir::NoDotAndDotDot);
 
     foreach (QString file, files) {
         const QString fileSourcePath = sourcePath + QLatin1Char('/') + file;
@@ -1382,10 +1415,15 @@ void Deploy::recursiveCopyAndDeploy(const QString &appDirPath,
         }
     }
 
-    QStringList subdirs = QDir(sourcePath).entryList(QStringList() << QStringLiteral("*"), QDir::Dirs | QDir::NoDotAndDotDot);
+    auto subdirs =
+            QDir(sourcePath).entryList(QStringList() << QStringLiteral("*"),
+                                       QDir::Dirs | QDir::NoDotAndDotDot);
 
     foreach (QString dir, subdirs)
-        recursiveCopyAndDeploy(appDirPath, rpaths, sourcePath + QLatin1Char('/') + dir, destinationPath + QLatin1Char('/') + dir);
+        recursiveCopyAndDeploy(appDirPath,
+                               rpaths,
+                               sourcePath + QLatin1Char('/') + dir,
+                               destinationPath + QLatin1Char('/') + dir);
 }
 
 QString Deploy::copyDylib(const LibraryInfo &library, const QString path)
@@ -1469,7 +1507,7 @@ void Deploy::deployQmlImport(const QString &appDirPath,
 
     QString importDestinationPath;
 
-    if(fhsLikeMode){
+    if (fhsLikeMode){
         QFileInfo qfi(applicationBundle.binaryPath);
         QString qtTargetDir = qfi.absoluteDir().absolutePath() + "/../";
         importDestinationPath = qtTargetDir + "/qml/" + importName;

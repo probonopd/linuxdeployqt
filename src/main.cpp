@@ -113,7 +113,7 @@ int main(int argc, char **argv)
      * TODO: Proposed option set. -scan-bin-paths and -scan-qml-paths
      * options may subtitute -executable and -qmldir.
      *
-     * -library-blacklist: When deploying required libraries, avoid including
+     * -excludelist      : When deploying required libraries, avoid including
      *                     libraries listed here.
      * -extra-plugins    : Also deploy this plugins.
      * -extra-files      : Also copy these files to the deploy folder (useful for
@@ -140,12 +140,11 @@ int main(int argc, char **argv)
          * to do when using linuxdeployqt. */
         if (firstArgument.endsWith(".desktop")){
             qDebug() << "Desktop file as first argument:" << firstArgument;
-            QSettings * settings = 0;
-            settings = new QSettings(firstArgument, QSettings::IniFormat);
-            desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
+            QSettings settings(firstArgument, QSettings::IniFormat);
+            desktopExecEntry = settings.value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
             qDebug() << "desktopExecEntry:" << desktopExecEntry;
             desktopFile = firstArgument;
-            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().split('.').first().trimmed();
+            desktopIconEntry = settings.value("Desktop Entry/Icon", "r").toString().split(' ').first().split('.').first().trimmed();
             qDebug() << "desktopIconEntry:" << desktopIconEntry;
 
             QString candidateBin = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + desktopExecEntry); // Not FHS-like
@@ -169,36 +168,40 @@ int main(int argc, char **argv)
                 }
             }
 
-            /* Only if we could not find it below the directory in which the desktop file resides, search above */
+            /* Only if we could not find it below the directory in which the
+             * desktop file resides, search above */
             if (deploy.appBinaryPath.isEmpty()) {
-                if(QFileInfo(QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../bin/" + desktopExecEntry)).exists()){
+                if (QFileInfo(QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../bin/" + desktopExecEntry)).exists()){
                     directoryToBeSearched = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../../");
                 } else {
                     directoryToBeSearched = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + "/../");
                 }
+
                 QDirIterator it2(directoryToBeSearched, QDirIterator::Subdirectories);
+
                 while (it2.hasNext()) {
                     it2.next();
-                    if((it2.fileName() == desktopExecEntry) && (it2.fileInfo().isFile()) && (it2.fileInfo().isExecutable())){
+
+                    if ((it2.fileName() == desktopExecEntry) && (it2.fileInfo().isFile()) && (it2.fileInfo().isExecutable())){
                         qDebug() << "Found binary from desktop file:" << it2.fileInfo().canonicalFilePath();
                         deploy.appBinaryPath = it2.fileInfo().absoluteFilePath();
+
                         break;
                     }
                 }
             }
 
-            if(deploy.appBinaryPath == ""){
-                if((QFileInfo(candidateBin).isFile()) && (QFileInfo(candidateBin).isExecutable())) {
+            if (deploy.appBinaryPath.isEmpty()) {
+                if (QFileInfo(candidateBin).isFile() && QFileInfo(candidateBin).isExecutable()) {
                     deploy.appBinaryPath = QFileInfo(candidateBin).absoluteFilePath();
                 } else {
                     deploy.LogError() << "Could not determine the path to the executable based on the desktop file\n";
+
                     return 1;
                 }
             }
-
         } else {
-            deploy.appBinaryPath = firstArgument;
-            deploy.appBinaryPath = QFileInfo(QDir::cleanPath(deploy.appBinaryPath)).absoluteFilePath();
+            deploy.appBinaryPath = QFileInfo(QDir::cleanPath(firstArgument)).absoluteFilePath();
         }
     }
 
@@ -219,13 +222,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    bool plugins = true;
-    bool appimage = false;
-    QStringList additionalExecutables;
-    bool qmldirArgumentUsed = false;
-    QStringList qmlDirs;
-
-    /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
+    /* FHS-like mode is for an application that has been installed to a $PREFIX
+     * which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
     if (QDir().exists(QDir::cleanPath(deploy.appBinaryPath + "/../../bin"))) {
         deploy.fhsPrefix = QDir::cleanPath(deploy.appBinaryPath + "/../../");
@@ -266,15 +264,17 @@ int main(int argc, char **argv)
     QFile::link(relativeBinPath, appDirPath + "/AppRun");
 
     /* Copy the desktop file in place, into the top level of the AppDir */
-    if(desktopFile != ""){
+    if (!desktopFile.isEmpty()) {
         QString destination = QDir::cleanPath(appDirPath + "/" + QFileInfo(desktopFile).fileName());
-        if(QFileInfo(destination).exists() == false){
-            if (QFile::copy(desktopFile, destination)){
+
+        if (!QFileInfo(destination).exists()) {
+            if (QFile::copy(desktopFile, destination))
                 qDebug() << "Copied" << desktopFile << "to" << destination;
-            }
         }
-        if(QFileInfo(destination).isFile() == false){
+
+        if (!QFileInfo(destination).isFile()) {
             deploy.LogError() << destination << "does not exist and could not be copied there\n";
+
             return 1;
         }
     }
@@ -283,18 +283,18 @@ int main(int argc, char **argv)
     QStringList candidates;
     QString iconToBeUsed;
 
-    if(!desktopIconEntry.isEmpty()) {
-        QDirIterator it3(appDirPath, QDirIterator::Subdirectories);
+    if (!desktopIconEntry.isEmpty()) {
+        QDirIterator dirs(appDirPath, QDirIterator::Subdirectories);
 
-        while (it3.hasNext()) {
-            it3.next();
+        while (dirs.hasNext()) {
+            dirs.next();
 
-            if (it3.fileName().startsWith(desktopIconEntry)
-               && (it3.fileName().endsWith(".png")
-                   || it3.fileName().endsWith(".svg")
-                   || it3.fileName().endsWith(".svgz")
-                   || it3.fileName().endsWith(".xpm"))) {
-                candidates.append(it3.filePath());
+            if (dirs.fileName().startsWith(desktopIconEntry)
+               && (dirs.fileName().endsWith(".png")
+                   || dirs.fileName().endsWith(".svg")
+                   || dirs.fileName().endsWith(".svgz")
+                   || dirs.fileName().endsWith(".xpm"))) {
+                candidates.append(dirs.filePath());
             }
         }
 
@@ -305,41 +305,20 @@ int main(int argc, char **argv)
             iconToBeUsed = candidates.first(); // The only choice
         } else if(candidates.length() > 1){
             foreach(QString current, candidates) {
-                if(current.contains("256")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("128")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("svg")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("svgz")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("512")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("1024")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("64")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("48")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("xpm")){
-                    iconToBeUsed = current;
-                    continue;
+                for (auto &iconFormat: QStringList {"256",
+                                                    "128",
+                                                    "svg",
+                                                    "svgz",
+                                                    "512",
+                                                    "1024",
+                                                    "64",
+                                                    "48",
+                                                    "xpm"}) {
+                    if (current.contains(iconFormat)) {
+                        iconToBeUsed = current;
+
+                        break;
+                    }
                 }
             }
         }
@@ -385,11 +364,15 @@ int main(int argc, char **argv)
         }
     }
 
+    bool plugins = true;
+
     // Set options from command line
     if (cliParser.isSet(noPluginsOpt)) {
         deploy.LogDebug() << "Argument found:" << noPluginsOpt.valueName();
         plugins = false;
     }
+
+    bool appimage = false;
 
     if (cliParser.isSet(appimageOpt)) {
         deploy.LogDebug() << "Argument found:" << appimageOpt.valueName();
@@ -418,6 +401,8 @@ int main(int argc, char **argv)
             deploy.LogError() << "Could not parse verbose level";
     }
 
+    QStringList additionalExecutables;
+
     if (cliParser.isSet(executableOpt)) {
         deploy.LogDebug() << "Argument found:" << executableOpt.valueName();
         QString executables = cliParser.value(executableOpt).trimmed();
@@ -427,6 +412,9 @@ int main(int argc, char **argv)
         else
             deploy.LogError() << "Missing executable path";
     }
+
+    QStringList qmlDirs;
+    bool qmldirArgumentUsed = false;
 
     if (cliParser.isSet(qmldirOpt)) {
         deploy.LogDebug() << "Argument found:" << qmldirOpt.valueName();
