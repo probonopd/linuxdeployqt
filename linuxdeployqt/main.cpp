@@ -55,6 +55,7 @@ int main(int argc, char **argv)
         qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
         qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
+        qDebug() << "   -no-translations    : Skip deployment of translations.";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
@@ -168,6 +169,7 @@ int main(int argc, char **argv)
     extern QStringList librarySearchPath;
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
+    bool skipTranslations = false;
     QStringList qmlDirs;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
@@ -358,6 +360,9 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
+        } else if (argument == QByteArray("-no-translations")) {
+            LogDebug() << "Argument found:" << argument;
+            skipTranslations = true;
         } else if (argument.startsWith("-")) {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
@@ -391,6 +396,9 @@ int main(int argc, char **argv)
         deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
     }
 
+    deploymentInfo.usedModulesMask = 0;
+    findUsedModules(deploymentInfo);
+
     if (plugins && !deploymentInfo.qtPath.isEmpty()) {
         if (deploymentInfo.pluginPath.isEmpty())
             deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
@@ -400,6 +408,10 @@ int main(int argc, char **argv)
 
     if (runStripEnabled)
         stripAppBinary(appDirPath);
+
+    if (!skipTranslations) {
+        deployTranslations(appDirPath, deploymentInfo.usedModulesMask);
+    }
 
     if (appimage) {
         int result = createAppImage(appDirPath);

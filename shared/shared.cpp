@@ -62,6 +62,122 @@ using std::endl;
 
 QMap<QString,QString> qtToBeBundledInfo;
 
+enum QtModule
+#if defined(Q_COMPILER_CLASS_ENUM) || defined(Q_CC_MSVC)
+    : quint64
+#endif
+{
+    QtBluetoothModule         = 0x0000000000000001,
+    QtCLuceneModule           = 0x0000000000000002,
+    QtConcurrentModule        = 0x0000000000000004,
+    QtCoreModule              = 0x0000000000000008,
+    QtDeclarativeModule       = 0x0000000000000010,
+    QtDesignerComponents      = 0x0000000000000020,
+    QtDesignerModule          = 0x0000000000000040,
+    QtGuiModule               = 0x0000000000000080,
+    QtCluceneModule           = 0x0000000000000100,
+    QtHelpModule              = 0x0000000000000200,
+    QtMultimediaModule        = 0x0000000000000400,
+    QtMultimediaWidgetsModule = 0x0000000000000800,
+    QtMultimediaQuickModule   = 0x0000000000001000,
+    QtNetworkModule           = 0x0000000000002000,
+    QtNfcModule               = 0x0000000000004000,
+    QtOpenGLModule            = 0x0000000000008000,
+    QtPositioningModule       = 0x0000000000010000,
+    QtPrintSupportModule      = 0x0000000000020000,
+    QtQmlModule               = 0x0000000000040000,
+    QtQuickModule             = 0x0000000000080000,
+    QtQuickParticlesModule    = 0x0000000000100000,
+    QtScriptModule            = 0x0000000000200000,
+    QtScriptToolsModule       = 0x0000000000400000,
+    QtSensorsModule           = 0x0000000000800000,
+    QtSerialPortModule        = 0x0000000001000000,
+    QtSqlModule               = 0x0000000002000000,
+    QtSvgModule               = 0x0000000004000000,
+    QtTestModule              = 0x0000000008000000,
+    QtWidgetsModule           = 0x0000000010000000,
+    QtWinExtrasModule         = 0x0000000020000000,
+    QtXmlModule               = 0x0000000040000000,
+    QtXmlPatternsModule       = 0x0000000080000000,
+    QtWebKitModule            = 0x0000000100000000,
+    QtWebKitWidgetsModule     = 0x0000000200000000,
+    QtQuickWidgetsModule      = 0x0000000400000000,
+    QtWebSocketsModule        = 0x0000000800000000,
+    QtEnginioModule           = 0x0000001000000000,
+    QtWebEngineCoreModule     = 0x0000002000000000,
+    QtWebEngineModule         = 0x0000004000000000,
+    QtWebEngineWidgetsModule  = 0x0000008000000000,
+    QtQmlToolingModule        = 0x0000010000000000,
+    Qt3DCoreModule            = 0x0000020000000000,
+    Qt3DRendererModule        = 0x0000040000000000,
+    Qt3DQuickModule           = 0x0000080000000000,
+    Qt3DQuickRendererModule   = 0x0000100000000000,
+    Qt3DInputModule           = 0x0000200000000000,
+    QtLocationModule          = 0x0000400000000000,
+    QtWebChannelModule        = 0x0000800000000000,
+    QtTextToSpeechModule      = 0x0001000000000000,
+    QtSerialBusModule         = 0x0002000000000000
+};
+
+struct QtModuleEntry {
+    quint64 module;
+    const char *option;
+    const char *libraryName;
+    const char *translation;
+};
+
+static QtModuleEntry qtModuleEntries[] = {
+    { QtBluetoothModule, "bluetooth", "Qt5Bluetooth", 0 },
+    { QtCLuceneModule, "clucene", "Qt5CLucene", "qt_help" },
+    { QtConcurrentModule, "concurrent", "Qt5Concurrent", "qtbase" },
+    { QtCoreModule, "core", "Qt5Core", "qtbase" },
+    { QtDeclarativeModule, "declarative", "Qt5Declarative", "qtquick1" },
+    { QtDesignerModule, "designer", "Qt5Designer", 0 },
+    { QtDesignerComponents, "designercomponents", "Qt5DesignerComponents", 0 },
+    { QtEnginioModule, "enginio", "Enginio", 0 },
+    { QtGuiModule, "gui", "Qt5Gui", "qtbase" },
+    { QtHelpModule, "qthelp", "Qt5Help", "qt_help" },
+    { QtMultimediaModule, "multimedia", "Qt5Multimedia", "qtmultimedia" },
+    { QtMultimediaWidgetsModule, "multimediawidgets", "Qt5MultimediaWidgets", "qtmultimedia" },
+    { QtMultimediaQuickModule, "multimediaquick", "Qt5MultimediaQuick_p", "qtmultimedia" },
+    { QtNetworkModule, "network", "Qt5Network", "qtbase" },
+    { QtNfcModule, "nfc", "Qt5Nfc", 0 },
+    { QtOpenGLModule, "opengl", "Qt5OpenGL", 0 },
+    { QtPositioningModule, "positioning", "Qt5Positioning", 0 },
+    { QtPrintSupportModule, "printsupport", "Qt5PrintSupport", 0 },
+    { QtQmlModule, "qml", "Qt5Qml", "qtdeclarative" },
+    { QtQmlToolingModule, "qmltooling", "qmltooling", 0 },
+    { QtQuickModule, "quick", "Qt5Quick", "qtdeclarative" },
+    { QtQuickParticlesModule, "quickparticles", "Qt5QuickParticles", 0 },
+    { QtQuickWidgetsModule, "quickwidgets", "Qt5QuickWidgets", 0 },
+    { QtScriptModule, "script", "Qt5Script", "qtscript" },
+    { QtScriptToolsModule, "scripttools", "Qt5ScriptTools", "qtscript" },
+    { QtSensorsModule, "sensors", "Qt5Sensors", 0 },
+    { QtSerialPortModule, "serialport", "Qt5SerialPort", "qtserialport" },
+    { QtSqlModule, "sql", "Qt5Sql", "qtbase" },
+    { QtSvgModule, "svg", "Qt5Svg", 0 },
+    { QtTestModule, "test", "Qt5Test", "qtbase" },
+    { QtWebKitModule, "webkit", "Qt5WebKit", 0 },
+    { QtWebKitWidgetsModule, "webkitwidgets", "Qt5WebKitWidgets", 0 },
+    { QtWebSocketsModule, "websockets", "Qt5WebSockets", "qtwebsockets" },
+    { QtWidgetsModule, "widgets", "Qt5Widgets", "qtbase" },
+    { QtWinExtrasModule, "winextras", "Qt5WinExtras", 0 },
+    { QtXmlModule, "xml", "Qt5Xml", "qtbase" },
+    { QtXmlPatternsModule, "xmlpatterns", "Qt5XmlPatterns", "qtxmlpatterns" },
+    { QtWebEngineCoreModule, "webenginecore", "Qt5WebEngineCore", 0 },
+    { QtWebEngineModule, "webengine", "Qt5WebEngine", "qtwebengine" },
+    { QtWebEngineWidgetsModule, "webenginewidgets", "Qt5WebEngineWidgets", 0 },
+    { Qt3DCoreModule, "3dcore", "Qt53DCore", 0 },
+    { Qt3DRendererModule, "3drenderer", "Qt53DRenderer", 0 },
+    { Qt3DQuickModule, "3dquick", "Qt53DQuick", 0 },
+    { Qt3DQuickRendererModule, "3dquickrenderer", "Qt53DQuickRenderer", 0 },
+    { Qt3DInputModule, "3dinput", "Qt53DInput", 0 },
+    { QtLocationModule, "geoservices", "Qt5Location", 0 },
+    { QtWebChannelModule, "webchannel", "Qt5WebChannel", 0 },
+    { QtTextToSpeechModule, "texttospeech", "Qt5TextToSpeech", 0 },
+    { QtSerialBusModule, "serialbus", "Qt5SerialBus", 0 }
+};
+
 bool operator==(const LibraryInfo &a, const LibraryInfo &b)
 {
     return ((a.libraryPath == b.libraryPath) && (a.binaryPath == b.binaryPath));
@@ -1471,4 +1587,137 @@ int createAppImage(const QString &appDirPath)
     LogNormal() << "ret" << ret;
     LogNormal() << "WEXITSTATUS(ret)" << WEXITSTATUS(ret);
     return WEXITSTATUS(ret);
+}
+
+void findUsedModules(DeploymentInfo &info)
+{
+    LogDebug() << "Creating mask of used modules";
+
+    const QStringList &libraries = info.deployedLibraries;
+
+    const size_t qtModulesCount = sizeof(qtModuleEntries)/sizeof(QtModuleEntry);
+    for (size_t i = 0; i < qtModulesCount; ++i) {
+        QtModuleEntry &entry = qtModuleEntries[i];
+        const QString name = QLatin1String(qtModuleEntries[i].libraryName);
+
+        bool found = false;
+        foreach (const QString &library, libraries) {
+            if (library.contains(name, Qt::CaseInsensitive)) {
+                LogDebug() << "Found dependency:" << name;
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            info.usedModulesMask |= entry.module;
+        }
+    }
+}
+
+void deployTranslations(const QString &appDirPath, quint64 usedQtModules)
+{
+    LogDebug() << "Deploying translations...";
+    QString qtTranslationsPath = qtToBeBundledInfo.value("QT_INSTALL_TRANSLATIONS");
+    if (qtTranslationsPath.isEmpty() || !QFile::exists(qtTranslationsPath)) {
+        LogError() << "Qt translations path could not be determined";
+        return;
+    }
+
+    QString translationsDirPath = appDirPath + QStringLiteral("/translations");
+    LogDebug() << "Using" << translationsDirPath << "as translations directory for App";
+    LogDebug() << "Using" << qtTranslationsPath << " to search for Qt translations";
+
+    QFileInfo fi(translationsDirPath);
+    if (!fi.isDir()) {
+        if (!QDir().mkpath(translationsDirPath)) {
+            LogError() << "Failed to create translations directory";
+        }
+    } else {
+        LogDebug() << "Translations directory already exists";
+    }
+
+    if (!deployTranslations(qtTranslationsPath, translationsDirPath, usedQtModules)) {
+        LogError() << "Failed to copy translations";
+    }
+}
+
+QStringList translationNameFilters(quint64 modules, const QString &prefix)
+{
+    QStringList result;
+    const size_t qtModulesCount = sizeof(qtModuleEntries)/sizeof(QtModuleEntry);
+    for (size_t i = 0; i < qtModulesCount; ++i) {
+        if ((qtModuleEntries[i].module & modules) && qtModuleEntries[i].translation) {
+            const QString name = QLatin1String(qtModuleEntries[i].translation) +
+                                 QLatin1Char('_') +  prefix + QStringLiteral(".qm");
+            if (!result.contains(name))
+                result.push_back(name);
+        }
+    }
+    LogDebug() << "Translation name filters:" << result;
+    return result;
+}
+
+bool deployTranslations(const QString &sourcePath, const QString &target, quint64 usedQtModules)
+{
+    LogDebug() << "Translations target is" << target;
+
+    // Find available languages prefixes by checking on qtbase.
+    QStringList prefixes;
+    QDir sourceDir(sourcePath);
+    const QStringList qmFilter = QStringList(QStringLiteral("qtbase_*.qm"));
+    foreach (QString qmFile, sourceDir.entryList(qmFilter)) {
+        qmFile.chop(3);
+        qmFile.remove(0, 7);
+        prefixes.push_back(qmFile);
+    }
+    if (prefixes.isEmpty()) {
+        LogError() << "Could not find any translations in "
+                   << sourcePath << " (developer build?)";
+        return true;
+    }
+    // Run lconvert to concatenate all files into a single named "qt_<prefix>.qm" in the application folder
+    // Use QT_INSTALL_TRANSLATIONS as working directory to keep the command line short.
+    const QString absoluteTarget = QFileInfo(target).absoluteFilePath();
+
+    QString lconvertPath = QDir::cleanPath(qtToBeBundledInfo.value("QT_INSTALL_BINS")) + "/lconvert";
+    LogDebug() << "Looking for lconvert at" << lconvertPath;
+
+    // Fallback: Look relative to the linuxdeployqt binary
+    if (!QFile(lconvertPath).exists()){
+        lconvertPath = QCoreApplication::applicationDirPath() + "/lconvert";
+        LogDebug() << "Fallback, looking for lconvert at" << lconvertPath;
+    }
+
+    // Verify that we found a lconvert binary
+    if (!QFile(lconvertPath).exists()) {
+        LogError() << "lconvert not found at" << lconvertPath;
+        return false;
+    }
+
+    LogNormal() << "Found lconvert at" << lconvertPath;
+
+    QStringList arguments;
+    foreach (const QString &prefix, prefixes) {
+        arguments.clear();
+        const QString targetFile = QStringLiteral("qt_") + prefix + QStringLiteral(".qm");
+        arguments.append(QStringLiteral("-o"));
+        const QString currentTargetFile = absoluteTarget + QLatin1Char('/') + targetFile;
+        arguments.append(currentTargetFile);
+
+        foreach (const QFileInfo &qmFileInfo, sourceDir.entryInfoList(translationNameFilters(usedQtModules, prefix)))
+            arguments.append(qmFileInfo.absoluteFilePath());
+
+        LogNormal() << "Creating " << currentTargetFile << "...";
+        LogDebug() << "lconvert arguments:" << arguments;
+
+        QProcess lconvert;
+        lconvert.start(lconvertPath, arguments);
+        lconvert.waitForFinished();
+
+        if (lconvert.exitStatus() != QProcess::NormalExit) {
+            LogError() << "Fail in lconvert on file" << currentTargetFile;
+        }
+    } // for prefixes.
+    return true;
 }
