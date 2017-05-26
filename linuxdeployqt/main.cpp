@@ -403,6 +403,7 @@ int main(int argc, char **argv)
         if (deploymentInfo.pluginPath.isEmpty())
             deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
         deployPlugins(appDirPath, deploymentInfo);
+        createQtConf(appDirPath);
     }
 
     if (runStripEnabled)

@@ -116,6 +116,8 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath,
                                  const QStringList &additionalExecutables,
                                  const QString &qmake);
 DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useLoaderPath);
+void createQtConf(const QString &appDirPath);
+void createQtConfForQtWebEngineProcess(const QString &appDirPath);
 void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo);
 bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs);
 void changeIdentification(const QString &id, const QString &binaryPath);
