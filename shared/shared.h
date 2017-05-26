@@ -99,6 +99,7 @@ public:
     QSet<QString> rpathsUsed;
     bool useLoaderPath;
     bool isLibrary;
+    bool requiresQtWidgetsLibrary;
 };
 
 inline QDebug operator<<(QDebug debug, const AppDirInfo &info);
