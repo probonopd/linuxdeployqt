@@ -18,13 +18,9 @@ compiler:
 before_install:
   # Enable core dumps
   # https://github.com/springmeyer/travis-coredump/blob/master/.travis.yml
-  - ulimit -c unlimited -S
   - ulimit -a -S
-  - ulimit -a -H
-  - cat /proc/sys/kernel/core_pattern
-  - cat /etc/default/apport
-  - service --status-all || true
-  - initctl list || true
+  - ulimit -a -H  
+  - ulimit -c unlimited -S
   - ./tests/tests-environment.sh
 
 script:
@@ -36,6 +32,7 @@ after_success:
 
 after_script:
   - "xpra stop :99"
+  - find ./ -maxdepth 1 -name 'core*'
   - for i in $(find ./ -maxdepth 1 -name 'core*' -print); do gdb $(pwd)/test core* -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
 
 branches:
