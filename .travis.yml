@@ -1,18 +1,30 @@
 language: cpp
 sudo: required
 dist: trusty
-
+addons:
+  apt:
+    packages:
+      - gdb
+      - apport
 os: linux
 
 env:
   global:
     - DISPLAY=:99
 
+compiler:
+  - gcc
+
 before_install:
+  # Enable core dumps
+  # https://github.com/springmeyer/travis-coredump/blob/master/.travis.yml
+  - ulimit -a -S
+  - ulimit -a -H
+  - ulimit -c unlimited -S
   - ./tests/tests-environment.sh
 
 script:
- - ./tests/tests-ci.sh
+  - ./tests/tests-ci.sh
 
 after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
@@ -20,6 +32,8 @@ after_success:
 
 after_script:
   - "xpra stop :99"
+  - find ./ -maxdepth 1 -name 'core*'
+  - for i in $(find ./ -maxdepth 1 -name 'core*' -print); do gdb $(pwd)/test core* -ex "thread apply all bt" -ex "set pagination 0" -batch; done;
 
 branches:
   except:

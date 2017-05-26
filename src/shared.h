@@ -81,9 +81,11 @@ class DeploymentInfo
         QString qtPath;
         QString pluginPath;
         QStringList deployedLibraries;
+        quint64 usedModulesMask;
         QSet<QString> rpathsUsed;
         bool useLoaderPath;
         bool isLibrary;
+        bool requiresQtWidgetsLibrary;
 };
 
 inline QDebug operator<<(QDebug debug, const AppDirInfo &info);
@@ -123,6 +125,8 @@ class Deploy
                                          const QString &bundlePath,
                                          const QStringList &binaryPaths,
                                          bool useLoaderPath);
+        void createQtConf(const QString &appDirPath);
+        void createQtConfForQtWebEngineProcess(const QString &appDirPath);
         void deployPlugins(const QString &appDirPath,
                            DeploymentInfo deploymentInfo);
         void deployPlugins(const AppDirInfo &appDirInfo,
@@ -140,6 +144,12 @@ class Deploy
                          const QString &value);
         int createAppImage(const QString &appBundlePath);
         bool checkAppImagePrerequisites(const QString &appBundlePath);
+        void findUsedModules(DeploymentInfo &info);
+        void deployTranslations(const QString &appDirPath,
+                                quint64 usedQtModules);
+        bool deployTranslations(const QString &sourcePath,
+                                const QString &target,
+                                quint64 usedQtModules);
 
         QDebug LogError();
         QDebug LogWarning();
@@ -152,6 +162,7 @@ class Deploy
         QMap<QString,QString> m_qtToBeBundledInfo;
         QString m_log;
         bool m_appstoreCompliant;
+        int m_qtDetected;
         bool m_deployLibrary;
 
         bool lddOutputContainsLinuxVDSO(const QString &lddOutput);
@@ -175,6 +186,8 @@ class Deploy
                              const QSet<QString> &rpaths,
                              const QString &importSourcePath,
                              const QString &importName);
+        QStringList translationNameFilters(quint64 modules,
+                                           const QString &prefix);
 };
 
 #endif

@@ -109,6 +109,11 @@ int main(int argc, char **argv)
         "always-overwrite",
         QObject::tr("Copy files even if the target file exists"));
     cliParser.addOption(alwaysOverwriteOpt);
+
+    QCommandLineOption noTranslationsOpt(
+        "no-translations",
+        QObject::tr("Skip deployment of translations"));
+    cliParser.addOption(noTranslationsOpt);
     /*
      * TODO: Proposed option set. -scan-bin-paths and -scan-qml-paths
      * options may subtitute -executable and -qmldir.
@@ -432,6 +437,13 @@ int main(int argc, char **argv)
         deploy.alwaysOwerwriteEnabled = true;
     }
 
+    bool skipTranslations = false;
+
+    if (cliParser.isSet(noTranslationsOpt)) {
+        deploy.LogDebug() << "Argument found:" << noTranslationsOpt.valueName();
+        skipTranslations = true;
+    }
+
     if (appimage && !deploy.checkAppImagePrerequisites(appDirPath)) {
         deploy.LogError() << "checkAppImagePrerequisites failed\n";
 
@@ -460,15 +472,22 @@ int main(int argc, char **argv)
         deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
     }
 
+    deploymentInfo.usedModulesMask = 0;
+    deploy.findUsedModules(deploymentInfo);
+
     if (plugins && !deploymentInfo.qtPath.isEmpty()) {
         if (deploymentInfo.pluginPath.isEmpty())
             deploymentInfo.pluginPath = QDir::cleanPath(deploymentInfo.qtPath + "/../plugins");
 
         deploy.deployPlugins(appDirPath, deploymentInfo);
+        deploy.createQtConf(appDirPath);
     }
 
     if (deploy.runStripEnabled)
         deploy.stripAppBinary(appDirPath);
+
+    if (!skipTranslations)
+        deploy.deployTranslations(appDirPath, deploymentInfo.usedModulesMask);
 
     if (appimage) {
         int result = deploy.createAppImage(appDirPath);

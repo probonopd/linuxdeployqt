@@ -50,6 +50,7 @@ Options:
    -executable=<path>  : Let the given executable use the deployed libraries too
    -qmldir=<path>      : Scan for QML imports in the given path
    -always-overwrite   : Copy files even if the target file exists
+   -no-translations    : Skip deployment of translations
 
 linuxdeployqt takes an application as input and makes it
 self-contained by copying in the Qt libraries and plugins that
@@ -180,6 +181,7 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/crapp/labpowerqt/
 - https://github.com/probonopd/linuxdeployqt/ obviously ;-)
 - https://github.com/xdgurl/xdgurl
+- https://github.com/QNapi/qnapi
 
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
