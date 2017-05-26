@@ -198,6 +198,7 @@ Deploy::Deploy():
     m_qtDetected(0),
     m_deployLibrary(false)
 {
+    this->m_excludeList = this->readExcludeList();
 }
 
 Deploy::~Deploy()
@@ -330,43 +331,10 @@ LibraryInfo Deploy::parseLddLibraryLine(const QString &line,
         return info;
 
     if (bundleAllButCoreLibs) {
-        /*
-        Bundle every lib including the low-level ones except those that are explicitly blacklisted.
-        This is more suitable for bundling in a way that is portable between different distributions and target systems.
-        Along the way, this also takes care of non-Qt libraries.
-
-        The excludelist can be updated by running
-        #/bin/bash
-        blacklisted=$(wget https://raw.githubusercontent.com/probonopd/AppImages/master/excludelist -O - | sort | uniq | grep -v "^#.*" | grep "[^-\s]")
-        for item in $blacklisted; do
-          echo -ne '"'$item'" << '
-        done
-        */
-
-        QFile excludelistFile(":/excludelist");
-
-        if (!excludelistFile.open(QIODevice::ReadOnly | QIODevice::Text))
-            return info;
-
-        QStringList excludelist;
-
-        for (auto line = excludelistFile.readLine().trimmed(); !excludelistFile.atEnd();) {
-            if (line.startsWith("#"))
-                continue;
-            else {
-                int comment = line.indexOf("#");
-
-                if (comment > 0)
-                    line = line.left(comment);
-            }
-
-            excludelist << line;
-        }
-
-        LogDebug() << "excludelist:" << excludelist;
+        LogDebug() << "excludelist:" << this->m_excludeList;
 
         if (!trimmed.contains("libicu")) {
-            if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName())) {
+            if (containsHowOften(this->m_excludeList, QFileInfo(trimmed).completeBaseName())) {
                 LogDebug() << "Skipping blacklisted" << trimmed;
 
                 return info;
@@ -1875,4 +1843,38 @@ QStringList Deploy::translationNameFilters(quint64 modules,
     LogDebug() << "Translation name filters:" << result;
 
     return result;
+}
+
+QStringList Deploy::readExcludeList() const
+{
+    /* Bundle every lib including the low-level ones except those that are explicitly blacklisted.
+     * This is more suitable for bundling in a way that is portable between different distributions and target systems.
+     * Along the way, this also takes care of non-Qt libraries.
+     */
+    QFile excludelistFile(":/excludelist");
+
+    if (!excludelistFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        return QStringList();
+
+    QStringList excludelist;
+
+    while (!excludelistFile.atEnd()) {
+        auto line = excludelistFile.readLine().trimmed();
+
+        if (line.startsWith("#"))
+            continue;
+        else {
+            int comment = line.indexOf("#");
+
+            if (comment > 0)
+                line = line.left(comment);
+        }
+
+        if (line.isEmpty())
+            continue;
+
+        excludelist << line;
+    }
+
+    return excludelist;
 }

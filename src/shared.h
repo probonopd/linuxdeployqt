@@ -164,6 +164,7 @@ class Deploy
         bool m_appstoreCompliant;
         int m_qtDetected;
         bool m_deployLibrary;
+        QStringList m_excludeList;
 
         bool lddOutputContainsLinuxVDSO(const QString &lddOutput);
         bool copyFilePrintStatus(const QString &from, const QString &to);
@@ -188,6 +189,7 @@ class Deploy
                              const QString &importName);
         QStringList translationNameFilters(quint64 modules,
                                            const QString &prefix);
+        QStringList readExcludeList() const;
 };
 
 #endif
