@@ -314,10 +314,10 @@ LibraryInfo Deploy::parseLddLibraryLine(const QString &line,
     Q_UNUSED(rpaths);
 
     if (fhsLikeMode) {
-        this->m_bundleLibraryDirectory= "lib"; // relative to bundle
-    } else {
-        QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
+        QString relativePrefix = fhsPrefix.replace(appDirPath + "/", "");
         this->m_bundleLibraryDirectory = relativePrefix + "/lib/";
+    } else {
+        this->m_bundleLibraryDirectory = "lib"; // relative to bundle
     }
 
     LogDebug() << "bundleLibraryDirectory:" << this->m_bundleLibraryDirectory;
