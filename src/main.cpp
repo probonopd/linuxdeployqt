@@ -134,6 +134,19 @@ int main(int argc, char **argv)
 
     Deploy deploy;
 
+    if (cliParser.isSet(verboseOpt)) {
+        bool ok = false;
+        int number = cliParser.value(verboseOpt).toInt(&ok);
+
+        if (ok)
+            deploy.logLevel = number;
+
+        deploy.LogDebug() << "Argument found:" << verboseOpt.names().first();
+
+        if (!ok)
+            deploy.LogError() << "Could not parse verbose level";
+    }
+
     QString desktopFile;
     QString desktopExecEntry;
     QString desktopIconEntry;
@@ -373,43 +386,32 @@ int main(int argc, char **argv)
 
     // Set options from command line
     if (cliParser.isSet(noPluginsOpt)) {
-        deploy.LogDebug() << "Argument found:" << noPluginsOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << noPluginsOpt.names().first();
         plugins = false;
     }
 
     bool appimage = false;
 
     if (cliParser.isSet(appimageOpt)) {
-        deploy.LogDebug() << "Argument found:" << appimageOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << appimageOpt.names().first();
         appimage = true;
         deploy.bundleAllButCoreLibs = true;
     }
 
     if (cliParser.isSet(noStripOpt)) {
-        deploy.LogDebug() << "Argument found:" << noStripOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << noStripOpt.names().first();
         deploy.runStripEnabled = false;
     }
 
     if (cliParser.isSet(bundleNonQtLibsOpt)) {
-        deploy.LogDebug() << "Argument found:" << bundleNonQtLibsOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << bundleNonQtLibsOpt.names().first();
         deploy.bundleAllButCoreLibs = true;
-    }
-
-    if (cliParser.isSet(verboseOpt)) {
-        deploy.LogDebug() << "Argument found:" << verboseOpt.valueName();
-        bool ok = false;
-        int number = cliParser.value(verboseOpt).toInt(&ok);
-
-        if (ok)
-            deploy.logLevel = number;
-        else
-            deploy.LogError() << "Could not parse verbose level";
     }
 
     QStringList additionalExecutables;
 
     if (cliParser.isSet(executableOpt)) {
-        deploy.LogDebug() << "Argument found:" << executableOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << executableOpt.names().first();
         QString executables = cliParser.value(executableOpt).trimmed();
 
         if (!executables.isEmpty())
@@ -422,7 +424,7 @@ int main(int argc, char **argv)
     bool qmldirArgumentUsed = false;
 
     if (cliParser.isSet(qmldirOpt)) {
-        deploy.LogDebug() << "Argument found:" << qmldirOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << qmldirOpt.names().first();
         QString dirs = cliParser.value(qmldirOpt).trimmed();
         qmldirArgumentUsed = true;
 
@@ -433,14 +435,14 @@ int main(int argc, char **argv)
     }
 
     if (cliParser.isSet(alwaysOverwriteOpt)) {
-        deploy.LogDebug() << "Argument found:" << alwaysOverwriteOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << alwaysOverwriteOpt.names().first();
         deploy.alwaysOwerwriteEnabled = true;
     }
 
     bool skipTranslations = false;
 
     if (cliParser.isSet(noTranslationsOpt)) {
-        deploy.LogDebug() << "Argument found:" << noTranslationsOpt.valueName();
+        deploy.LogDebug() << "Argument found:" << noTranslationsOpt.names().first();
         skipTranslations = true;
     }
 
