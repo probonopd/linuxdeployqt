@@ -51,8 +51,10 @@ int main(int argc, char **argv)
         "self-contained by copying in the Qt libraries and plugins that "
         "the application uses.\n"
         "\n"
-        "It deploys the Qt instance that qmake on the $PATH points to, "
-        "so make sure that it is the correct one.\n"
+        "By default it deploys the Qt instance that qmake on the $PATH points "
+        "to.\n"
+        "The '-qmake' option can be used to point to the qmake executable to "
+        "be used instead.\n"
         "\n"
         "Plugins related to a Qt library are copied in with the library.\n"
         "\n"
@@ -110,6 +112,13 @@ int main(int argc, char **argv)
         QObject::tr("Copy files even if the target file exists"));
     cliParser.addOption(alwaysOverwriteOpt);
 
+    QCommandLineOption qmakeOpt(
+        "qmake",
+        QObject::tr("The qmake executable to use"),
+        "path", ""
+    );
+    cliParser.addOption(qmakeOpt);
+
     QCommandLineOption noTranslationsOpt(
         "no-translations",
         QObject::tr("Skip deployment of translations"));
@@ -123,7 +132,6 @@ int main(int argc, char **argv)
      * -extra-plugins    : Also deploy this plugins.
      * -extra-files      : Also copy these files to the deploy folder (useful for
      *                     including extra required utilities).
-     * -qmake            : Use this alternative binary as qmake.
      * -scan-bin-paths   : Scan this paths for binaries and dynamic libraries.
      * -scan-qml-paths   : Scan this directories for Qml imports.
      * -scan-recursive   : Scan directories recursively.
@@ -439,6 +447,13 @@ int main(int argc, char **argv)
         deploy.alwaysOwerwriteEnabled = true;
     }
 
+    QString qmakeExecutable;
+
+    if (cliParser.isSet(qmakeOpt)) {
+        deploy.LogDebug() << "Argument found:" << qmakeOpt.names().first();
+        qmakeExecutable = cliParser.value(qmakeOpt).trimmed();;
+    }
+
     bool skipTranslations = false;
 
     if (cliParser.isSet(noTranslationsOpt)) {
@@ -452,7 +467,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    auto deploymentInfo = deploy.deployQtLibraries(appDirPath, additionalExecutables);
+    auto deploymentInfo = deploy.deployQtLibraries(appDirPath,
+                                                   additionalExecutables,
+                                                   qmakeExecutable);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {

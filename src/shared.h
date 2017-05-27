@@ -120,7 +120,8 @@ class Deploy
                                           const QString &appDirPath,
                                           const QSet<QString> &rpaths);
         DeploymentInfo deployQtLibraries(const QString &appDirPath,
-                                         const QStringList &additionalExecutables);
+                                         const QStringList &additionalExecutables,
+                                         const QString &qmake);
         DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
                                          const QString &bundlePath,
                                          const QStringList &binaryPaths,

@@ -484,7 +484,8 @@ QList<LibraryInfo> Deploy::getQtLibraries(const QList<DylibInfo> &dependencies,
  *  a list of actually deployed libraries.
  */
 DeploymentInfo Deploy::deployQtLibraries(const QString &appDirPath,
-                                         const QStringList &additionalExecutables)
+                                         const QStringList &additionalExecutables,
+                                         const QString &qmake)
 {
    AppDirInfo applicationBundle;
 
@@ -510,10 +511,13 @@ DeploymentInfo Deploy::deployQtLibraries(const QString &appDirPath,
        // Determine the location of the Qt to be bundled
        LogDebug() << "Using qmake to determine the location of the Qt to be bundled";
 
-       QString qmakePath = "";
+       // Use the qmake executable passed in by the user:
+       QString qmakePath = qmake;
 
-       // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
-       qmakePath = QStandardPaths::findExecutable("qmake");
+       // If we did not get a qmake, first try to find "qmake", which is the
+       // upstream name of the binary in both Qt4 and Qt5:
+       if (qmakePath.isEmpty())
+           qmakePath = QStandardPaths::findExecutable("qmake");
 
        // But openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
        // Qt 4 on Fedora comes with suffix -qt4
@@ -638,6 +642,7 @@ DeploymentInfo Deploy::deployQtLibraries(QList<LibraryInfo> libraries,
 
         // Copy the library to the app bundle.
         const QString deployedBinaryPath = copyDylib(library, bundlePath);
+
         // Skip the rest if already was deployed.
         if (deployedBinaryPath.isNull())
             continue;
