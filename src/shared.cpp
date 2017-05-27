@@ -277,7 +277,13 @@ LddInfo Deploy::findDependencyInfo(const QString &binaryPath)
         if (outputLine.contains("not found")){
             LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
             LogError() << "Please ensure that all libraries can be found by ldd. Aborting.";
-            exit(1);
+
+            /* FIXME: Can't continue the deploy process because exiting, making
+             * the app crash.
+             * This situation must be handled in a different way, or simply
+             * ignore those "not found" lines.
+             */
+            // exit(1);
         }
     }
 
