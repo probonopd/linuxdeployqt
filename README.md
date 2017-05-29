@@ -77,7 +77,7 @@ install:
 
 script:
   - qmake PREFIX=/usr
-  - make -j4
+  - make -j$(nproc)
   - make INSTALL_ROOT=appdir install ; find appdir/
 
 after_success:
@@ -105,6 +105,7 @@ __CMake__ wants `DESTDIR` instead:
 
 ```
   - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - make -j$(nproc)
   - make DESTDIR=appdir install ; find appdir/
 ```
 
@@ -112,7 +113,7 @@ __autotools__ (the dinosaur that spends precious minutes "checking...") wants `D
 
 ```
     - ./configure --prefix=/usr
-    - make -j4
+    - make -j$(nproc)
     - make install DESTDIR=$(readlink -f appdir) ; find appdir/
 ```
 
