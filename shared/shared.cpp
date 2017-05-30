@@ -740,6 +740,7 @@ void runPatchelf(QStringList options)
 
 bool patchQtCore(const QString &path, const QString &variable, const QString &value)
 {
+    return true; // ################################### Disabling for now since using qt.conf
     QFile file(path);
     if (!file.open(QIODevice::ReadWrite)) {
         LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
