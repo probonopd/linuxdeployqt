@@ -5,7 +5,7 @@ set -e
 sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
 sudo apt-get update -qq
 
-git clone -o 44b7f95 https://github.com/NixOS/patchelf.git
+git clone https://github.com/NixOS/patchelf.git
 cd patchelf
 bash ./bootstrap.sh
 ./configure
