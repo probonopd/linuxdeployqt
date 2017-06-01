@@ -5,14 +5,8 @@ set -e
 sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
 sudo apt-get update -qq
 
-git clone -o 44b7f95 https://github.com/NixOS/patchelf.git
-cd patchelf
-bash ./bootstrap.sh
-./configure
-make -j2
-sudo make install
-
-cd -
+wget http://ftp.de.debian.org/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
+sudo dpkg -i patchelf_0.8-2_amd64.deb
 
 cd /tmp/
 wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
