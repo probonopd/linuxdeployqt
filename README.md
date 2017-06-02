@@ -78,7 +78,7 @@ install:
 
 script:
   - qmake PREFIX=/usr
-  - make -j4
+  - make -j$(nproc)
   - make INSTALL_ROOT=appdir install ; find appdir/
 
 after_success:
@@ -106,6 +106,7 @@ __CMake__ wants `DESTDIR` instead:
 
 ```
   - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - make -j$(nproc)
   - make DESTDIR=appdir install ; find appdir/
 ```
 
@@ -113,7 +114,7 @@ __autotools__ (the dinosaur that spends precious minutes "checking...") wants `D
 
 ```
     - ./configure --prefix=/usr
-    - make -j4
+    - make -j$(nproc)
     - make install DESTDIR=$(readlink -f appdir) ; find appdir/
 ```
 
@@ -137,7 +138,7 @@ This PR, when merged, will compile this application on [Travis CI](https://travi
 For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so.
 
 Providing an [AppImage](http://appimage.org/) would have, among others, these advantages:
-- Works for most Linux distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
+- Applications packaged as an AppImage can run on many distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
 - One app = one file = super simple for users: just download one AppImage file, [make it executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80), and run
 - No unpacking or installation necessary
 - No root needed

@@ -3,11 +3,11 @@
 set -x
 
 source /opt/qt*/bin/qt*-env.sh
-/opt/qt*/bin/qmake linuxdeployqt.pro
-make -j2
+/opt/qt*/bin/qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
+make -j
 
 mkdir -p linuxdeployqt.AppDir/usr/bin/
-cp /usr/local/bin/{appimagetool,mksquashfs,patchelf,zsyncmake} linuxdeployqt.AppDir/usr/bin/
+cp /usr/bin/patchelf /usr/local/bin/{appimagetool,mksquashfs,zsyncmake} linuxdeployqt.AppDir/usr/bin/
 find linuxdeployqt.AppDir/
 export VERSION=continuous
 cp ./linuxdeployqt linuxdeployqt.AppDir/usr/bin/
@@ -24,4 +24,20 @@ do
         sleep 1;
 done
 
+# enable core dumps
+echo "/tmp/coredump" | sudo tee /proc/sys/kernel/core_pattern
+
+ulimit -c unlimited
+ulimit -a -S
+ulimit -a -H
+
 bash -e tests/tests.sh
+
+if [ $? -ne 0 ]; then
+    echo "FAILURE: linuxdeployqt CRASHED -- uploading files for debugging to transfer.sh"
+    set -v
+    [ -e /tmp/coredump ] && curl --upload-file /tmp/coredump https://transfer.sh/coredump
+    curl --upload-file linuxdeployqt-*-x86_64.AppImage https://transfer.sh/linuxdeployqt-x86_64.AppImage
+    find -type f -iname 'libQt5Core.so*' -exec curl --upload {} https://transfer.sh/libQt5Core.so \; || true
+    exit $RESULT
+fi

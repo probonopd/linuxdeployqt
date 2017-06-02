@@ -1250,6 +1250,13 @@ bool Deploy::patchQtCore(const QString &path,
                          const QString &variable,
                          const QString &value)
 {
+#if 1 // FIXME: Disabling for now since using qt.conf
+    Q_UNUSED(path)
+    Q_UNUSED(variable)
+    Q_UNUSED(value)
+
+    return false;
+#else
     QFile file(path);
 
     if (!file.open(QIODevice::ReadWrite)) {
@@ -1302,6 +1309,7 @@ bool Deploy::patchQtCore(const QString &path,
     }
 
     return true;
+#endif
 }
 
 int Deploy::createAppImage(const QString &appDirPath)
