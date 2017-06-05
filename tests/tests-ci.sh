@@ -10,8 +10,8 @@ mkdir -p linuxdeployqt.AppDir/usr/bin/
 cp /usr/bin/patchelf /usr/local/bin/{appimagetool,mksquashfs,zsyncmake} linuxdeployqt.AppDir/usr/bin/
 find linuxdeployqt.AppDir/
 export VERSION=continuous
-cp ./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
-./linuxdeployqt/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt.desktop -verbose=3 -appimage
+cp ./linuxdeployqt linuxdeployqt.AppDir/usr/bin/
+./linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt.desktop -verbose=3 -appimage
 ls -lh
 find *.AppDir
 xpra start :99
@@ -34,10 +34,10 @@ ulimit -a -H
 bash -e tests/tests.sh
 
 if [ $? -ne 0 ]; then
-  echo "FAILURE: linuxdeployqt CRASHED -- uploading files for debugging to transfer.sh"
-  set -v
-  [ -e /tmp/coredump ] && curl --upload-file /tmp/coredump https://transfer.sh/coredump
-  curl --upload-file linuxdeployqt-*-x86_64.AppImage https://transfer.sh/linuxdeployqt-x86_64.AppImage
-  find -type f -iname 'libQt5Core.so*' -exec curl --upload {} https://transfer.sh/libQt5Core.so \; || true
-  exit $RESULT
+    echo "FAILURE: linuxdeployqt CRASHED -- uploading files for debugging to transfer.sh"
+    set -v
+    [ -e /tmp/coredump ] && curl --upload-file /tmp/coredump https://transfer.sh/coredump
+    curl --upload-file linuxdeployqt-*-x86_64.AppImage https://transfer.sh/linuxdeployqt-x86_64.AppImage
+    find -type f -iname 'libQt5Core.so*' -exec curl --upload {} https://transfer.sh/libQt5Core.so \; || true
+    exit $RESULT
 fi
