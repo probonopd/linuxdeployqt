@@ -1059,10 +1059,14 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    /* From now on let ldd exit if it doesn't find something */
    qtDetectionComplete = 1;
 
+   QString libraryPath;
    if(fhsLikeMode == false){
-       changeIdentification("$ORIGIN/lib/" + bundleLibraryDirectory, QFileInfo(applicationBundle.binaryPath).canonicalFilePath());
+       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("lib/" + bundleLibraryDirectory);
    } else {
-       changeIdentification("$ORIGIN/../lib/" + bundleLibraryDirectory, QFileInfo(applicationBundle.binaryPath).canonicalFilePath());
+       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("../lib/" + bundleLibraryDirectory);
+   }
+   foreach (const QString &executable, QStringList() << applicationBundle.binaryPath << additionalExecutables) {
+       changeIdentification("$ORIGIN/" + QFileInfo(executable).dir().relativeFilePath(libraryPath) + "/" + bundleLibraryDirectory, QFileInfo(executable).canonicalFilePath());
    }
    applicationBundle.libraryPaths = findAppLibraries(appDirPath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
