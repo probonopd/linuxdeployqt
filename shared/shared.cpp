@@ -54,7 +54,8 @@ bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
 int logLevel = 1;
-int qtDetected = 0;
+bool qtDetected = 0;
+bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
 
 using std::cout;
@@ -298,7 +299,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
 
     foreach (QString outputLine, outputLines) {
         // LogDebug() << "ldd outputLine:" << outputLine;
-        if (outputLine.contains("not found")){
+        if ((outputLine.contains("not found")) && (qtDetectionComplete == 1)){
             LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
             LogError() << "Please ensure that all libraries can be found by ldd. Aborting.";
             exit(1);
@@ -1084,6 +1085,9 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
            setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
        }
    }
+
+   /* From now on let ldd exit if it doesn't find something */
+   qtDetectionComplete = 1;
 
    if(fhsLikeMode == false){
        changeIdentification("$ORIGIN/lib/" + bundleLibraryDirectory, QFileInfo(applicationBundle.binaryPath).canonicalFilePath());

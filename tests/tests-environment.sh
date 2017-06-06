@@ -2,7 +2,7 @@
 
 set -e
 
-sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
+sudo add-apt-repository --yes ppa:beineri/opt-qt59-trusty
 sudo apt-get update -qq
 
 wget http://ftp.de.debian.org/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
@@ -15,4 +15,4 @@ chmod +x appimagetool*AppImage
 sudo cp squashfs-root/usr/bin/* /usr/local/bin
 cd -
 
-sudo apt-get -y install qt58base qt58declarative qt58webengine binutils xpra
+sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra
