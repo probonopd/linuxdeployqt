@@ -1031,19 +1031,22 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
        QString qmakePath = "";
 
-       // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
-       qmakePath = QStandardPaths::findExecutable("qmake");
 
-       // But openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
+       // Try to find a version specific qmake first
+       // openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
        // Qt 4 on Fedora comes with suffix -qt4
        // http://www.geopsy.org/wiki/index.php/Installing_Qt_binary_packages
+       if(qtDetected == 5){
+           qmakePath = QStandardPaths::findExecutable("qmake-qt5");
+           LogDebug() << "qmake 5";
+       } else if(qtDetected == 4){
+           qmakePath = QStandardPaths::findExecutable("qmake-qt4");
+           LogDebug() << "qmake 4";
+       }
+
        if(qmakePath == ""){
-           if(qtDetected == 5){
-               qmakePath = QStandardPaths::findExecutable("qmake-qt5");
-           }
-           if(qtDetected == 4){
-               qmakePath = QStandardPaths::findExecutable("qmake-qt4");
-           }
+         // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
+         qmakePath = QStandardPaths::findExecutable("qmake");
        }
 
        if(qmakePath == ""){
@@ -1051,6 +1054,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
            exit(1);
        }
 
+       LogNormal() << "Using qmake: " << qmakePath;
        QString output = captureOutput(qmakePath + " -query");
        LogDebug() << "-query output from qmake:" << output;
 
