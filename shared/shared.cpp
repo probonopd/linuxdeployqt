@@ -54,7 +54,7 @@ bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
 int logLevel = 1;
-bool qtDetected = 0;
+int qtDetected = 0;
 bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
 
