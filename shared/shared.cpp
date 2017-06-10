@@ -670,26 +670,28 @@ QString copyDylib(const LibraryInfo &library, const QString path)
     return dylibDestinationBinaryPath;
 }
 
-void runPatchelf(QStringList options)
+QString runPatchelf(QStringList options)
 {
     QProcess patchelftool;
+    LogDebug() << "options:" << options;
     patchelftool.start("patchelf", options);
     if (!patchelftool.waitForStarted()) {
-        if(patchelftool.errorString().contains("execvp: No such file or directory")){
+        if(patchelftool.errorString().contains("No such file or directory")){
             LogError() << "Could not start patchelf.";
             LogError() << "Make sure it is installed on your $PATH, e.g., in /usr/local/bin.";
             LogError() << "You can get it from https://nixos.org/patchelf.html.";
         } else {
-            LogError() << "Could not start patchelftool. Process error is" << patchelftool.errorString();
+            LogError() << "Could not start patchelf tool. Process error is" << patchelftool.errorString();
         }
         exit(1);
     }
     patchelftool.waitForFinished();
     if (patchelftool.exitCode() != 0) {
         LogError() << "runPatchelf:" << patchelftool.readAllStandardError();
-        LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
+        // LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
         // exit(1); // Do not exit because this could be a script that patchelf can't work on
     }
+    return(patchelftool.readAllStandardOutput().trimmed());
 }
 
 bool patchQtCore(const QString &path, const QString &variable, const QString &value)
@@ -742,6 +744,19 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
 
 void changeIdentification(const QString &id, const QString &binaryPath)
 {
+    LogNormal() << "Checking rpath in" << binaryPath;
+    QString oldRpath = runPatchelf(QStringList() << "--print-rpath" << binaryPath);
+    LogDebug() << "oldRpath:" << oldRpath;
+    if (oldRpath.startsWith("/")){
+    	LogDebug() << "Old rpath in" << binaryPath << "starts with /, hence adding it to LD_LIBRARY_PATH";
+    	// FIXME: Split along ":" characters, check each one, only append to LD_LIBRARY_PATH if not already there
+    	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    	QString oldPath = env.value("LD_LIBRARY_PATH");
+    	QString newPath = oldRpath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
+    	// FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
+    	LogDebug() << "Added to LD_LIBRARY_PATH:" << newPath;
+    	setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
+    }
     LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
     runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
 
