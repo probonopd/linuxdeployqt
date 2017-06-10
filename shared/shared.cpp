@@ -577,53 +577,6 @@ QList<LibraryInfo> getQtLibrariesForPaths(const QStringList &paths, const QStrin
     return result;
 }
 
-QStringList getBinaryDependencies(const QString executablePath,
-                                  const QString &path,
-                                  const QList<QString> &additionalBinariesContainingRpaths)
-{
-    QStringList binaries;
-
-    const QList<DylibInfo> dependencies = findDependencyInfo(path).dependencies;
-
-    bool rpathsLoaded = false;
-    QSet<QString> rpaths;
-
-    // return bundle-local dependencies. (those starting with @executable_path)
-    foreach (const DylibInfo &info, dependencies) {
-        QString trimmedLine = info.binaryPath;
-        if (trimmedLine.startsWith("@executable_path/")) {
-            QString binary = QDir::cleanPath(executablePath + trimmedLine.mid(QStringLiteral("@executable_path/").length()));
-            if (binary != path)
-                binaries.append(binary);
-        } else if (trimmedLine.startsWith("@rpath/")) {
-            if (!rpathsLoaded) {
-                rpaths = getBinaryRPaths(path, true, executablePath);
-                foreach (const QString &binaryPath, additionalBinariesContainingRpaths) {
-                    QSet<QString> binaryRpaths = getBinaryRPaths(binaryPath, true);
-                    rpaths += binaryRpaths;
-                }
-                rpathsLoaded = true;
-            }
-            bool resolved = false;
-            foreach (const QString &rpath, rpaths) {
-                QString binary = QDir::cleanPath(rpath + "/" + trimmedLine.mid(QStringLiteral("@rpath/").length()));
-                LogDebug() << "Checking for" << binary;
-                if (QFile::exists(binary)) {
-                    binaries.append(binary);
-                    resolved = true;
-                    break;
-                }
-            }
-            if (!resolved && !rpaths.isEmpty()) {
-                LogError() << "Cannot resolve rpath" << trimmedLine;
-                LogError() << " using" << rpaths;
-            }
-        }
-    }
-
-    return binaries;
-}
-
 // copies everything _inside_ sourcePath to destinationPath
 bool recursiveCopy(const QString &sourcePath, const QString &destinationPath)
 {
