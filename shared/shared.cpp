@@ -1599,7 +1599,7 @@ void deployTranslations(const QString &appDirPath, quint64 usedQtModules)
     LogDebug() << "Deploying translations...";
     QString qtTranslationsPath = qtToBeBundledInfo.value("QT_INSTALL_TRANSLATIONS");
     if (qtTranslationsPath.isEmpty() || !QFile::exists(qtTranslationsPath)) {
-        LogError() << "Qt translations path could not be determined";
+        LogDebug() << "Qt translations path could not be determined, maybe there are no translations?";
         return;
     }
 
