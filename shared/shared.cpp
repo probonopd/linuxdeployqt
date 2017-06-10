@@ -670,7 +670,7 @@ QString copyDylib(const LibraryInfo &library, const QString path)
     return dylibDestinationBinaryPath;
 }
 
-QString runPatchelf(QStringList options)
+void runPatchelf(QStringList options)
 {
     QProcess patchelftool;
     patchelftool.start("patchelf", options);
@@ -690,7 +690,6 @@ QString runPatchelf(QStringList options)
         LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
         // exit(1); // Do not exit because this could be a script that patchelf can't work on
     }
-    return(patchelftool.readAllStandardOutput().trimmed());
 }
 
 bool patchQtCore(const QString &path, const QString &variable, const QString &value)
@@ -743,17 +742,6 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
 
 void changeIdentification(const QString &id, const QString &binaryPath)
 {
-    LogNormal() << "Checking rpath in" << binaryPath;
-    QString oldRpath = runPatchelf(QStringList() << "--get-rpath" << id << binaryPath);
-    if (oldRpath.startsWith("/")){
-	LogDebug() << "Old rpath in" << binaryPath << "starts with /, hence adding it to LD_LIBRARY_PATH";
-	// FIXME: Split along ":" characters, check each one, only append to LD_LIBRARY_PATH if not already there
-	QString oldPath = env.value("LD_LIBRARY_PATH");
-	QString newPath = oldRpath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
-	// FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
-	LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
-	setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
-    }
     LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
     runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
 
