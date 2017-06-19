@@ -10,8 +10,8 @@ DEFINES += BUILD_LINUXDEPLOYQT
 
 load(qt_tool)
 
-HEADERS += ../shared/shared.h
+HEADERS += shared.h
 SOURCES += main.cpp \
-	../shared/shared.cpp
+	shared.cpp
 
-DEFINES -= QT_USE_QSTRINGBUILDER
+DEFINES -= QT_USE_QSTRINGBUILDER #leads to compile errors if not disabled
