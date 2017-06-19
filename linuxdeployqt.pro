@@ -1,2 +1,1 @@
-TEMPLATE = subdirs
-SUBDIRS = linuxdeployqt
+load(qt_parts)
