@@ -54,12 +54,130 @@ bool alwaysOwerwriteEnabled = false;
 QStringList librarySearchPath;
 bool appstoreCompliant = false;
 int logLevel = 1;
+int qtDetected = 0;
+bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
 
 using std::cout;
 using std::endl;
 
 QMap<QString,QString> qtToBeBundledInfo;
+
+enum QtModule
+#if defined(Q_COMPILER_CLASS_ENUM) || defined(Q_CC_MSVC)
+    : quint64
+#endif
+{
+    QtBluetoothModule         = 0x0000000000000001,
+    QtCLuceneModule           = 0x0000000000000002,
+    QtConcurrentModule        = 0x0000000000000004,
+    QtCoreModule              = 0x0000000000000008,
+    QtDeclarativeModule       = 0x0000000000000010,
+    QtDesignerComponents      = 0x0000000000000020,
+    QtDesignerModule          = 0x0000000000000040,
+    QtGuiModule               = 0x0000000000000080,
+    QtCluceneModule           = 0x0000000000000100,
+    QtHelpModule              = 0x0000000000000200,
+    QtMultimediaModule        = 0x0000000000000400,
+    QtMultimediaWidgetsModule = 0x0000000000000800,
+    QtMultimediaQuickModule   = 0x0000000000001000,
+    QtNetworkModule           = 0x0000000000002000,
+    QtNfcModule               = 0x0000000000004000,
+    QtOpenGLModule            = 0x0000000000008000,
+    QtPositioningModule       = 0x0000000000010000,
+    QtPrintSupportModule      = 0x0000000000020000,
+    QtQmlModule               = 0x0000000000040000,
+    QtQuickModule             = 0x0000000000080000,
+    QtQuickParticlesModule    = 0x0000000000100000,
+    QtScriptModule            = 0x0000000000200000,
+    QtScriptToolsModule       = 0x0000000000400000,
+    QtSensorsModule           = 0x0000000000800000,
+    QtSerialPortModule        = 0x0000000001000000,
+    QtSqlModule               = 0x0000000002000000,
+    QtSvgModule               = 0x0000000004000000,
+    QtTestModule              = 0x0000000008000000,
+    QtWidgetsModule           = 0x0000000010000000,
+    QtWinExtrasModule         = 0x0000000020000000,
+    QtXmlModule               = 0x0000000040000000,
+    QtXmlPatternsModule       = 0x0000000080000000,
+    QtWebKitModule            = 0x0000000100000000,
+    QtWebKitWidgetsModule     = 0x0000000200000000,
+    QtQuickWidgetsModule      = 0x0000000400000000,
+    QtWebSocketsModule        = 0x0000000800000000,
+    QtEnginioModule           = 0x0000001000000000,
+    QtWebEngineCoreModule     = 0x0000002000000000,
+    QtWebEngineModule         = 0x0000004000000000,
+    QtWebEngineWidgetsModule  = 0x0000008000000000,
+    QtQmlToolingModule        = 0x0000010000000000,
+    Qt3DCoreModule            = 0x0000020000000000,
+    Qt3DRendererModule        = 0x0000040000000000,
+    Qt3DQuickModule           = 0x0000080000000000,
+    Qt3DQuickRendererModule   = 0x0000100000000000,
+    Qt3DInputModule           = 0x0000200000000000,
+    QtLocationModule          = 0x0000400000000000,
+    QtWebChannelModule        = 0x0000800000000000,
+    QtTextToSpeechModule      = 0x0001000000000000,
+    QtSerialBusModule         = 0x0002000000000000
+};
+
+struct QtModuleEntry {
+    quint64 module;
+    const char *option;
+    const char *libraryName;
+    const char *translation;
+};
+
+static QtModuleEntry qtModuleEntries[] = {
+    { QtBluetoothModule, "bluetooth", "Qt5Bluetooth", 0 },
+    { QtCLuceneModule, "clucene", "Qt5CLucene", "qt_help" },
+    { QtConcurrentModule, "concurrent", "Qt5Concurrent", "qtbase" },
+    { QtCoreModule, "core", "Qt5Core", "qtbase" },
+    { QtDeclarativeModule, "declarative", "Qt5Declarative", "qtquick1" },
+    { QtDesignerModule, "designer", "Qt5Designer", 0 },
+    { QtDesignerComponents, "designercomponents", "Qt5DesignerComponents", 0 },
+    { QtEnginioModule, "enginio", "Enginio", 0 },
+    { QtGuiModule, "gui", "Qt5Gui", "qtbase" },
+    { QtHelpModule, "qthelp", "Qt5Help", "qt_help" },
+    { QtMultimediaModule, "multimedia", "Qt5Multimedia", "qtmultimedia" },
+    { QtMultimediaWidgetsModule, "multimediawidgets", "Qt5MultimediaWidgets", "qtmultimedia" },
+    { QtMultimediaQuickModule, "multimediaquick", "Qt5MultimediaQuick_p", "qtmultimedia" },
+    { QtNetworkModule, "network", "Qt5Network", "qtbase" },
+    { QtNfcModule, "nfc", "Qt5Nfc", 0 },
+    { QtOpenGLModule, "opengl", "Qt5OpenGL", 0 },
+    { QtPositioningModule, "positioning", "Qt5Positioning", 0 },
+    { QtPrintSupportModule, "printsupport", "Qt5PrintSupport", 0 },
+    { QtQmlModule, "qml", "Qt5Qml", "qtdeclarative" },
+    { QtQmlToolingModule, "qmltooling", "qmltooling", 0 },
+    { QtQuickModule, "quick", "Qt5Quick", "qtdeclarative" },
+    { QtQuickParticlesModule, "quickparticles", "Qt5QuickParticles", 0 },
+    { QtQuickWidgetsModule, "quickwidgets", "Qt5QuickWidgets", 0 },
+    { QtScriptModule, "script", "Qt5Script", "qtscript" },
+    { QtScriptToolsModule, "scripttools", "Qt5ScriptTools", "qtscript" },
+    { QtSensorsModule, "sensors", "Qt5Sensors", 0 },
+    { QtSerialPortModule, "serialport", "Qt5SerialPort", "qtserialport" },
+    { QtSqlModule, "sql", "Qt5Sql", "qtbase" },
+    { QtSvgModule, "svg", "Qt5Svg", 0 },
+    { QtTestModule, "test", "Qt5Test", "qtbase" },
+    { QtWebKitModule, "webkit", "Qt5WebKit", 0 },
+    { QtWebKitWidgetsModule, "webkitwidgets", "Qt5WebKitWidgets", 0 },
+    { QtWebSocketsModule, "websockets", "Qt5WebSockets", "qtwebsockets" },
+    { QtWidgetsModule, "widgets", "Qt5Widgets", "qtbase" },
+    { QtWinExtrasModule, "winextras", "Qt5WinExtras", 0 },
+    { QtXmlModule, "xml", "Qt5Xml", "qtbase" },
+    { QtXmlPatternsModule, "xmlpatterns", "Qt5XmlPatterns", "qtxmlpatterns" },
+    { QtWebEngineCoreModule, "webenginecore", "Qt5WebEngineCore", 0 },
+    { QtWebEngineModule, "webengine", "Qt5WebEngine", "qtwebengine" },
+    { QtWebEngineWidgetsModule, "webenginewidgets", "Qt5WebEngineWidgets", 0 },
+    { Qt3DCoreModule, "3dcore", "Qt53DCore", 0 },
+    { Qt3DRendererModule, "3drenderer", "Qt53DRenderer", 0 },
+    { Qt3DQuickModule, "3dquick", "Qt53DQuick", 0 },
+    { Qt3DQuickRendererModule, "3dquickrenderer", "Qt53DQuickRenderer", 0 },
+    { Qt3DInputModule, "3dinput", "Qt53DInput", 0 },
+    { QtLocationModule, "geoservices", "Qt5Location", 0 },
+    { QtWebChannelModule, "webchannel", "Qt5WebChannel", 0 },
+    { QtTextToSpeechModule, "texttospeech", "Qt5TextToSpeech", 0 },
+    { QtSerialBusModule, "serialbus", "Qt5SerialBus", 0 }
+};
 
 bool operator==(const LibraryInfo &a, const LibraryInfo &b)
 {
@@ -181,7 +299,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
 
     foreach (QString outputLine, outputLines) {
         // LogDebug() << "ldd outputLine:" << outputLine;
-        if (outputLine.contains("not found")){
+        if ((outputLine.contains("not found")) && (qtDetectionComplete == 1)){
             LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
             LogError() << "Please ensure that all libraries can be found by ldd. Aborting.";
             exit(1);
@@ -256,7 +374,7 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
         */
 
         QStringList excludelist;
-        excludelist << "libasound.so.2" << "libcom_err.so.2" << "libcrypt.so.1" << "libc.so.6" << "libdl.so.2" << "libdrm.so.2" << "libexpat.so.1" << "libfontconfig.so.1" << "libgcc_s.so.1" << "libgdk_pixbuf-2.0.so.0" << "libgdk-x11-2.0.so.0" << "libgio-2.0.so.0" << "libglib-2.0.so.0" << "libGL.so.1" << "libgobject-2.0.so.0" << "libgpg-error.so.0" << "libgssapi_krb5.so.2" << "libgtk-x11-2.0.so.0" << "libhcrypto.so.4" << "libhx509.so.5" << "libICE.so.6" << "libidn.so.11" << "libk5crypto.so.3" << "libkeyutils.so.1" << "libkrb5.so.26" << "libkrb5.so.3" << "libkrb5support.so.0" << "libm.so.6" << "libnss3.so" << "libnssutil3.so" << "libp11-kit.so.0" << "libpcre.so.3" << "libpthread.so.0" << "libresolv.so.2" << "libroken.so.18" << "librt.so.1" << "libselinux.so.1" << "libSM.so.6" << "libstdc++.so.6" << "libusb-1.0.so.0" << "libuuid.so.1" << "libwind.so.0" << "libX11.so.6" << "libxcb.so.1" << "libz.so.1";
+        excludelist << "libasound.so.2" << "libcom_err.so.2" << "libcrypt.so.1" << "libc.so.6" << "libdl.so.2" << "libdrm.so.2" << "libexpat.so.1" << "libfontconfig.so.1" << "libgcc_s.so.1" << "libgdk_pixbuf-2.0.so.0" << "libgdk-x11-2.0.so.0" << "libgio-2.0.so.0" << "libglib-2.0.so.0" << "libGL.so.1" << "libgobject-2.0.so.0" << "libgpg-error.so.0" << "libgssapi_krb5.so.2" << "libgtk-x11-2.0.so.0" << "libhcrypto.so.4" << "libhx509.so.5" << "libICE.so.6" << "libidn.so.11" << "libk5crypto.so.3" << "libkeyutils.so.1" << "libkrb5.so.26" << "libkrb5.so.3" << "libkrb5support.so.0" << "libm.so.6" << "libnss3.so" << "libnssutil3.so" << "libp11-kit.so.0" << "libpangoft2-1.0.so.0" << "libpangocairo-1.0.so.0" << "libpango-1.0.so.0" << "libpcre.so.3" << "libpthread.so.0" << "libresolv.so.2" << "libroken.so.18" << "librt.so.1" << "libselinux.so.1" << "libSM.so.6" << "libstdc++.so.6" << "libusb-1.0.so.0" << "libuuid.so.1" << "libwind.so.0" << "libX11.so.6" << "libxcb.so.1" << "libz.so.1";
         LogDebug() << "excludelist:" << excludelist;
         if (! trimmed.contains("libicu")) {
             if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName())) {
@@ -459,53 +577,6 @@ QList<LibraryInfo> getQtLibrariesForPaths(const QStringList &paths, const QStrin
     return result;
 }
 
-QStringList getBinaryDependencies(const QString executablePath,
-                                  const QString &path,
-                                  const QList<QString> &additionalBinariesContainingRpaths)
-{
-    QStringList binaries;
-
-    const QList<DylibInfo> dependencies = findDependencyInfo(path).dependencies;
-
-    bool rpathsLoaded = false;
-    QSet<QString> rpaths;
-
-    // return bundle-local dependencies. (those starting with @executable_path)
-    foreach (const DylibInfo &info, dependencies) {
-        QString trimmedLine = info.binaryPath;
-        if (trimmedLine.startsWith("@executable_path/")) {
-            QString binary = QDir::cleanPath(executablePath + trimmedLine.mid(QStringLiteral("@executable_path/").length()));
-            if (binary != path)
-                binaries.append(binary);
-        } else if (trimmedLine.startsWith("@rpath/")) {
-            if (!rpathsLoaded) {
-                rpaths = getBinaryRPaths(path, true, executablePath);
-                foreach (const QString &binaryPath, additionalBinariesContainingRpaths) {
-                    QSet<QString> binaryRpaths = getBinaryRPaths(binaryPath, true);
-                    rpaths += binaryRpaths;
-                }
-                rpathsLoaded = true;
-            }
-            bool resolved = false;
-            foreach (const QString &rpath, rpaths) {
-                QString binary = QDir::cleanPath(rpath + "/" + trimmedLine.mid(QStringLiteral("@rpath/").length()));
-                LogDebug() << "Checking for" << binary;
-                if (QFile::exists(binary)) {
-                    binaries.append(binary);
-                    resolved = true;
-                    break;
-                }
-            }
-            if (!resolved && !rpaths.isEmpty()) {
-                LogError() << "Cannot resolve rpath" << trimmedLine;
-                LogError() << " using" << rpaths;
-            }
-        }
-    }
-
-    return binaries;
-}
-
 // copies everything _inside_ sourcePath to destinationPath
 bool recursiveCopy(const QString &sourcePath, const QString &destinationPath)
 {
@@ -599,30 +670,33 @@ QString copyDylib(const LibraryInfo &library, const QString path)
     return dylibDestinationBinaryPath;
 }
 
-void runPatchelf(QStringList options)
+QString runPatchelf(QStringList options)
 {
     QProcess patchelftool;
+    LogDebug() << "options:" << options;
     patchelftool.start("patchelf", options);
     if (!patchelftool.waitForStarted()) {
-        if(patchelftool.errorString().contains("execvp: No such file or directory")){
+        if(patchelftool.errorString().contains("No such file or directory")){
             LogError() << "Could not start patchelf.";
             LogError() << "Make sure it is installed on your $PATH, e.g., in /usr/local/bin.";
             LogError() << "You can get it from https://nixos.org/patchelf.html.";
         } else {
-            LogError() << "Could not start patchelftool. Process error is" << patchelftool.errorString();
+            LogError() << "Could not start patchelf tool. Process error is" << patchelftool.errorString();
         }
         exit(1);
     }
     patchelftool.waitForFinished();
     if (patchelftool.exitCode() != 0) {
         LogError() << "runPatchelf:" << patchelftool.readAllStandardError();
-        LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
+        // LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
         // exit(1); // Do not exit because this could be a script that patchelf can't work on
     }
+    return(patchelftool.readAllStandardOutput().trimmed());
 }
 
 bool patchQtCore(const QString &path, const QString &variable, const QString &value)
 {
+    return true; // ################################### Disabling for now since using qt.conf
     QFile file(path);
     if (!file.open(QIODevice::ReadWrite)) {
         LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
@@ -670,6 +744,21 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
 
 void changeIdentification(const QString &id, const QString &binaryPath)
 {
+    LogNormal() << "Checking rpath in" << binaryPath;
+    QString oldRpath = runPatchelf(QStringList() << "--print-rpath" << binaryPath);
+    LogDebug() << "oldRpath:" << oldRpath;
+    if (oldRpath.startsWith("/")){
+    	LogDebug() << "Old rpath in" << binaryPath << "starts with /, hence adding it to LD_LIBRARY_PATH";
+    	// FIXME: Split along ":" characters, check each one, only append to LD_LIBRARY_PATH if not already there
+    	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    	QString oldPath = env.value("LD_LIBRARY_PATH");
+    	if (not oldPath.contains(oldRpath)){
+        	QString newPath = oldRpath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
+        	// FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
+        	LogDebug() << "Added to LD_LIBRARY_PATH:" << newPath;
+        	setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);    	    
+    	}
+    }
     LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
     runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
 
@@ -809,6 +898,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
     LogNormal() << "Deploying the following libraries:" << binaryPaths;
     QStringList copiedLibraries;
     DeploymentInfo deploymentInfo;
+    deploymentInfo.requiresQtWidgetsLibrary = false;
     deploymentInfo.useLoaderPath = useLoaderPath;
     deploymentInfo.pluginPath = qtToBeBundledInfo.value("QT_INSTALL_PLUGINS");
     QSet<QString> rpathsUsed;
@@ -820,6 +910,10 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         if(library.libraryName.contains("libQt") and library.libraryName.contains("Core.so")) {
             LogNormal() << "Setting deploymentInfo.qtPath to:" << library.libraryDirectory;
             deploymentInfo.qtPath = library.libraryDirectory;
+        }
+	    
+	if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets.so")) {
+            deploymentInfo.requiresQtWidgetsLibrary = true;
         }
 
         if (library.libraryDirectory.startsWith(bundlePath)) {
@@ -889,7 +983,6 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    LogDebug() << "applicationBundle.binaryPath:" << applicationBundle.binaryPath;
 
    // Find out whether Qt is a dependency of the application to be bundled
-   int qtDetected = 0;
    LddInfo lddInfo = findDependencyInfo(appBinaryPath);
    foreach (const DylibInfo dep, lddInfo.dependencies) {
        LogDebug() << "dep.binaryPath" << dep.binaryPath;
@@ -908,19 +1001,22 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
        QString qmakePath = "";
 
-       // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
-       qmakePath = QStandardPaths::findExecutable("qmake");
 
-       // But openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
+       // Try to find a version specific qmake first
+       // openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
        // Qt 4 on Fedora comes with suffix -qt4
        // http://www.geopsy.org/wiki/index.php/Installing_Qt_binary_packages
+       if(qtDetected == 5){
+           qmakePath = QStandardPaths::findExecutable("qmake-qt5");
+           LogDebug() << "qmake 5";
+       } else if(qtDetected == 4){
+           qmakePath = QStandardPaths::findExecutable("qmake-qt4");
+           LogDebug() << "qmake 4";
+       }
+
        if(qmakePath == ""){
-           if(qtDetected == 5){
-               qmakePath = QStandardPaths::findExecutable("qmake-qt5");
-           }
-           if(qtDetected == 4){
-               qmakePath = QStandardPaths::findExecutable("qmake-qt4");
-           }
+         // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
+         qmakePath = QStandardPaths::findExecutable("qmake");
        }
 
        if(qmakePath == ""){
@@ -928,6 +1024,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
            exit(1);
        }
 
+       LogNormal() << "Using qmake: " << qmakePath;
        QString output = captureOutput(qmakePath + " -query");
        LogDebug() << "-query output from qmake:" << output;
 
@@ -959,10 +1056,17 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        }
    }
 
+   /* From now on let ldd exit if it doesn't find something */
+   qtDetectionComplete = 1;
+
+   QString libraryPath;
    if(fhsLikeMode == false){
-       changeIdentification("$ORIGIN/lib/" + bundleLibraryDirectory, QFileInfo(applicationBundle.binaryPath).canonicalFilePath());
+       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("lib/" + bundleLibraryDirectory);
    } else {
-       changeIdentification("$ORIGIN/../lib/" + bundleLibraryDirectory, QFileInfo(applicationBundle.binaryPath).canonicalFilePath());
+       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("../lib/" + bundleLibraryDirectory);
+   }
+   foreach (const QString &executable, QStringList() << applicationBundle.binaryPath << additionalExecutables) {
+       changeIdentification("$ORIGIN/" + QFileInfo(executable).dir().relativeFilePath(libraryPath) + "/" + bundleLibraryDirectory, QFileInfo(executable).canonicalFilePath());
    }
    applicationBundle.libraryPaths = findAppLibraries(appDirPath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
@@ -1260,6 +1364,11 @@ void deployQmlImport(const QString &appDirPath, const QSet<QString> &rpaths, con
 // Scan qml files in qmldirs for import statements, deploy used imports from Qml2ImportsPath to ./qml.
 bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs)
 {
+    if(!qtDetected){
+        LogDebug() << "Skipping QML imports since no Qt detected";
+        return false;
+    }
+
     LogNormal() << "";
     LogNormal() << "Deploying QML imports ";
     LogNormal() << "Application QML file search path(s) is" << qmlDirs;
@@ -1277,8 +1386,8 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     // Verify that we found a qmlimportscanner binary
     if (!QFile(qmlImportScannerPath).exists()) {
         LogError() << "qmlimportscanner not found at" << qmlImportScannerPath;
-        LogError() << "Rebuild qtdeclarative/tools/qmlimportscanner";
-        return false;
+        LogError() << "Please install it if you want to bundle QML based applications.";
+        return true;
     }
 
     // build argument list for qmlimportsanner: "-rootPath foo/ -rootPath bar/ -importPath path/to/qt/qml"
@@ -1376,7 +1485,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     //      2) QtQuick.Controls is used
     // The intended failure mode is that libwidgetsplugin.dylib will be present
     // in the app bundle but not used at run-time.
-    if (deploymentInfo.deployedLibraries.contains("QtWidgets") && qtQuickContolsInUse) {
+    if (deploymentInfo.requiresQtWidgetsLibrary && qtQuickContolsInUse) {
         LogNormal() << "Deploying QML import QtQuick/PrivateWidgets";
         QString name = "QtQuick/PrivateWidgets";
         QString path = qtToBeBundledInfo.value("QT_INSTALL_QML") + QLatin1Char('/') + name;
@@ -1461,4 +1570,137 @@ int createAppImage(const QString &appDirPath)
     LogNormal() << "ret" << ret;
     LogNormal() << "WEXITSTATUS(ret)" << WEXITSTATUS(ret);
     return WEXITSTATUS(ret);
+}
+
+void findUsedModules(DeploymentInfo &info)
+{
+    LogDebug() << "Creating mask of used modules";
+
+    const QStringList &libraries = info.deployedLibraries;
+
+    const size_t qtModulesCount = sizeof(qtModuleEntries)/sizeof(QtModuleEntry);
+    for (size_t i = 0; i < qtModulesCount; ++i) {
+        QtModuleEntry &entry = qtModuleEntries[i];
+        const QString name = QLatin1String(qtModuleEntries[i].libraryName);
+
+        bool found = false;
+        foreach (const QString &library, libraries) {
+            if (library.contains(name, Qt::CaseInsensitive)) {
+                LogDebug() << "Found dependency:" << name;
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            info.usedModulesMask |= entry.module;
+        }
+    }
+}
+
+void deployTranslations(const QString &appDirPath, quint64 usedQtModules)
+{
+    LogDebug() << "Deploying translations...";
+    QString qtTranslationsPath = qtToBeBundledInfo.value("QT_INSTALL_TRANSLATIONS");
+    if (qtTranslationsPath.isEmpty() || !QFile::exists(qtTranslationsPath)) {
+        LogDebug() << "Qt translations path could not be determined, maybe there are no translations?";
+        return;
+    }
+
+    QString translationsDirPath = appDirPath + QStringLiteral("/translations");
+    LogDebug() << "Using" << translationsDirPath << "as translations directory for App";
+    LogDebug() << "Using" << qtTranslationsPath << " to search for Qt translations";
+
+    QFileInfo fi(translationsDirPath);
+    if (!fi.isDir()) {
+        if (!QDir().mkpath(translationsDirPath)) {
+            LogError() << "Failed to create translations directory";
+        }
+    } else {
+        LogDebug() << "Translations directory already exists";
+    }
+
+    if (!deployTranslations(qtTranslationsPath, translationsDirPath, usedQtModules)) {
+        LogError() << "Failed to copy translations";
+    }
+}
+
+QStringList translationNameFilters(quint64 modules, const QString &prefix)
+{
+    QStringList result;
+    const size_t qtModulesCount = sizeof(qtModuleEntries)/sizeof(QtModuleEntry);
+    for (size_t i = 0; i < qtModulesCount; ++i) {
+        if ((qtModuleEntries[i].module & modules) && qtModuleEntries[i].translation) {
+            const QString name = QLatin1String(qtModuleEntries[i].translation) +
+                                 QLatin1Char('_') +  prefix + QStringLiteral(".qm");
+            if (!result.contains(name))
+                result.push_back(name);
+        }
+    }
+    LogDebug() << "Translation name filters:" << result;
+    return result;
+}
+
+bool deployTranslations(const QString &sourcePath, const QString &target, quint64 usedQtModules)
+{
+    LogDebug() << "Translations target is" << target;
+
+    // Find available languages prefixes by checking on qtbase.
+    QStringList prefixes;
+    QDir sourceDir(sourcePath);
+    const QStringList qmFilter = QStringList(QStringLiteral("qtbase_*.qm"));
+    foreach (QString qmFile, sourceDir.entryList(qmFilter)) {
+        qmFile.chop(3);
+        qmFile.remove(0, 7);
+        prefixes.push_back(qmFile);
+    }
+    if (prefixes.isEmpty()) {
+        LogError() << "Could not find any translations in "
+                   << sourcePath << " (developer build?)";
+        return true;
+    }
+    // Run lconvert to concatenate all files into a single named "qt_<prefix>.qm" in the application folder
+    // Use QT_INSTALL_TRANSLATIONS as working directory to keep the command line short.
+    const QString absoluteTarget = QFileInfo(target).absoluteFilePath();
+
+    QString lconvertPath = QDir::cleanPath(qtToBeBundledInfo.value("QT_INSTALL_BINS")) + "/lconvert";
+    LogDebug() << "Looking for lconvert at" << lconvertPath;
+
+    // Fallback: Look relative to the linuxdeployqt binary
+    if (!QFile(lconvertPath).exists()){
+        lconvertPath = QCoreApplication::applicationDirPath() + "/lconvert";
+        LogDebug() << "Fallback, looking for lconvert at" << lconvertPath;
+    }
+
+    // Verify that we found a lconvert binary
+    if (!QFile(lconvertPath).exists()) {
+        LogError() << "lconvert not found at" << lconvertPath;
+        return false;
+    }
+
+    LogNormal() << "Found lconvert at" << lconvertPath;
+
+    QStringList arguments;
+    foreach (const QString &prefix, prefixes) {
+        arguments.clear();
+        const QString targetFile = QStringLiteral("qt_") + prefix + QStringLiteral(".qm");
+        arguments.append(QStringLiteral("-o"));
+        const QString currentTargetFile = absoluteTarget + QLatin1Char('/') + targetFile;
+        arguments.append(currentTargetFile);
+
+        foreach (const QFileInfo &qmFileInfo, sourceDir.entryInfoList(translationNameFilters(usedQtModules, prefix)))
+            arguments.append(qmFileInfo.absoluteFilePath());
+
+        LogNormal() << "Creating " << currentTargetFile << "...";
+        LogDebug() << "lconvert arguments:" << arguments;
+
+        QProcess lconvert;
+        lconvert.start(lconvertPath, arguments);
+        lconvert.waitForFinished();
+
+        if (lconvert.exitStatus() != QProcess::NormalExit) {
+            LogError() << "Fail in lconvert on file" << currentTargetFile;
+        }
+    } // for prefixes.
+    return true;
 }

@@ -2,17 +2,11 @@
 
 set -e
 
-sudo add-apt-repository --yes ppa:beineri/opt-qt58-trusty
+sudo add-apt-repository --yes ppa:beineri/opt-qt59-trusty
 sudo apt-get update -qq
 
-git clone -o 44b7f95 https://github.com/NixOS/patchelf.git
-cd patchelf
-bash ./bootstrap.sh
-./configure
-make -j2
-sudo make install
-
-cd -
+wget http://ftp.de.debian.org/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
+sudo dpkg -i patchelf_0.8-2_amd64.deb
 
 cd /tmp/
 wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
@@ -21,4 +15,4 @@ chmod +x appimagetool*AppImage
 sudo cp squashfs-root/usr/bin/* /usr/local/bin
 cd -
 
-sudo apt-get -y install qt58base qt58declarative qt58webengine binutils xpra
+sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra
