@@ -28,7 +28,7 @@ Options:
    -no-strip           : Don't run 'strip' on the binaries
    -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries
    -executable=<path>  : Let the given executable use the deployed libraries too
-   -qmldir=<path>      : Scan for QML imports in the given path
+   -qmldir=<path>      : Scan for QML imports to bundle from the given directory, determined by Qt's qmlimportscanner
    -always-overwrite   : Copy files even if the target file exists
    -no-translations    : Skip deployment of translations
 
