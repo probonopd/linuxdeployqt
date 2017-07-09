@@ -46,6 +46,8 @@ Given that a desktop file should be provided with an AppImage, `linuxdeployqt` c
 Where the _desktop_ file specifies the executable to be run (with `EXEC=`), the name of the applications and an icon.
 See [desktop file specification](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html).
 
+For a more detailed example, see "Using linuxdeployqt with Travis CI" below.
+
 #### Checking library inclusion
 
 Open in Qt Creator and build your application. Run it from the command line and inspect it with `ldd` to make sure the correct libraries from the correct locations are getting loaded, as `linuxdeployqt` will use `ldd` internally to determine from where to copy libraries into the bundle.
