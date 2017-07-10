@@ -85,24 +85,24 @@ sudo: require
 dist: trusty
 
 before_install:
-    - sudo add-apt-repository ppa:beineri/opt-qt58-trusty -y
+    - sudo add-apt-repository ppa:beineri/opt-qt59-trusty -y
     - sudo apt-get update -qq
     
 install: 
-    - sudo apt-get -y install qt58base
+    - sudo apt-get -y install qt59base
     - source /opt/qt*/bin/qt*-env.sh
 
 script:
   - qmake PREFIX=/usr
   - make -j$(nproc)
   - make INSTALL_ROOT=appdir install ; find appdir/
-
-after_success:
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" 
   - chmod a+x linuxdeployqt*.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
   - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage
+
+after_success:
   - find ./appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
   - curl --upload-file ./APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
 ``` 
