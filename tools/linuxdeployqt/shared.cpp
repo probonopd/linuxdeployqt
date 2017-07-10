@@ -301,6 +301,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         // LogDebug() << "ldd outputLine:" << outputLine;
         if ((outputLine.contains("not found")) && (qtDetectionComplete == 1)){
             LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
+            LogError() << "for binary:" << binaryPath;
             LogError() << "Please ensure that all libraries can be found by ldd. Aborting.";
             exit(1);
         }
