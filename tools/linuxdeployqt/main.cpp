@@ -56,6 +56,7 @@ int main(int argc, char **argv)
         qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
         qDebug() << "   -no-translations    : Skip deployment of translations.";
+        qDebug() << "   -deploy-svg         : Force svg dependencies deployment(for Qt 5 applications).";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
@@ -166,11 +167,12 @@ int main(int argc, char **argv)
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
     extern bool alwaysOwerwriteEnabled;
-    extern QStringList librarySearchPath;
+//    extern QStringList librarySearchPath; the variabile is not used
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
+    bool deploySvg = false;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -363,6 +365,9 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
+        } else if (argument == QByteArray("-deploy-svg")) {
+            LogDebug() << "Argument found:" << argument;
+            deploySvg = true;
         } else if (argument.startsWith("-")) {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
@@ -376,7 +381,7 @@ int main(int argc, char **argv)
         }
     }
 
-    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables);
+    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables, deploySvg);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {

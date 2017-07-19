@@ -114,7 +114,7 @@ QString findAppBinary(const QString &appDirPath);
 QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appDirPath, const QSet<QString> &rpaths);
 QList<LibraryInfo> getQtLibraries(const QStringList &lddLines, const QString &appDirPath, const QSet<QString> &rpaths);
 QString copyLibrary(const LibraryInfo &library, const QString path);
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables);
+DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const bool &deploySvg);
 DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useLoaderPath);
 void createQtConf(const QString &appDirPath);
 void createQtConfForQtWebEngineProcess(const QString &appDirPath);

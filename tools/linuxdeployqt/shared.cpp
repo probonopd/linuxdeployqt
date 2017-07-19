@@ -57,6 +57,7 @@ int logLevel = 1;
 int qtDetected = 0;
 bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
+bool deploySvgNeeded = false;
 
 using std::cout;
 using std::endl;
@@ -326,6 +327,18 @@ LddInfo findDependencyInfo(const QString &binaryPath)
             dylib.compatibilityVersion = 0;
             dylib.currentVersion = 0;
             */
+            info.dependencies << dylib;
+        }
+    }
+
+    if (deploySvgNeeded && !binaryPath.contains(QRegExp(".+lib.+"))) {
+        LogNormal() << "Deploying svg library.";
+        DylibInfo dylib;
+        QString librarySearchPath = outputLines.filter("libQt").at(1);
+        const QRegularExpressionMatch match = regexp.match(librarySearchPath);
+        if (match.hasMatch()) {
+            dylib.binaryPath = match.captured(1).trimmed();
+            dylib.binaryPath = dylib.binaryPath.replace(QRegExp("libQt.+"), "libQt5Svg.so.5");
             info.dependencies << dylib;
         }
     }
@@ -973,8 +986,9 @@ static QString captureOutput(const QString &command)
     return process.readAllStandardOutput();
 }
 
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables)
+DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const bool &deploySvg)
 {
+   deploySvgNeeded = deploySvg;
    AppDirInfo applicationBundle;
 
    applicationBundle.path = appDirPath;
