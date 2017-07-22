@@ -298,6 +298,14 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     }
 
     foreach (QString outputLine, outputLines) {
+        
+       if(outputLine.contains("libQt5")){
+               qtDetected = 5;
+       }
+       if(outputLine.contains("libQtCore.so.4")){
+               qtDetected = 4;
+       }
+        
         // LogDebug() << "ldd outputLine:" << outputLine;
         if ((outputLine.contains("not found")) && (qtDetectionComplete == 1)){
             LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
@@ -984,15 +992,6 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
 
    // Find out whether Qt is a dependency of the application to be bundled
    LddInfo lddInfo = findDependencyInfo(appBinaryPath);
-   foreach (const DylibInfo dep, lddInfo.dependencies) {
-       LogDebug() << "dep.binaryPath" << dep.binaryPath;
-       if(dep.binaryPath.contains("libQt5")){
-               qtDetected = 5;
-       }
-       if(dep.binaryPath.contains("libQtCore.so.4")){
-               qtDetected = 4;
-       }
-   }
 
    if(qtDetected != 0){
 
