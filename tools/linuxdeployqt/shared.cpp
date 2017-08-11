@@ -50,13 +50,13 @@ bool runStripEnabled = true;
 bool bundleAllButCoreLibs = false;
 bool fhsLikeMode = false;
 QString fhsPrefix;
-static bool alwaysOwerwriteEnabled = false;
-static QStringList librarySearchPath;
-static bool appstoreCompliant = false;
+bool alwaysOwerwriteEnabled = false;
+QStringList librarySearchPath;
+bool appstoreCompliant = false;
 int logLevel = 1;
-static int qtDetected = 0;
-static bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
-static bool deployLibrary = false;
+int qtDetected = 0;
+bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
+bool deployLibrary = false;
 
 using std::cout;
 using std::endl;
