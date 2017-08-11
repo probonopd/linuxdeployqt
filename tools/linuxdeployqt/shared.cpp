@@ -61,7 +61,7 @@ bool deployLibrary = false;
 using std::cout;
 using std::endl;
 
-QMap<QString,QString> qtToBeBundledInfo;
+static QMap<QString,QString> qtToBeBundledInfo;
 
 enum QtModule
 #if defined(Q_COMPILER_CLASS_ENUM) || defined(Q_CC_MSVC)
@@ -202,7 +202,7 @@ QDebug operator<<(QDebug debug, const LibraryInfo &info)
     return debug;
 }
 
-QString bundleLibraryDirectory;
+static QString bundleLibraryDirectory;
 
 inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
 {
@@ -217,20 +217,20 @@ inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
 // on architecture. See "vDSO names" in the notes section of vdso(7)
 // for more information.
 static bool lddOutputContainsLinuxVDSO(const QString &lddOutput) {
-	// aarch64, arm, mips, x86_64, x86/x32
-	if (lddOutput.contains(QStringLiteral("linux-vdso.so.1"))) {
-		return true;
-	// ppc32, s390
-	} else if (lddOutput.contains(QStringLiteral("linux-vdso32.so.1"))) {
-		return true;
-	// ppc64, s390x
-	} else if (lddOutput.contains(QStringLiteral("linux-vdso64.so.1"))) {
-		return true;
-	// ia64, sh, i386
-	} else if (lddOutput.contains(QStringLiteral("linux-gate.so.1"))) {
-		return true;
-	}
-	return false;
+    // aarch64, arm, mips, x86_64, x86/x32
+    if (lddOutput.contains(QStringLiteral("linux-vdso.so.1"))) {
+        return true;
+    // ppc32, s390
+    } else if (lddOutput.contains(QStringLiteral("linux-vdso32.so.1"))) {
+        return true;
+    // ppc64, s390x
+    } else if (lddOutput.contains(QStringLiteral("linux-vdso64.so.1"))) {
+        return true;
+    // ia64, sh, i386
+    } else if (lddOutput.contains(QStringLiteral("linux-gate.so.1"))) {
+        return true;
+    }
+    return false;
 }
 
 bool copyFilePrintStatus(const QString &from, const QString &to)
@@ -298,14 +298,14 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     }
 
     foreach (QString outputLine, outputLines) {
-        
+
        if(outputLine.contains("libQt5")){
                qtDetected = 5;
        }
        if(outputLine.contains("libQtCore.so.4")){
                qtDetected = 4;
        }
-        
+
         // LogDebug() << "ldd outputLine:" << outputLine;
         if ((outputLine.contains("not found")) && (qtDetectionComplete == 1)){
             LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
@@ -756,16 +756,16 @@ void changeIdentification(const QString &id, const QString &binaryPath)
     QString oldRpath = runPatchelf(QStringList() << "--print-rpath" << binaryPath);
     LogDebug() << "oldRpath:" << oldRpath;
     if (oldRpath.startsWith("/")){
-    	LogDebug() << "Old rpath in" << binaryPath << "starts with /, hence adding it to LD_LIBRARY_PATH";
-    	// FIXME: Split along ":" characters, check each one, only append to LD_LIBRARY_PATH if not already there
-    	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    	QString oldPath = env.value("LD_LIBRARY_PATH");
-    	if (not oldPath.contains(oldRpath)){
-        	QString newPath = oldRpath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
-        	// FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
-        	LogDebug() << "Added to LD_LIBRARY_PATH:" << newPath;
-        	setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);    	    
-    	}
+        LogDebug() << "Old rpath in" << binaryPath << "starts with /, hence adding it to LD_LIBRARY_PATH";
+        // FIXME: Split along ":" characters, check each one, only append to LD_LIBRARY_PATH if not already there
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        QString oldPath = env.value("LD_LIBRARY_PATH");
+        if (not oldPath.contains(oldRpath)){
+            QString newPath = oldRpath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
+            // FIXME: Directory layout might be different for system Qt; cannot assume lib/ to always be inside the Qt directory
+            LogDebug() << "Added to LD_LIBRARY_PATH:" << newPath;
+            setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
+        }
     }
     LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
     runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
@@ -919,8 +919,8 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
             LogNormal() << "Setting deploymentInfo.qtPath to:" << library.libraryDirectory;
             deploymentInfo.qtPath = library.libraryDirectory;
         }
-	    
-	if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets.so")) {
+
+    if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets.so")) {
             deploymentInfo.requiresQtWidgetsLibrary = true;
         }
 
@@ -981,7 +981,7 @@ static QString captureOutput(const QString &command)
     return process.readAllStandardOutput();
 }
 
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables)
+DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const QString& qmake)
 {
    AppDirInfo applicationBundle;
 
@@ -998,24 +998,26 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        // Determine the location of the Qt to be bundled
        LogDebug() << "Using qmake to determine the location of the Qt to be bundled";
 
-       QString qmakePath = "";
+       // Use the qmake executable passed in by the user:
+       QString qmakePath = qmake;
 
+       if (qmakePath.isEmpty()) {
+           // Try to find a version specific qmake first
+           // openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
+           // Qt 4 on Fedora comes with suffix -qt4
+           // http://www.geopsy.org/wiki/index.php/Installing_Qt_binary_packages
+           if(qtDetected == 5){
+               qmakePath = QStandardPaths::findExecutable("qmake-qt5");
+               LogDebug() << "qmake 5";
+           } else if(qtDetected == 4){
+               qmakePath = QStandardPaths::findExecutable("qmake-qt4");
+               LogDebug() << "qmake 4";
+           }
 
-       // Try to find a version specific qmake first
-       // openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
-       // Qt 4 on Fedora comes with suffix -qt4
-       // http://www.geopsy.org/wiki/index.php/Installing_Qt_binary_packages
-       if(qtDetected == 5){
-           qmakePath = QStandardPaths::findExecutable("qmake-qt5");
-           LogDebug() << "qmake 5";
-       } else if(qtDetected == 4){
-           qmakePath = QStandardPaths::findExecutable("qmake-qt4");
-           LogDebug() << "qmake 4";
-       }
-
-       if(qmakePath == ""){
-         // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
-         qmakePath = QStandardPaths::findExecutable("qmake");
+           if(qmakePath == ""){
+             // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
+             qmakePath = QStandardPaths::findExecutable("qmake");
+           }
        }
 
        if(qmakePath == ""){
@@ -1120,7 +1122,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 }
             } else {
                 pluginList.append(QStringLiteral("imageformats/") + plugin);
-	    }
+        }
         }
     }
 
@@ -1130,8 +1132,8 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         foreach (const QString &plugin, xcbglintegrationPlugins) {
             pluginList.append(QStringLiteral("xcbglintegrations/") + plugin);
         }
-    }    
-    
+    }
+
     // Also deploy plugins/iconengines/libqsvgicon.so whenever libQt5Svg.so.* is about to be deployed,
     // https://github.com/probonopd/linuxdeployqt/issues/36
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
@@ -1173,7 +1175,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 
     QString sourcePath;
     QString destinationPath;
-    
+
     // Qt WebEngine if libQt5WebEngineCore is in use
     // https://doc-snapshots.qt.io/qt5-5.7/qtwebengine-deploying.html
     // TODO: Rather than hardcode the source paths, somehow get them dynamically
@@ -1230,7 +1232,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         destinationPath = QDir::cleanPath(dstTranslations + "/qtwebengine_locales");
         recursiveCopy(sourcePath, destinationPath);
     }
-    
+
     LogNormal() << "pluginList after having detected hopefully all required plugins:" << pluginList;
 
     foreach (const QString &plugin, pluginList) {
@@ -1249,7 +1251,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
             QString relativePath = dir.relativeFilePath(appDirInfo.path + "/" + libraries[0].libraryDestinationDirectory);
             relativePath.remove(0, 3); // remove initial '../'
             changeIdentification("$ORIGIN/" + relativePath, QFileInfo(destinationPath).canonicalFilePath());
-            
+
         }
     }
 }
@@ -1261,23 +1263,23 @@ void createQtConf(const QString &appDirPath)
     // See https://github.com/probonopd/linuxdeployqt/issues/ 75, 98, 99
     QByteArray contents;
     if(fhsLikeMode){
-	    contents = "# Generated by linuxdeployqt\n"
-				  "# https://github.com/probonopd/linuxdeployqt/\n"
-				  "[Paths]\n"
-				  "Prefix = ../\n"
-				  "Plugins = plugins\n"
-				  "Imports = qml\n"
-				  "Qml2Imports = qml\n";	    
+        contents = "# Generated by linuxdeployqt\n"
+                  "# https://github.com/probonopd/linuxdeployqt/\n"
+                  "[Paths]\n"
+                  "Prefix = ../\n"
+                  "Plugins = plugins\n"
+                  "Imports = qml\n"
+                  "Qml2Imports = qml\n";
     } else {
-	    contents = "# Generated by linuxdeployqt\n"
-				  "# https://github.com/probonopd/linuxdeployqt/\n"
-				  "[Paths]\n"
-		    		  "Prefix = ./\n"
-				  "Plugins = plugins\n"
-				  "Imports = qml\n"
-				  "Qml2Imports = qml\n";	    
+        contents = "# Generated by linuxdeployqt\n"
+                  "# https://github.com/probonopd/linuxdeployqt/\n"
+                  "[Paths]\n"
+                      "Prefix = ./\n"
+                  "Plugins = plugins\n"
+                  "Imports = qml\n"
+                  "Qml2Imports = qml\n";
     }
-	
+
     QString filePath = appDirPath + "/"; // Is picked up when placed next to the main executable
     QString fileName = QDir::cleanPath(appBinaryPath + "/../qt.conf");
 
@@ -1401,7 +1403,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     argumentList.append(qtToBeBundledInfo.value("QT_INSTALL_QML"));
 
     LogDebug() << "qmlImportsPath (QT_INSTALL_QML):" << qtToBeBundledInfo.value("QT_INSTALL_QML");
-	
+
     // run qmlimportscanner
     QProcess qmlImportScanner;
     LogDebug() << qmlImportScannerPath << argumentList;
