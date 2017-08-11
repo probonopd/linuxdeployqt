@@ -28,7 +28,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QProcessEnvironment>
-#include "../shared/shared.h"
+#include "shared.h"
 #include <QRegularExpression>
 #include <stdlib.h>
 #include <QSettings>
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
     if (QDir().exists(appBinaryPath)) {
         qDebug() << "app-binary:" << appBinaryPath;
     } else {
-        qDebug() << "Error: Could not find app-binary" << appBinaryPath;
+        LogError() << "Error: Could not find app-binary" << appBinaryPath;
         return 1;
     }
 
@@ -201,6 +201,11 @@ int main(int argc, char **argv)
         appDirPath = QDir::cleanPath(fhsPrefix + "/../");
         QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
         relativeBinPath = relativePrefix + "/bin/" + appName;
+    }
+    if(appDirPath == "/"){
+        LogError() << "'/' is not a valid AppDir. Please refer to the documentation.";
+        LogError() << "Consider adding INSTALL_ROOT or DESTDIR to your install steps.";
+        return 1;
     }
     qDebug() << "appDirPath:" << appDirPath;
     qDebug() << "relativeBinPath:" << relativeBinPath;
