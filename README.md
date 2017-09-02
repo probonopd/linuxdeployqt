@@ -97,9 +97,9 @@ install:
     - source /opt/qt*/bin/qt*-env.sh
 
 script:
-  - qmake PREFIX=/usr
+  - qmake CONFIG+=release PREFIX=/usr
   - make -j$(nproc)
-  - make INSTALL_ROOT=appdir install ; find appdir/
+  - make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
   - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt*.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
@@ -131,9 +131,9 @@ If `qmake` does not allow for `make install` or does not install the desktop fil
 __CMake__ wants `DESTDIR` instead:
 
 ```
-  - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - cmake . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
   - make -j$(nproc)
-  - make DESTDIR=appdir install ; find appdir/
+  - make DESTDIR=appdir -j$(nproc) install ; find appdir/
 ```
 
 __autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
