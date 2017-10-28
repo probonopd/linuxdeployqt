@@ -88,6 +88,12 @@ int main(int argc, char **argv)
          * to do when using linuxdeployqt. */
         if (firstArgument.endsWith(".desktop")){
             qDebug() << "Desktop file as first argument:" << firstArgument;
+
+            /* Check if the desktop file really exists */
+            if (! QFile::exists(firstArgument)) {
+                LogError() << "Desktop file in first argument does not exist!";
+                return 1;
+            }
             QSettings * settings = 0;
             settings = new QSettings(firstArgument, QSettings::IniFormat);
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
