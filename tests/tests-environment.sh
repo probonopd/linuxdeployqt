@@ -2,7 +2,7 @@
 
 set -e
 
-sudo add-apt-repository --yes ppa:beineri/opt-qt59-trusty
+sudo add-apt-repository --yes ppa:beineri/opt-qt591-trusty
 sudo apt-get update -qq
 
 wget http://ftp.de.debian.org/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
