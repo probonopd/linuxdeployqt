@@ -30,6 +30,7 @@ Options:
    -executable=<path>  : Let the given executable use the deployed libraries too
    -qmldir=<path>      : Scan for QML imports to bundle from the given directory, determined by Qt's qmlimportscanner
    -always-overwrite   : Copy files even if the target file exists
+   -qmake=<path>       : The qmake executable to use
    -no-translations    : Skip deployment of translations
 
 linuxdeployqt takes an application as input and makes it
@@ -54,7 +55,7 @@ Open in Qt Creator and build your application. Run it from the command line and 
 
 #### QMake configuration
 
-__Important:__ `linuxdeployqt` deploys the Qt instance that qmake on the $PATH points to, so make sure that it is the correct one. Verify that qmake finds the correct Qt instance like this before running the `linuxdeployqt` tool:
+__Important:__ By default, `linuxdeployqt` deploys the Qt instance that qmake on the $PATH points to, so make sure that it is the correct one. Verify that qmake finds the correct Qt instance like this before running the `linuxdeployqt` tool:
 
 ```
 qmake -v
@@ -62,7 +63,10 @@ qmake -v
 QMake version 3.0
 Using Qt version 5.7.0 in /tmp/.mount_QtCreator-5.7.0-x86_64/5.7/gcc_64/lib
 ```
+
 If this does not show the correct path to your Qt instance that you want to be bundled, then adjust your `$PATH` to find the correct `qmake`.
+
+Alternatively, use the `-qmake` command line option to point the tool directly to the qmake executable to be used.
 
 #### Remove unecessary files
 
@@ -87,16 +91,16 @@ dist: trusty
 before_install:
     - sudo add-apt-repository ppa:beineri/opt-qt59-trusty -y
     - sudo apt-get update -qq
-    
-install: 
+
+install:
     - sudo apt-get -y install qt59base
     - source /opt/qt*/bin/qt*-env.sh
 
 script:
-  - qmake PREFIX=/usr
+  - qmake CONFIG+=release PREFIX=/usr
   - make -j$(nproc)
-  - make INSTALL_ROOT=appdir install ; find appdir/
-  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" 
+  - make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
+  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt*.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
@@ -105,7 +109,7 @@ script:
 after_success:
   - find ./appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
   - curl --upload-file ./APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
-``` 
+```
 
 When you save your change, then Travis CI should build and upload an AppImage for you. More likely than not, some fine-tuning will still be required.
 
@@ -127,9 +131,9 @@ If `qmake` does not allow for `make install` or does not install the desktop fil
 __CMake__ wants `DESTDIR` instead:
 
 ```
-  - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - cmake . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
   - make -j$(nproc)
-  - make DESTDIR=appdir install ; find appdir/
+  - make DESTDIR=appdir -j$(nproc) install ; find appdir/
 ```
 
 __autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
@@ -171,6 +175,7 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - Can optionally GPG2-sign your AppImages (inside the file)
 - Works on Live ISOs
 - Can use the same AppImages when dual-booting multiple distributions
+- Can be listed in the [AppImageHub](https://appimage.github.io/) central directory of available AppImages
 
 [Here is an overview](https://github.com/probonopd/AppImageKit/wiki/AppImages) of projects that are already distributing upstream-provided, official AppImages.
 

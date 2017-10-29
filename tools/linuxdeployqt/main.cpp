@@ -55,14 +55,16 @@ int main(int argc, char **argv)
         qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
         qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
+        qDebug() << "   -qmake=<path>       : The qmake executable to use";
         qDebug() << "   -no-translations    : Skip deployment of translations.";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
         qDebug() << "the application uses.";
         qDebug() << "";
-        qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
-        qDebug() << "so make sure that it is the correct one.";
+        qDebug() << "By default it deploys the Qt instance that qmake on the $PATH points to.";
+        qDebug() << "The '-qmake' option can be used to point to the qmake executable";
+        qDebug() << "to be used instead.";
         qDebug() << "";
         qDebug() << "Plugins related to a Qt library are copied in with the library.";
         /* TODO: To be implemented
@@ -86,6 +88,12 @@ int main(int argc, char **argv)
          * to do when using linuxdeployqt. */
         if (firstArgument.endsWith(".desktop")){
             qDebug() << "Desktop file as first argument:" << firstArgument;
+
+            /* Check if the desktop file really exists */
+            if (! QFile::exists(firstArgument)) {
+                LogError() << "Desktop file in first argument does not exist!";
+                return 1;
+            }
             QSettings * settings = 0;
             settings = new QSettings(firstArgument, QSettings::IniFormat);
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
@@ -171,6 +179,7 @@ int main(int argc, char **argv)
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
+    QString qmakeExecutable;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -365,6 +374,10 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
+        } else if (argument.startsWith("-qmake=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            qmakeExecutable = argument.mid(index+1);
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
@@ -381,7 +394,8 @@ int main(int argc, char **argv)
         }
     }
 
-    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables);
+    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
+                                                      qmakeExecutable);
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {
