@@ -16,4 +16,4 @@ chmod +x appimagetool*AppImage
 sudo cp squashfs-root/usr/bin/* /usr/local/bin
 cd -
 
-sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra
+sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra zsync
