@@ -1609,9 +1609,18 @@ void deployTranslations(const QString &appDirPath, quint64 usedQtModules)
         return;
     }
 
-    QString translationsDirPath = appDirPath + QStringLiteral("/translations");
-    LogDebug() << "Using" << translationsDirPath << "as translations directory for App";
-    LogDebug() << "Using" << qtTranslationsPath << " to search for Qt translations";
+    QString translationsDirPath;
+    if (!fhsLikeMode) {
+        translationsDirPath = appDirPath + QStringLiteral("/translations");
+    } else {
+        // TODO: refactor this global variables hack
+        QFileInfo appBinaryFI(appBinaryPath);
+        QString appRoot = appBinaryFI.absoluteDir().absolutePath() + "/../";
+        translationsDirPath = appRoot + QStringLiteral("/translations");
+    }
+
+    LogNormal() << "Using" << translationsDirPath << "as translations directory for App";
+    LogNormal() << "Using" << qtTranslationsPath << " to search for Qt translations";
 
     QFileInfo fi(translationsDirPath);
     if (!fi.isDir()) {
