@@ -175,9 +175,9 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - Can optionally GPG2-sign your AppImages (inside the file)
 - Works on Live ISOs
 - Can use the same AppImages when dual-booting multiple distributions
-- Can be listed in the [AppImageHub](https://appimage.github.io/) central directory of available AppImages
+- Can be listed in the [AppImageHub](https://appimage.github.io/apps) central directory of available AppImages
 
-[Here is an overview](https://github.com/probonopd/AppImageKit/wiki/AppImages) of projects that are already distributing upstream-provided, official AppImages.
+[Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
 __Please note:__ Instead of storing AppImage builds temporarily for 14 days each on transfer.sh, you could use GitHub Releases to store the binaries permanently. This way, they would be visible on the Releases page of your project. This is what I recommend. See https://docs.travis-ci.com/user/deployment/releases/. If you want to do this for continuous builds, also see https://github.com/probonopd/uploadtool.
 
