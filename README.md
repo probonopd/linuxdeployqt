@@ -89,7 +89,7 @@ sudo: require
 dist: trusty
 
 before_install:
-    - sudo add-apt-repository ppa:beineri/opt-qt591-trusty -y
+    - sudo add-apt-repository ppa:beineri/opt-qt592-trusty -y
     - sudo apt-get update -qq
 
 install:
@@ -166,9 +166,7 @@ The exception is that you are building Qt libraries that _should_ be installed t
 `linuxdeployqt` is great for upstream application projects that want to release their software in binary form to Linux users quickly and without much overhead. If you would like to see a particular application use `linuxdeployqt`, then sending a Pull Request may be an option to get the upstream application project to consider it. You can use the following template text for Pull Requests but make sure to customize it to the project in question.
 
 ```
-This PR, when merged, will compile this application on [Travis CI](https://travis-ci.org/) upon each `git push`, and upload an [AppImage](http://appimage.org/) to a temporary download URL on transfer.sh (available for 14 days). The download URL is toward the end of each Travis CI build log of each build (see below for how to set up automatic uploading to your GitHub Releases page).
-
-For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so.
+This PR, when merged, will compile this application on [Travis CI](https://travis-ci.org/) upon each `git push`, and upload an [AppImage](http://appimage.org/) to your GitHub Releases page.
 
 Providing an [AppImage](http://appimage.org/) would have, among others, these advantages:
 - Applications packaged as an AppImage can run on many distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
@@ -186,8 +184,7 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 
 [Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
-__Please note:__ Instead of storing AppImage builds temporarily for 14 days each on transfer.sh, you could use GitHub Releases to store the binaries permanently. This way, they would be visible on the Releases page of your project. This is what I recommend. See https://docs.travis-ci.com/user/deployment/releases/. If you want to do this for continuous builds, also see https://github.com/probonopd/uploadtool.
-
+__PLEASE NOTE:__ For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so. Also, You need to set up `GITHUB_TOKEN` in Travis CI for this to work; please see https://github.com/probonopd/uploadtool.
 If you would like to see only one entry for the Pull Request in your project's history, then please enable [this GitHub functionality](https://help.github.com/articles/configuring-commit-squashing-for-pull-requests/) on your repo. It allows you to squash (combine) the commits when merging.
 
 If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
