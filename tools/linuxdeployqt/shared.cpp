@@ -239,8 +239,8 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
         if (alwaysOwerwriteEnabled) {
             QFile(to).remove();
         } else {
-            LogDebug() << QFileInfo(to).fileName() << "already deployed, skipping.";
-            return false;
+            LogDebug() << QFileInfo(to).fileName() << "already exists at target location";
+            return true;
         }
     }
 
@@ -1067,6 +1067,16 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    } else {
        libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("../lib/" + bundleLibraryDirectory);
    }
+
+   /* Make ldd detect pre-existing libraries in the AppDir.
+    * TODO: Consider searching the AppDir for .so* files outside of libraryPath
+    * and warning about them not being taken into consideration */
+   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+   QString oldPath = env.value("LD_LIBRARY_PATH");
+   QString newPath = libraryPath + ":" + oldPath; // FIXME: If we use a ldd replacement, we still need to observe this path
+   LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
+   setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
+
    foreach (const QString &executable, QStringList() << applicationBundle.binaryPath << additionalExecutables) {
        changeIdentification("$ORIGIN/" + QFileInfo(executable).dir().relativeFilePath(libraryPath) + "/" + bundleLibraryDirectory, QFileInfo(executable).canonicalFilePath());
    }
