@@ -926,8 +926,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         }
 
         if (library.libraryDirectory.startsWith(bundlePath)) {
-            LogNormal()  << library.libraryName << "already deployed, skipping.";
-            continue;
+            LogNormal()  << library.libraryName << "already at target location";
         }
 
         if (library.rpathUsed.isEmpty() != true) {
