@@ -244,7 +244,7 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
         }
     }
 
-    QDir dir(to + "/../");
+    QDir dir(QDir::cleanPath(to + "/../"));
     if (!dir.exists()) {
         dir.mkpath(".");
     }
