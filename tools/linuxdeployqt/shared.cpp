@@ -244,6 +244,11 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
         }
     }
 
+    QDir dir(to + "/../");
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+
     if (QFile::copy(from, to)) {
         QFile dest(to);
         dest.setPermissions(dest.permissions() | QFile::WriteOwner | QFile::WriteUser);
@@ -268,6 +273,68 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
         LogError() << " to" << to;
         return false;
     }
+}
+
+bool copyCopyrightFile(QString libPath){
+
+    /* When deploying files (e.g., libraries) from the
+     * system, then try to also deploy their copyright file.
+     * This is currently only implemented for dpkg-based,
+     * Debian-like systems. Pull requests welcome for other
+     * systems. */
+
+    QString dpkgPath;
+    dpkgPath = QStandardPaths::findExecutable("dpkg");
+    if(dpkgPath == ""){
+        LogNormal() << "dpkg not found, hence not deploying copyright files";
+        return false;
+    }
+
+    QString copyrightFilePath;
+
+    /* Find out which package the file being deployed belongs to */
+
+    QString program = "dpkg";
+    QStringList arguments;
+    arguments << "-S" << libPath;
+    QProcess *myProcess = new QProcess();
+    myProcess->start(program, arguments);
+    myProcess->waitForFinished();
+    QString strOut = myProcess->readAllStandardOutput().split(':')[0];
+    if(strOut == "") return false;
+
+    /* Find out the copyright file in that package */
+
+    arguments << "-S" << strOut;
+    myProcess->start(program, arguments);
+    myProcess->waitForFinished();
+    strOut = myProcess->readAllStandardOutput();
+
+     QStringList outputLines = strOut.split("\n", QString::SkipEmptyParts);
+
+     foreach (QString outputLine, outputLines) {
+        if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright"))){
+                 copyrightFilePath = outputLine.split(' ')[1];
+        }
+     }
+
+     if(copyrightFilePath == "") return false;
+
+     LogDebug() << "copyrightFilePath:" << copyrightFilePath;
+
+     /* Where should we copy this file to? We are assuming the Debian-like path contains
+      * the name of the package like so: copyrightFilePath: "/usr/share/doc/libpcre3/copyright"
+      * this assumption is most likely only true for Debian-like systems */
+     QString packageName = copyrightFilePath.split("/")[copyrightFilePath.split("/").length()-2];
+     QString copyrightFileTargetPath;
+     if(fhsLikeMode){
+         copyrightFileTargetPath = QDir::cleanPath(appBinaryPath + "/../../share/doc/" + packageName + "/copyright");
+     } else {
+         copyrightFileTargetPath = QDir::cleanPath(appBinaryPath + "/../doc/" + packageName + "/copyright");
+     }
+
+     /* Do the actual copying */
+     return(copyFilePrintStatus(copyrightFilePath, copyrightFileTargetPath));
 }
 
 LddInfo findDependencyInfo(const QString &binaryPath)
@@ -600,6 +667,8 @@ bool recursiveCopy(const QString &sourcePath, const QString &destinationPath)
         const QString fileSourcePath = sourcePath + "/" + file;
         const QString fileDestinationPath = destinationPath + "/" + file;
         copyFilePrintStatus(fileSourcePath, fileDestinationPath);
+        LogDebug() << "copyCopyrightFile:" << fileSourcePath;
+        copyCopyrightFile(fileSourcePath);
     }
 
     QStringList subdirs = QDir(sourcePath).entryList(QStringList() << "*", QDir::Dirs | QDir::NoDotAndDotDot);
@@ -621,6 +690,8 @@ void recursiveCopyAndDeploy(const QString &appDirPath, const QSet<QString> &rpat
 
         QString fileDestinationPath = destinationPath + QLatin1Char('/') + file;
         copyFilePrintStatus(fileSourcePath, fileDestinationPath);
+        LogDebug() << "copyCopyrightFile:" << fileSourcePath;
+        copyCopyrightFile(fileSourcePath);
 
         if(fileDestinationPath.endsWith(".so")){
 
@@ -676,6 +747,8 @@ QString copyDylib(const LibraryInfo &library, const QString path)
 
     // Copy dylib binary
     copyFilePrintStatus(library.sourceFilePath, dylibDestinationBinaryPath);
+    LogDebug() << "copyCopyrightFile:" << library.sourceFilePath;
+    copyCopyrightFile(library.sourceFilePath);
     return dylibDestinationBinaryPath;
 }
 
@@ -1263,6 +1336,8 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
             changeIdentification("$ORIGIN/" + relativePath, QFileInfo(destinationPath).canonicalFilePath());
 
         }
+        LogDebug() << "copyCopyrightFile:" << sourcePath;
+        copyCopyrightFile(sourcePath);
     }
 }
 
