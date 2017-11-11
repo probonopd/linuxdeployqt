@@ -305,7 +305,7 @@ int main(int argc, char **argv)
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svgz").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svgz";
-                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
+                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svg").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svg";
