@@ -194,6 +194,7 @@ If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
 ## Projects using linuxdeployqt
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
+- https://github.com/probonopd/ImageMagick
 - https://github.com/Subsurface-divelog/subsurface/
 - https://github.com/jimevins/glabels-qt
 - https://travis-ci.org/NeoTheFox/RepRaptor
