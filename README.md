@@ -89,12 +89,12 @@ sudo: require
 dist: trusty
 
 before_install:
-    - sudo add-apt-repository ppa:beineri/opt-qt592-trusty -y
-    - sudo apt-get update -qq
+  - sudo add-apt-repository ppa:beineri/opt-qt592-trusty -y
+  - sudo apt-get update -qq
 
 install:
-    - sudo apt-get -y install qt59base
-    - source /opt/qt*/bin/qt*-env.sh
+  - sudo apt-get -y install qt59base
+  - source /opt/qt*/bin/qt*-env.sh
 
 script:
   - qmake CONFIG+=release PREFIX=/usr
@@ -147,9 +147,9 @@ __CMake__ wants `DESTDIR` instead:
 __autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
 
 ```
-    - ./configure --prefix=/usr
-    - make -j$(nproc)
-    - make install DESTDIR=$(readlink -f appdir) ; find appdir/
+  - ./configure --prefix=/usr
+  - make -j$(nproc)
+  - make install DESTDIR=$(readlink -f appdir) ; find appdir/
 ```
 
 Caution if you encounter
