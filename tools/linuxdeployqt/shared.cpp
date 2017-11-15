@@ -290,6 +290,13 @@ bool copyCopyrightFile(QString libPath){
         return false;
     }
 
+    QString dpkgQueryPath;
+    dpkgQueryPath = QStandardPaths::findExecutable("dpkg");
+    if(dpkgQueryPath == ""){
+        LogNormal() << "dpkg-query not found, hence not deploying copyright files";
+        return false;
+    }
+    
     QString copyrightFilePath;
 
     /* Find out which package the file being deployed belongs to */
@@ -304,8 +311,8 @@ bool copyCopyrightFile(QString libPath){
     if(strOut == "") return false;
 
     /* Find out the copyright file in that package */
-
-    arguments << "-S" << strOut;
+    program = "dpkg-query";
+    arguments << "-L" << strOut;
     myProcess->start(program, arguments);
     myProcess->waitForFinished();
     strOut = myProcess->readAllStandardOutput();
@@ -313,8 +320,9 @@ bool copyCopyrightFile(QString libPath){
      QStringList outputLines = strOut.split("\n", QString::SkipEmptyParts);
 
      foreach (QString outputLine, outputLines) {
-        if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright"))){
+        if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright")) && (outputLine.contains(" "))){
                  copyrightFilePath = outputLine.split(' ')[1];
+                 break;
         }
      }
 
