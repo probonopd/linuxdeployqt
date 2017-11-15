@@ -320,8 +320,8 @@ bool copyCopyrightFile(QString libPath){
      QStringList outputLines = strOut.split("\n", QString::SkipEmptyParts);
 
      foreach (QString outputLine, outputLines) {
-        if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright"))){
-                 copyrightFilePath = outputLine;
+        if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright")) && (outputLine.contains(" "))){
+                 copyrightFilePath = outputLine.split(' ')[1];
         }
      }
 
