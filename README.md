@@ -182,6 +182,7 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - Works on Live ISOs
 - Can use the same AppImages when dual-booting multiple distributions
 - Can be listed in the [AppImageHub](https://appimage.github.io/apps) central directory of available AppImages
+- Can double as a self-extracting compressed archive with the `--appimage-extract` parameter
 
 [Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
