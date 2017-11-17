@@ -291,7 +291,7 @@ bool copyCopyrightFile(QString libPath){
     }
 
     QString dpkgQueryPath;
-    dpkgQueryPath = QStandardPaths::findExecutable("dpkg");
+    dpkgQueryPath = QStandardPaths::findExecutable("dpkg-query");
     if(dpkgQueryPath == ""){
         LogNormal() << "dpkg-query not found, hence not deploying copyright files";
         return false;
@@ -301,19 +301,17 @@ bool copyCopyrightFile(QString libPath){
 
     /* Find out which package the file being deployed belongs to */
 
-    QString program = "dpkg";
     QStringList arguments;
     arguments << "-S" << libPath;
     QProcess *myProcess = new QProcess();
-    myProcess->start(program, arguments);
+    myProcess->start(dpkgPath, arguments);
     myProcess->waitForFinished();
     QString strOut = myProcess->readAllStandardOutput().split(':')[0];
     if(strOut == "") return false;
 
     /* Find out the copyright file in that package */
-    program = "dpkg-query";
     arguments << "-L" << strOut;
-    myProcess->start(program, arguments);
+    myProcess->start(dpkgQueryPath, arguments);
     myProcess->waitForFinished();
     strOut = myProcess->readAllStandardOutput();
 
@@ -321,8 +319,10 @@ bool copyCopyrightFile(QString libPath){
 
      foreach (QString outputLine, outputLines) {
         if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright")) && (outputLine.contains(" "))){
-                 copyrightFilePath = outputLine.split(' ')[1];
-                 break;
+            // copyrightFilePath = outputLine.split(' ')[1]; // This is not working on multiarch systems; see https://github.com/probonopd/linuxdeployqt/issues/184#issuecomment-345293540
+            QStringList parts = outputLine.split(' ');
+            copyrightFilePath = parts[parts.size() - 1]; // Grab last element
+            break;
         }
      }
 
