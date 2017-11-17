@@ -11,6 +11,7 @@ cp /usr/bin/{patchelf,desktop-file-validate} /usr/local/bin/{appimagetool,mksqua
 find linuxdeployqt.AppDir/
 export VERSION=continuous
 cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
+./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/desktop-file-validate -verbose=3 -bundle-non-qt-libs
 ./bin/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt.desktop -verbose=3 -appimage
 ls -lh
 find *.AppDir
