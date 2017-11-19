@@ -30,6 +30,7 @@ Options:
    -executable=<path>  : Let the given executable use the deployed libraries too
    -qmldir=<path>      : Scan for QML imports to bundle from the given directory, determined by Qt's qmlimportscanner
    -always-overwrite   : Copy files even if the target file exists
+   -qmake=<path>       : The qmake executable to use
    -no-translations    : Skip deployment of translations
 
 linuxdeployqt takes an application as input and makes it
@@ -54,7 +55,7 @@ Open in Qt Creator and build your application. Run it from the command line and 
 
 #### QMake configuration
 
-__Important:__ `linuxdeployqt` deploys the Qt instance that qmake on the $PATH points to, so make sure that it is the correct one. Verify that qmake finds the correct Qt instance like this before running the `linuxdeployqt` tool:
+__Important:__ By default, `linuxdeployqt` deploys the Qt instance that qmake on the $PATH points to, so make sure that it is the correct one. Verify that qmake finds the correct Qt instance like this before running the `linuxdeployqt` tool:
 
 ```
 qmake -v
@@ -62,7 +63,10 @@ qmake -v
 QMake version 3.0
 Using Qt version 5.7.0 in /tmp/.mount_QtCreator-5.7.0-x86_64/5.7/gcc_64/lib
 ```
+
 If this does not show the correct path to your Qt instance that you want to be bundled, then adjust your `$PATH` to find the correct `qmake`.
+
+Alternatively, use the `-qmake` command line option to point the tool directly to the qmake executable to be used.
 
 #### Remove unecessary files
 
@@ -85,27 +89,35 @@ sudo: require
 dist: trusty
 
 before_install:
-    - sudo add-apt-repository ppa:beineri/opt-qt59-trusty -y
-    - sudo apt-get update -qq
-    
-install: 
-    - sudo apt-get -y install qt59base
-    - source /opt/qt*/bin/qt*-env.sh
+  - sudo add-apt-repository ppa:beineri/opt-qt592-trusty -y
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get -y install qt59base
+  - source /opt/qt*/bin/qt*-env.sh
 
 script:
-  - qmake PREFIX=/usr
+  - qmake CONFIG+=release PREFIX=/usr
   - make -j$(nproc)
-  - make INSTALL_ROOT=appdir install ; find appdir/
-  - wget -c "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" 
-  - chmod a+x linuxdeployqt*.AppImage
+  - make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
+  - wget -c -q "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
-  - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
-  - ./linuxdeployqt*.AppImage ./appdir/usr/share/applications/*.desktop -appimage
+  - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -bundle-non-qt-libs
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
 
 after_success:
   - find ./appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
-  - curl --upload-file ./APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
-``` 
+  - # curl --upload-file ./APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh ./APPNAME*.AppImage*
+  
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/
+```
 
 When you save your change, then Travis CI should build and upload an AppImage for you. More likely than not, some fine-tuning will still be required.
 
@@ -127,17 +139,17 @@ If `qmake` does not allow for `make install` or does not install the desktop fil
 __CMake__ wants `DESTDIR` instead:
 
 ```
-  - cmake . -DCMAKE_INSTALL_PREFIX=/usr
+  - cmake . -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
   - make -j$(nproc)
-  - make DESTDIR=appdir install ; find appdir/
+  - make DESTDIR=appdir -j$(nproc) install ; find appdir/
 ```
 
 __autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
 
 ```
-    - ./configure --prefix=/usr
-    - make -j$(nproc)
-    - make install DESTDIR=$(readlink -f appdir) ; find appdir/
+  - ./configure --prefix=/usr
+  - make -j$(nproc)
+  - make install DESTDIR=$(readlink -f appdir) ; find appdir/
 ```
 
 Caution if you encounter
@@ -155,9 +167,7 @@ The exception is that you are building Qt libraries that _should_ be installed t
 `linuxdeployqt` is great for upstream application projects that want to release their software in binary form to Linux users quickly and without much overhead. If you would like to see a particular application use `linuxdeployqt`, then sending a Pull Request may be an option to get the upstream application project to consider it. You can use the following template text for Pull Requests but make sure to customize it to the project in question.
 
 ```
-This PR, when merged, will compile this application on [Travis CI](https://travis-ci.org/) upon each `git push`, and upload an [AppImage](http://appimage.org/) to a temporary download URL on transfer.sh (available for 14 days). The download URL is toward the end of each Travis CI build log of each build (see below for how to set up automatic uploading to your GitHub Releases page).
-
-For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so.
+This PR, when merged, will compile this application on [Travis CI](https://travis-ci.org/) upon each `git push`, and upload an [AppImage](http://appimage.org/) to your GitHub Releases page.
 
 Providing an [AppImage](http://appimage.org/) would have, among others, these advantages:
 - Applications packaged as an AppImage can run on many distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
@@ -171,11 +181,12 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - Can optionally GPG2-sign your AppImages (inside the file)
 - Works on Live ISOs
 - Can use the same AppImages when dual-booting multiple distributions
+- Can be listed in the [AppImageHub](https://appimage.github.io/apps) central directory of available AppImages
+- Can double as a self-extracting compressed archive with the `--appimage-extract` parameter
 
-[Here is an overview](https://github.com/probonopd/AppImageKit/wiki/AppImages) of projects that are already distributing upstream-provided, official AppImages.
+[Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
-__Please note:__ Instead of storing AppImage builds temporarily for 14 days each on transfer.sh, you could use GitHub Releases to store the binaries permanently. This way, they would be visible on the Releases page of your project. This is what I recommend. See https://docs.travis-ci.com/user/deployment/releases/. If you want to do this for continuous builds, also see https://github.com/probonopd/uploadtool.
-
+__PLEASE NOTE:__ For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so. Also, You need to set up `GITHUB_TOKEN` in Travis CI for this to work; please see https://github.com/probonopd/uploadtool.
 If you would like to see only one entry for the Pull Request in your project's history, then please enable [this GitHub functionality](https://help.github.com/articles/configuring-commit-squashing-for-pull-requests/) on your repo. It allows you to squash (combine) the commits when merging.
 
 If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
@@ -184,6 +195,8 @@ If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
 ## Projects using linuxdeployqt
 
 These projects are already using [Travis CI](http://travis-ci.org/) and linuxdeployqt to provide AppImages of their builds:
+- https://github.com/probonopd/ImageMagick
+- https://github.com/Subsurface-divelog/subsurface/
 - https://github.com/jimevins/glabels-qt
 - https://travis-ci.org/NeoTheFox/RepRaptor
 - https://github.com/electronpass/electronpass-desktop

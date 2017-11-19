@@ -55,6 +55,7 @@ int main(int argc, char **argv)
         qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
         qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
         qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
+        qDebug() << "   -qmake=<path>       : The qmake executable to use";
         qDebug() << "   -no-translations    : Skip deployment of translations.";
         qDebug() << "   -deploy-svg         : Force svg dependencies deployment(for Qt 5 applications).";
         qDebug() << "";
@@ -62,8 +63,9 @@ int main(int argc, char **argv)
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
         qDebug() << "the application uses.";
         qDebug() << "";
-        qDebug() << "It deploys the Qt instance that qmake on the $PATH points to,";
-        qDebug() << "so make sure that it is the correct one.";
+        qDebug() << "By default it deploys the Qt instance that qmake on the $PATH points to.";
+        qDebug() << "The '-qmake' option can be used to point to the qmake executable";
+        qDebug() << "to be used instead.";
         qDebug() << "";
         qDebug() << "Plugins related to a Qt library are copied in with the library.";
         /* TODO: To be implemented
@@ -87,6 +89,12 @@ int main(int argc, char **argv)
          * to do when using linuxdeployqt. */
         if (firstArgument.endsWith(".desktop")){
             qDebug() << "Desktop file as first argument:" << firstArgument;
+
+            /* Check if the desktop file really exists */
+            if (! QFile::exists(firstArgument)) {
+                LogError() << "Desktop file in first argument does not exist!";
+                return 1;
+            }
             QSettings * settings = 0;
             settings = new QSettings(firstArgument, QSettings::IniFormat);
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
@@ -172,7 +180,11 @@ int main(int argc, char **argv)
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
+<<<<<<< HEAD
     bool deploySvg = false;
+=======
+    QString qmakeExecutable;
+>>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -298,7 +310,7 @@ int main(int argc, char **argv)
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svgz").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svgz";
-                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
+                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svg").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svg";
@@ -367,6 +379,10 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
+        } else if (argument.startsWith("-qmake=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            qmakeExecutable = argument.mid(index+1);
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
@@ -386,7 +402,12 @@ int main(int argc, char **argv)
         }
     }
 
+<<<<<<< HEAD
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables, deploySvg);
+=======
+    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
+                                                      qmakeExecutable);
+>>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {

@@ -80,6 +80,24 @@ killall QtWidgetsApplication && echo "SUCCESS"
 cd ../../../
 
 ###############################################################################
+# Test bundling the sample Qt Widgets Application passing in the qmake exe
+###############################################################################
+
+cd tests/QtWidgetsApplication/build/
+mkdir -p explicitqmake
+
+cp QtWidgetsApplication explicitqmake/
+../../../linuxdeployqt-*-x86_64.AppImage explicitqmake/QtWidgetsApplication \
+    -qmake=$(which qmake)
+ldd explicitqmake/QtWidgetsApplication
+find explicitqmake/
+LD_DEBUG=libs explicitqmake/QtWidgetsApplication &
+sleep 5
+killall QtWidgetsApplication && echo "SUCCESS"
+
+cd ../../../
+
+###############################################################################
 # Test bundling the sample Qt Quick Controls 2 Application that comes with Qt Creator
 ###############################################################################
 
