@@ -94,6 +94,7 @@ class DeploymentInfo
 {
 public:
     QString qtPath;
+    QString qtLibrariesPath;
     QString pluginPath;
     QStringList deployedLibraries;
     quint64 usedModulesMask;
@@ -114,19 +115,9 @@ QString findAppBinary(const QString &appDirPath);
 QList<LibraryInfo> getQtLibraries(const QString &path, const QString &appDirPath, const QSet<QString> &rpaths);
 QList<LibraryInfo> getQtLibraries(const QStringList &lddLines, const QString &appDirPath, const QSet<QString> &rpaths);
 QString copyLibrary(const LibraryInfo &library, const QString path);
-<<<<<<< HEAD
-<<<<<<< HEAD
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const bool &deploySvg);
-=======
 DeploymentInfo deployQtLibraries(const QString &appDirPath,
                                  const QStringList &additionalExecutables,
                                  const QString &qmake);
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
-=======
-DeploymentInfo deployQtLibraries(const QString &appDirPath,
-                                 const QStringList &additionalExecutables,
-                                 const QString &qmake);
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
 DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bundlePath, const QStringList &binaryPaths, bool useLoaderPath);
 void createQtConf(const QString &appDirPath);
 void createQtConfForQtWebEngineProcess(const QString &appDirPath);
