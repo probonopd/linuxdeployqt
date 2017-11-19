@@ -47,17 +47,17 @@ int main(int argc, char **argv)
         qDebug() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
         qDebug() << "";
         qDebug() << "Options:";
-        qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
-        qDebug() << "   -no-plugins         : Skip plugin deployment";
-        qDebug() << "   -appimage           : Create an AppImage (implies -bundle-non-qt-libs)";
-        qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
-        qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
-        qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
-        qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
-        qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
-        qDebug() << "   -qmake=<path>       : The qmake executable to use";
-        qDebug() << "   -no-translations    : Skip deployment of translations.";
-        qDebug() << "   -deploy-svg         : Force svg dependencies deployment(for Qt 5 applications).";
+        qDebug() << "   -verbose=<0-3>         : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
+        qDebug() << "   -no-plugins            : Skip plugin deployment";
+        qDebug() << "   -appimage              : Create an AppImage (implies -bundle-non-qt-libs)";
+        qDebug() << "   -no-strip              : Don't run 'strip' on the binaries";
+        qDebug() << "   -bundle-non-qt-libs    : Also bundle non-core, non-Qt libraries";
+        qDebug() << "   -executable=<path>     : Let the given executable use the deployed libraries too";
+        qDebug() << "   -qmldir=<path>         : Scan for QML imports in the given path";
+        qDebug() << "   -always-overwrite      : Copy files even if the target file exists";
+        qDebug() << "   -qmake=<path>          : The qmake executable to use";
+        qDebug() << "   -no-translations       : Skip deployment of translations.";
+        qDebug() << "   -extra-qt-libs=<list>  : List of extra Qt libraries which should be deployed, separated by comma.";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
@@ -174,21 +174,13 @@ int main(int argc, char **argv)
     extern bool bundleAllButCoreLibs;
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
-    extern bool alwaysOwerwriteEnabled;
-//    extern QStringList librarySearchPath; the variabile is not used
+    extern bool alwaysOwerwriteEnabled;    
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    bool deploySvg = false;
-=======
     QString qmakeExecutable;
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
-=======
-    QString qmakeExecutable;
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
+    QStringList extraQtLibraries;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -390,9 +382,10 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
-        } else if (argument == QByteArray("-deploy-svg")) {
+        } else if (argument.startsWith("-extra-qt-libs=")) {
             LogDebug() << "Argument found:" << argument;
-            deploySvg = true;
+            int index = argument.indexOf("=");
+            extraQtLibraries = QString(argument.mid(index+1)).split(",");
         } else if (argument.startsWith("-")) {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
@@ -406,17 +399,44 @@ int main(int argc, char **argv)
         }
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables, deploySvg);
-=======
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
                                                       qmakeExecutable);
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
-=======
-    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
-                                                      qmakeExecutable);
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
+
+    if (extraQtLibraries.size() > 0) {
+        LogDebug() << "Deploying extra Qt libraries.";
+        foreach (QString extraQtLibrary, extraQtLibraries) {
+            if (!extraQtLibrary.contains(QRegExp(".*libQt.*"))) {
+                LogWarning() << "File" << extraQtLibrary << "isn't an Qt-specific library!";
+            }
+            else {
+                const QString correctFileName = extraQtLibrary.remove(QRegExp("\\..+")).append(".so.5");
+                const QString sourceFilePath = deploymentInfo.qtLibrariesPath + correctFileName;
+                const QString destinationFilePath = appDirPath + "/usr/lib/" + correctFileName;
+                LogDebug() << "Source file name:" << correctFileName;
+                LogDebug() << "Source file path:" << sourceFilePath;
+                LogDebug() << "Destination file path:" << destinationFilePath;
+                if (QFile::exists(sourceFilePath)) {
+                    if (!QFile::exists(destinationFilePath)) {
+                        if (!QFile::copy(sourceFilePath, destinationFilePath)) {
+                            LogError() << "Error copying file" << correctFileName << "\n"
+                                       << "from:" << sourceFilePath << "\n"
+                                       << "to:" + destinationFilePath;
+                            return 1;
+                        }
+                        LogDebug() << "File" << correctFileName << "copied";
+                    }
+                    else {
+                        LogDebug() << "File" << correctFileName << "exists and will not be copied!";
+                    }
+                }
+                else {
+                    LogWarning() << "File" << correctFileName << " cannot be found at:" << sourceFilePath << "\n"
+                                 << "The packaging will continue, but if you are really in need of"
+                                 << "it then make sure the library exists, name is correct and try again.";
+                }
+            }
+        }
+    }
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {

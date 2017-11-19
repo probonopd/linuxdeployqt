@@ -57,7 +57,7 @@ int logLevel = 1;
 int qtDetected = 0;
 bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
-bool deploySvgNeeded = false;
+QString qtLibrariesPath;
 
 using std::cout;
 using std::endl;
@@ -415,15 +415,15 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         }
     }
 
-    if (deploySvgNeeded && !binaryPath.contains(QRegExp(".+lib.+"))) {
-        LogNormal() << "Deploying svg library.";
-        DylibInfo dylib;
+    //It will store the first Qt libraries path it encounters
+    if (!binaryPath.contains(QRegExp(".+lib.+")) && qtLibrariesPath.trimmed().size() == 0) {
+        LogDebug() << "Saving the path for Qt libraries.";
         QString librarySearchPath = outputLines.filter("libQt").at(1);
         const QRegularExpressionMatch match = regexp.match(librarySearchPath);
         if (match.hasMatch()) {
-            dylib.binaryPath = match.captured(1).trimmed();
-            dylib.binaryPath = dylib.binaryPath.replace(QRegExp("libQt.+"), "libQt5Svg.so.5");
-            info.dependencies << dylib;
+            qtLibrariesPath = match.captured(1).trimmed();
+            qtLibrariesPath = qtLibrariesPath.remove(QRegExp("libQt.+"));
+            LogDebug() << "Qt libraries path found: " << qtLibrariesPath;
         }
     }
 
@@ -1004,6 +1004,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
     deploymentInfo.requiresQtWidgetsLibrary = false;
     deploymentInfo.useLoaderPath = useLoaderPath;
     deploymentInfo.pluginPath = qtToBeBundledInfo.value("QT_INSTALL_PLUGINS");
+    deploymentInfo.qtLibrariesPath = qtLibrariesPath;
     QSet<QString> rpathsUsed;
 
     while (libraries.isEmpty() == false) {
@@ -1075,17 +1076,8 @@ static QString captureOutput(const QString &command)
     return process.readAllStandardOutput();
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const bool &deploySvg)
-=======
 DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const QString& qmake)
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
-=======
-DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const QString& qmake)
->>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
 {
-   deploySvgNeeded = deploySvg;
    AppDirInfo applicationBundle;
 
    applicationBundle.path = appDirPath;
