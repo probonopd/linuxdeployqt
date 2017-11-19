@@ -1076,7 +1076,11 @@ static QString captureOutput(const QString &command)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const bool &deploySvg)
+=======
+DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const QString& qmake)
+>>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
 =======
 DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const QString& qmake)
 >>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1

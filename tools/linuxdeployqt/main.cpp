@@ -181,7 +181,11 @@ int main(int argc, char **argv)
     bool skipTranslations = false;
     QStringList qmlDirs;
 <<<<<<< HEAD
+<<<<<<< HEAD
     bool deploySvg = false;
+=======
+    QString qmakeExecutable;
+>>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
 =======
     QString qmakeExecutable;
 >>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
@@ -403,7 +407,12 @@ int main(int argc, char **argv)
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables, deploySvg);
+=======
+    DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
+                                                      qmakeExecutable);
+>>>>>>> afac55f2de3b241fbcc825b0208ea6c9e2f730f1
 =======
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
                                                       qmakeExecutable);
