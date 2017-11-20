@@ -1218,7 +1218,9 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     }
 
     // Platform OpenGL context
-    if ((containsHowOften(deploymentInfo.deployedLibraries, "libQt5OpenGL")) or (containsHowOften(deploymentInfo.deployedLibraries, "libQt5XcbQpa"))) {
+    if ((containsHowOften(deploymentInfo.deployedLibraries, "libQt5OpenGL"))
+		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt5XcbQpa"))
+		    or (containsHowOften(deploymentInfo.deployedLibraries, "libxcb-glx"))) {
         QStringList xcbglintegrationPlugins = QDir(pluginSourcePath +  QStringLiteral("/xcbglintegrations")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, xcbglintegrationPlugins) {
             pluginList.append(QStringLiteral("xcbglintegrations/") + plugin);
