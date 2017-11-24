@@ -1204,6 +1204,11 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
         LogDebug() << "libQt5Gui detected";
         pluginList.append("platforms/libqxcb.so");
+	// Platform plugin contexts - apparently needed to enter special characters:
+        QStringList platformPluginContexts = QDir(pluginSourcePath +  QStringLiteral("/platforminputcontexts")).entryList(QStringList() << QStringLiteral("*.so"));
+        foreach (const QString &plugin, platformPluginContexts) {
+            pluginList.append(QStringLiteral("platforminputcontexts/") + plugin);
+        }
         // All image formats (svg if QtSvg library is used)
         QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, imagePlugins) {
