@@ -89,7 +89,7 @@ sudo: require
 dist: trusty
 
 before_install:
-  - sudo add-apt-repository ppa:beineri/opt-qt592-trusty -y
+  - sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
   - sudo apt-get update -qq
 
 install:
