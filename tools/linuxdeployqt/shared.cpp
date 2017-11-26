@@ -1204,10 +1204,15 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
         LogDebug() << "libQt5Gui detected";
         pluginList.append("platforms/libqxcb.so");
-	// Platform plugin contexts - apparently needed to enter special characters:
+	// Platform plugin contexts - apparently needed to enter special characters
         QStringList platformPluginContexts = QDir(pluginSourcePath +  QStringLiteral("/platforminputcontexts")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, platformPluginContexts) {
             pluginList.append(QStringLiteral("platforminputcontexts/") + plugin);
+        }
+	// Platform themes - make Qt look more native e.g., on Gtk+ 3 (if available in Qt installation)
+        QStringList platformThemes = QDir(pluginSourcePath +  QStringLiteral("/platformthemes")).entryList(QStringList() << QStringLiteral("*.so"));
+        foreach (const QString &plugin, platformThemes) {
+            pluginList.append(QStringLiteral("platformthemes/") + plugin);
         }
         // All image formats (svg if QtSvg library is used)
         QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
