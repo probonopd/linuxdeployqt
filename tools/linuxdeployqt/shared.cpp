@@ -307,7 +307,6 @@ bool copyCopyrightFile(QString libPath){
     myProcess->start(dpkgPath, arguments);
     myProcess->waitForFinished();
     QString strOut = myProcess->readAllStandardOutput().split(':')[0];
-    myProcess.close();
     if(strOut == "") return false;
 
     /* Find out the copyright file in that package */
@@ -315,8 +314,7 @@ bool copyCopyrightFile(QString libPath){
     myProcess->start(dpkgQueryPath, arguments);
     myProcess->waitForFinished();
     strOut = myProcess->readAllStandardOutput();
-    myProcess.close();
-	
+
      QStringList outputLines = strOut.split("\n", QString::SkipEmptyParts);
 
      foreach (QString outputLine, outputLines) {
@@ -357,8 +355,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     QProcess ldd;
     ldd.start("ldd", QStringList() << binaryPath);
     ldd.waitForFinished();
-    myProcess.close();
-	
+
     if (ldd.exitStatus() != QProcess::NormalExit || ldd.exitCode() != 0) {
         LogError() << "findDependencyInfo:" << ldd.readAllStandardError();
         return info;
@@ -613,8 +610,7 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
     }
 
     objdump.waitForFinished();
-    objdump.close();
-	
+
     if (objdump.exitCode() != 0) {
         LogError() << "getBinaryRPaths:" << objdump.readAllStandardError();
     }
@@ -780,7 +776,6 @@ QString runPatchelf(QStringList options)
         exit(1);
     }
     patchelftool.waitForFinished();
-    patchelftool.close();
     if (patchelftool.exitCode() != 0) {
         LogError() << "runPatchelf:" << patchelftool.readAllStandardError();
         // LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
@@ -929,8 +924,7 @@ void runStrip(const QString &binaryPath)
         // exit(1); // Do not exit because this could be a script that patchelf can't work on
     }
     patchelfread.waitForFinished();
-    patchelfread.close();
-	
+
     if (patchelfread.exitCode() != 0){
         LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardError();
         LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardOutput();
@@ -959,8 +953,7 @@ void runStrip(const QString &binaryPath)
         exit(1);
     }
     strip.waitForFinished();
-    strip.close();
-	
+
     if (strip.exitCode() == 0)
         return;
 
@@ -1059,7 +1052,7 @@ static QString captureOutput(const QString &command)
     QProcess process;
     process.start(command, QIODevice::ReadOnly);
     process.waitForFinished();
-    process.close();
+
     if (process.exitStatus() != QProcess::NormalExit) {
         LogError() << command << "crashed:" << process.readAllStandardError();
     } else if (process.exitCode() != 0) {
@@ -1525,7 +1518,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         return false;
     }
     qmlImportScanner.waitForFinished();
-    qmlImportScanner.close();
+
     // log qmlimportscanner errors
     qmlImportScanner.setReadChannel(QProcess::StandardError);
     QByteArray errors = qmlImportScanner.readAll();
