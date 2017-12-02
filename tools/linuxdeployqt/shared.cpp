@@ -58,6 +58,7 @@ int qtDetected = 0;
 bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
 QString qtLibrariesPath;
+QStringList extraQtPlugins;
 
 using std::cout;
 using std::endl;
@@ -1348,6 +1349,36 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         sourcePath = QDir::cleanPath(qtTranslationsPath + "/qtwebengine_locales");
         destinationPath = QDir::cleanPath(dstTranslations + "/qtwebengine_locales");
         recursiveCopy(sourcePath, destinationPath);
+    }
+
+    if (!extraQtPlugins.isEmpty()) {
+        LogNormal() << "Deploying extra plugins.";
+        foreach (const QString &plugin, extraQtPlugins) {
+            QDir pluginDirectory(pluginSourcePath + "/" + plugin);
+            if (pluginDirectory.exists()) {
+                //If it is a plugin directory we will deploy the entire directory
+                QStringList plugins = pluginDirectory.entryList(QStringList() << QStringLiteral("*.so"));
+                foreach (const QString &pluginFile, plugins) {
+                    pluginList.append(plugin + "/" + pluginFile);
+                    LogDebug() << plugin + "/" + pluginFile << "appended";
+                }
+            }
+            else {
+                //If it isn't a directory we asume it is an explicit plugin and we will try to deploy that
+                if (!pluginList.contains(plugin)) {
+                    if (QFile::exists(pluginSourcePath + "/" + plugin)) {
+                        pluginList.append(plugin);
+                        LogDebug() << plugin << "appended";
+                    }
+                    else {
+                        LogDebug() << "The plugin" << plugin << "was already deployed." ;
+                    }
+                }
+                else {
+                    LogWarning() << "The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
+                }
+            }
+        }
     }
 
     LogNormal() << "pluginList after having detected hopefully all required plugins:" << pluginList;

@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         qDebug() << "   -always-overwrite      : Copy files even if the target file exists";
         qDebug() << "   -qmake=<path>          : The qmake executable to use";
         qDebug() << "   -no-translations       : Skip deployment of translations.";
-        qDebug() << "   -extra-qt-libs=<list>  : List of extra Qt libraries which should be deployed, separated by comma.";
+        qDebug() << "   -extra-plugins=<list>  : List of extra plugins which should be deployed, separated by comma.";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
@@ -174,13 +174,14 @@ int main(int argc, char **argv)
     extern bool bundleAllButCoreLibs;
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
+    extern QStringList librarySearchPath;
     extern bool alwaysOwerwriteEnabled;    
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
     QString qmakeExecutable;
-    QStringList extraQtLibraries;
+    extern QStringList extraQtPlugins;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -382,10 +383,10 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
-        } else if (argument.startsWith("-extra-qt-libs=")) {
+        } else if (argument.startsWith("-extra-plugins=")) {
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
-            extraQtLibraries = QString(argument.mid(index+1)).split(",");
+            extraQtPlugins = QString(argument.mid(index+1)).split(",");
         } else if (argument.startsWith("-")) {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
@@ -401,42 +402,6 @@ int main(int argc, char **argv)
 
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
                                                       qmakeExecutable);
-
-    if (extraQtLibraries.size() > 0) {
-        LogDebug() << "Deploying extra Qt libraries.";
-        foreach (QString extraQtLibrary, extraQtLibraries) {
-            if (!extraQtLibrary.contains(QRegExp(".*libQt.*"))) {
-                LogWarning() << "File" << extraQtLibrary << "isn't an Qt-specific library!";
-            }
-            else {
-                const QString correctFileName = extraQtLibrary.remove(QRegExp("\\..+")).append(".so.5");
-                const QString sourceFilePath = deploymentInfo.qtLibrariesPath + correctFileName;
-                const QString destinationFilePath = appDirPath + "/usr/lib/" + correctFileName;
-                LogDebug() << "Source file name:" << correctFileName;
-                LogDebug() << "Source file path:" << sourceFilePath;
-                LogDebug() << "Destination file path:" << destinationFilePath;
-                if (QFile::exists(sourceFilePath)) {
-                    if (!QFile::exists(destinationFilePath)) {
-                        if (!QFile::copy(sourceFilePath, destinationFilePath)) {
-                            LogError() << "Error copying file" << correctFileName << "\n"
-                                       << "from:" << sourceFilePath << "\n"
-                                       << "to:" + destinationFilePath;
-                            return 1;
-                        }
-                        LogDebug() << "File" << correctFileName << "copied";
-                    }
-                    else {
-                        LogDebug() << "File" << correctFileName << "exists and will not be copied!";
-                    }
-                }
-                else {
-                    LogWarning() << "File" << correctFileName << " cannot be found at:" << sourceFilePath << "\n"
-                                 << "The packaging will continue, but if you are really in need of"
-                                 << "it then make sure the library exists, name is correct and try again.";
-                }
-            }
-        }
-    }
 
     // Convenience: Look for .qml files in the current directoty if no -qmldir specified.
     if (qmlDirs.isEmpty()) {
