@@ -57,7 +57,6 @@ int logLevel = 1;
 int qtDetected = 0;
 bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
-QString qtLibrariesPath;
 QStringList extraQtPlugins;
 
 using std::cout;
@@ -413,18 +412,6 @@ LddInfo findDependencyInfo(const QString &binaryPath)
             dylib.currentVersion = 0;
             */
             info.dependencies << dylib;
-        }
-    }
-
-    //It will store the first Qt libraries path it encounters
-    if (!binaryPath.contains(QRegExp(".+lib.+")) && qtLibrariesPath.trimmed().size() == 0) {
-        LogDebug() << "Saving the path for Qt libraries.";
-        QString librarySearchPath = outputLines.filter("libQt").at(1);
-        const QRegularExpressionMatch match = regexp.match(librarySearchPath);
-        if (match.hasMatch()) {
-            qtLibrariesPath = match.captured(1).trimmed();
-            qtLibrariesPath = qtLibrariesPath.remove(QRegExp("libQt.+"));
-            LogDebug() << "Qt libraries path found: " << qtLibrariesPath;
         }
     }
 
@@ -1005,7 +992,6 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
     deploymentInfo.requiresQtWidgetsLibrary = false;
     deploymentInfo.useLoaderPath = useLoaderPath;
     deploymentInfo.pluginPath = qtToBeBundledInfo.value("QT_INSTALL_PLUGINS");
-    deploymentInfo.qtLibrariesPath = qtLibrariesPath;
     QSet<QString> rpathsUsed;
 
     while (libraries.isEmpty() == false) {

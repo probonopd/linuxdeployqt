@@ -95,7 +95,6 @@ class DeploymentInfo
 {
 public:
     QString qtPath;
-    QString qtLibrariesPath;
     QString pluginPath;
     QStringList deployedLibraries;
     quint64 usedModulesMask;
