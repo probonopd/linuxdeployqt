@@ -45,6 +45,7 @@ extern bool runStripEnabled;
 extern bool bundleAllButCoreLibs;
 extern bool fhsLikeMode;
 extern QString fhsPrefix;
+extern QStringList extraQtPlugins;
 
 class LibraryInfo
 {

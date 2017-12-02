@@ -47,16 +47,20 @@ int main(int argc, char **argv)
         qDebug() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
         qDebug() << "";
         qDebug() << "Options:";
-        qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
-        qDebug() << "   -no-plugins         : Skip plugin deployment";
-        qDebug() << "   -appimage           : Create an AppImage (implies -bundle-non-qt-libs)";
-        qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
-        qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
-        qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
-        qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
-        qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
-        qDebug() << "   -qmake=<path>       : The qmake executable to use";
-        qDebug() << "   -no-translations    : Skip deployment of translations.";
+        qDebug() << "   -verbose=<0-3>         : 0 = no output, 1 = error/warning (default),";
+        qDebug() << "                            2 = normal, 3 = debug";
+        qDebug() << "   -no-plugins            : Skip plugin deployment";
+        qDebug() << "   -appimage              : Create an AppImage (implies -bundle-non-qt-libs)";
+        qDebug() << "   -no-strip              : Don't run 'strip' on the binaries";
+        qDebug() << "   -bundle-non-qt-libs    : Also bundle non-core, non-Qt libraries";
+        qDebug() << "   -executable=<path>     : Let the given executable use the deployed libraries";
+        qDebug() << "                            too";
+        qDebug() << "   -qmldir=<path>         : Scan for QML imports in the given path";
+        qDebug() << "   -always-overwrite      : Copy files even if the target file exists";
+        qDebug() << "   -qmake=<path>          : The qmake executable to use";
+        qDebug() << "   -no-translations       : Skip deployment of translations.";
+        qDebug() << "   -extra-plugins=<list>  : List of extra plugins which should be deployed,";
+        qDebug() << "                            separated by comma.";
         qDebug() << "";
         qDebug() << "linuxdeployqt takes an application as input and makes it";
         qDebug() << "self-contained by copying in the Qt libraries and plugins that";
@@ -173,13 +177,14 @@ int main(int argc, char **argv)
     extern bool bundleAllButCoreLibs;
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
-    extern bool alwaysOwerwriteEnabled;
     extern QStringList librarySearchPath;
+    extern bool alwaysOwerwriteEnabled;    
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
     QString qmakeExecutable;
+    extern QStringList extraQtPlugins;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -381,6 +386,10 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
+        } else if (argument.startsWith("-extra-plugins=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            extraQtPlugins = QString(argument.mid(index+1)).split(",");
         } else if (argument.startsWith("-")) {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
