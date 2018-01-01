@@ -2,7 +2,7 @@
 
 This Linux Deployment Tool, `linuxdeployqt`, takes an application as input and makes it self-contained by copying in the resources that the application uses (like libraries, graphics, and plugins) into a bundle. The resulting bundle can be distributed as an AppDir or as an [AppImage](https://appimage.org/) to users, or can be put into cross-distribution packages. It can be used as part of the build process to deploy applications written in C, C++, and other compiled languages with systems like `CMake`, `qmake`, and `make`. When used on Qt-based applications, it can bundle a specific minimal subset of Qt required to run the application.
 
-![](https://user-images.githubusercontent.com/2480569/34470806-31909284-ef3a-11e7-9d9b-7dcaccc3d1d2.jpg)
+![](https://user-images.githubusercontent.com/2480569/34471167-d44bd55e-ef41-11e7-941e-e091a83cae38.png)
 
 ## Differences to macdeployqt
 This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt-5/osx-deployment.html), `macdeployqt` in the tools applications of the Qt Toolkit, but has been changed to a slightly different logic and other tools needed for Linux.
