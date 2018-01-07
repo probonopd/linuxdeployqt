@@ -63,7 +63,7 @@ fi
 7z x "$FILE" -o"$QTDIR" -aoa -y >/dev/null
 
 QTPATH=$(dirname $(find "$QTDIR" -executable -name qmake))
-if [ ! -z $QTPATH ] ; then echo export PATH=$QTPATH:\$PATH && export PATH=$QTPATH:$PATH ; fi
+if [ ! -z "$QTPATH" ] ; then echo export PATH=$QTPATH:\$PATH && export PATH=$QTPATH:$PATH ; fi
 
 QTLIBPATH=$(dirname $(find "$QTDIR" -name "libQt*Core.so"))
-if [ ! -z $QTLIBPATH ] ; then echo export LD_LIBRARY_PATH=$QTLIBPATH:\$LD_LIBRARY_PATH && export LD_LIBRARY_PATH=$QTLIBPATH:$LD_LIBRARY_PATH ; fi
+if [ ! -z "$QTLIBPATH" ] ; then echo export LD_LIBRARY_PATH=$QTLIBPATH:\$LD_LIBRARY_PATH && export LD_LIBRARY_PATH=$QTLIBPATH:$LD_LIBRARY_PATH ; fi
