@@ -1,0 +1,69 @@
+#!/bin/bash
+
+#
+# The missing Qt downloader for Travis CI
+# Ideally something like this (but done properly) would be offered by Qt officially
+#
+# To make the exports work, this file needs to be sourced rather than executed
+#
+
+# Install 7zip if it is not there yet
+which 7z >/dev/null 2>&1 || ( sudo apt-get update ; sudo apt-get -y install p7zip )
+
+QTCOMPILER="gcc_64"
+
+if [ "$QTCOMPILER" == "gcc_64" ] ; then QTARCH="x64" ; fi
+
+# Get the available versions
+QTVERSIONS=$(wget -q "http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/" -O - | grep qt5_ | cut -d '"' -f 12 | grep -v examples | sed -e 's|/||g' | sort -V -r)
+echo "Qt versions available from download.qt.io:"
+echo "$QTVERSIONS"
+if [ -z $QTVERSION ] ; then QTVERSION=$(echo $QTVERSIONS | cut -d " " -f 1) ; fi
+echo "Using $QTVERSION; override by setting \$QTVERSION"
+echo ""
+
+# List the Qt components for that version
+URL="http://download.qt.io/online/qtsdkrepository/linux_$QTARCH/desktop/$QTVERSION/"
+QTCOMPONENTS=$(wget -q "$URL" -O - | cut -d '"' -f 12 | grep "$QTCOMPILER" | sed -e 's|/||g' | sort)
+echo "Qt components available from download.qt.io:"
+echo "$QTCOMPONENTS"
+if [ -z $QTCOMPONENT ] ; then QTCOMPONENT=$(echo $QTCOMPONENTS | cut -d " " -f 1) ; fi
+echo "Using $QTCOMPONENT; override by setting \$QTCOMPONENT"
+echo ""
+
+# List the Qt subversions
+URL="http://download.qt.io/online/qtsdkrepository/linux_$QTARCH/desktop/$QTVERSION/$QTCOMPONENT"
+QTSUBVERSIONS=$(wget -q "$URL" -O - | cut -d '"' -f 12 | sed -e 's|/||g' | grep "meta.7z$" | sort -V -r | uniq | sed -e 's|meta.7z||g')
+echo "Qt subversions available from download.qt.io:"
+echo "$QTSUBVERSIONS"
+if [ -z $QTSUBVERSION ] ; then QTSUBVERSION=$(echo $QTSUBVERSIONS | cut -d " " -f 1) ; fi
+echo "Using $QTSUBVERSION; override by setting \$QTSUBVERSION"
+echo ""
+
+# List the Qt subcomponents for that subversion
+URL="http://download.qt.io/online/qtsdkrepository/linux_$QTARCH/desktop/$QTVERSION/$QTCOMPONENT/"
+wget -q "$URL" -O - | cut -d '"' -f 12 | sed -e 's|/||g' | grep "7z$" | grep $QTSUBVERSION | sort | sed -e 's|'$QTSUBVERSION'||g' | cut -d "-" -f 1
+echo "Qt subcomponents available from download.qt.io:"
+echo "$QTSUBCOMPONENTS"
+if [ -z $QTSUBCOMPONENT ] ; then QTSUBCOMPONENT=qtbase ; fi
+echo "Using $QTSUBCOMPONENT; override by setting \$QTSUBCOMPONENT"
+echo ""
+
+FILE=$(wget -q "$URL" -O - | cut -d '"' -f 12 | sed -e 's|/||g' | grep "7z$" | grep $QTSUBVERSION | grep $QTSUBCOMPONENT)
+echo "$URL$FILE"
+
+wget -c "$URL$FILE"
+
+if [ -z $QTDIR ] ; then
+  mkdir -p "$HOME/Qt"
+  QTDIR=$(readlink -f "$HOME/Qt")
+  echo "Using $QTDIR; override by setting \$QTDIR"
+fi
+
+7z x "$FILE" -o"$QTDIR" -aoa -y >/dev/null
+
+QTPATH=$(dirname $(find "$QTDIR" -executable -name qmake))
+if [ ! -z $QTPATH ] ; then echo export PATH=$QTPATH:\$PATH && export PATH=$QTPATH:$PATH ; fi
+
+QTLIBPATH=$(dirname $(find "$QTDIR" -name "libQt*Core.so"))
+if [ ! -z $QTLIBPATH ] ; then echo export LD_LIBRARY_PATH=$QTLIBPATH:\$LD_LIBRARY_PATH && export LD_LIBRARY_PATH=$QTLIBPATH:$LD_LIBRARY_PATH ; fi
