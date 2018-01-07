@@ -8,7 +8,7 @@
 #
 
 # Install 7zip if it is not there yet
-which p7zip >/dev/null 2>&1 || ( sudo apt-get update ; sudo apt-get -y install p7zip )
+which 7zr >/dev/null 2>&1 || ( sudo apt-get update ; sudo apt-get -y install p7zip )
 
 QTCOMPILER="gcc_64"
 
@@ -60,7 +60,7 @@ if [ -z $QTDIR ] ; then
   echo "Using $QTDIR; override by setting \$QTDIR"
 fi
 
-p7zip x "$FILE" -o"$QTDIR" -aoa -y >/dev/null
+7zr x "$FILE" -o"$QTDIR" -aoa -y >/dev/null
 
 QTPATH=$(dirname $(find "$QTDIR" -executable -name qmake))
 if [ ! -z "$QTPATH" ] ; then echo export PATH=$QTPATH:\$PATH && export PATH=$QTPATH:$PATH ; fi
