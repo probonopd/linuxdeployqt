@@ -17,5 +17,5 @@ sudo apt-get -y install binutils xpra zsync desktop-file-utils
 
 # Download Qt from qt.io
 . qtdownload
-QTSUBMODULE=qtdeclarative ; . qtdownload
+QTSUBCOMPONENT=qtdeclarative ; . qtdownload
 QTCOMPONENT=qt.qt5.5100.qtwebengine.gcc_64 ;  QTSUBCOMPONENT=qtwebengine ; . qtdownload
