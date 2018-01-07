@@ -14,9 +14,9 @@ before_install:
 script:
  - ./tests/tests-ci.sh
 
-after_success:
-  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-  - bash ./upload.sh ./linuxdeployqt-*.AppImage*
+#after_success:
+#  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+#  - bash ./upload.sh ./linuxdeployqt-*.AppImage*
 
 after_script:
   - "xpra stop :99"
