@@ -16,12 +16,6 @@ qmake
 make
 ```
 
-* Optional if you want to install `linuxdeployqt` into your Qt installation, and make it a part of your Qt just like any other tool (qmake, etc.)
-
-```
-sudo make install
-```
-
 * Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS). To learn more about this, see http://blog.qt.io/blog/2011/10/28/rpath-and-runpath/
 
 ```

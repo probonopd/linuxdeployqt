@@ -2,7 +2,7 @@
 
 set -e
 
-wget https://ftp.fau.de/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
+wget -c "https://ftp.fau.de/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb"
 echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf_0.8-2_amd64.deb" | sha256sum -c
 sudo dpkg -i patchelf_0.8-2_amd64.deb
 
