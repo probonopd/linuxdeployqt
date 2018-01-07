@@ -8,11 +8,8 @@ env:
   global:
     - DISPLAY=:99
 
-before_install:
-  - ./tests/tests-environment.sh
-
 script:
- - ./tests/tests-ci.sh
+  - ./tests/travis.sh
 
 #after_success:
 #  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
