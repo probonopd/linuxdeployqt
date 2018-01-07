@@ -2,8 +2,8 @@
 
 set -x
 
-source /opt/qt*/bin/qt*-env.sh
-/opt/qt*/bin/qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
+# source /opt/qt*/bin/qt*-env.sh
+qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
 make -j
 
 mkdir -p linuxdeployqt.AppDir/usr/bin/
