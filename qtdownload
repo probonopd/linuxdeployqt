@@ -49,7 +49,7 @@ if [ -z $QTSUBCOMPONENT ] ; then QTSUBCOMPONENT=qtbase ; fi
 echo "Using $QTSUBCOMPONENT; override by setting \$QTSUBCOMPONENT"
 echo ""
 
-FILE=$(wget -q "$URL" -O - | cut -d '"' -f 12 | sed -e 's|/||g' | grep "7z$" | grep $QTSUBVERSION | grep $QTSUBCOMPONENT)
+FILE=$(wget -q "$URL" -O - | cut -d '"' -f 12 | sed -e 's|/||g' | grep "7z$" | grep $QTSUBVERSION | grep $QTSUBCOMPONENT-)
 echo "$URL$FILE"
 
 wget -c "$URL$FILE"
