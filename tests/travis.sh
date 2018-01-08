@@ -21,6 +21,7 @@ QTSUBCOMPONENT=icu ; . qtdownload
 QTSUBCOMPONENT=qtquickcontrols ; . qtdownload
 QTSUBCOMPONENT=qtquickcontrols2 ; . qtdownload
 QTSUBCOMPONENT=qtdeclarative ; . qtdownload
+QTSUBCOMPONENT=qtwebchannel ; . qtdownload
 QTCOMPONENT=qt.qt5.5100.qtwebengine.gcc_64 ;  QTSUBCOMPONENT=qtwebengine ; . qtdownload
 #wget -c "https://raw.githubusercontent.com/RPCS3/rpcs3/master/qt-installer-noninteractive.qs"
 #sed -i -e 's|.*widget.selectComponent.*|widget.selectComponent("qt.qt5.5100.gcc_64");|g' qt-installer-noninteractive.qs
