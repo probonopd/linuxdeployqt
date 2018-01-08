@@ -20,6 +20,7 @@ echo "Qt versions available from download.qt.io:"
 echo "$QTVERSIONS"
 if [ -z $QTVERSION ] ; then QTVERSION=$(echo $QTVERSIONS | cut -d " " -f 1) ; fi
 echo "Using $QTVERSION; override by setting \$QTVERSION"
+sed -i -e 's|^QT_EDITION =.*|QT_EDITION = OpenSource|g' /home/me/Qt5.10.0b/5.10.0/gcc_64/mkspecs/qconfig.pri
 echo ""
 
 # List the Qt components for that version
@@ -82,7 +83,7 @@ cat > $QTPATH/qt.conf <<EOF
 Prefix = ..
 EOF
 
-# The following strings are missing in libQt5Core
-# qt_lcnsprod=OpenSource
-# qt_lcnsuser=Open Source
-
+# Workaround for:
+# Error: Qt license file was not found!
+# Project ERROR: License check failed! Giving up ...
+sed -i -e 's|^QT_EDITION =.*|QT_EDITION = OpenSource|g' "$QTDIR/mkspecs/qconfig.pri"
