@@ -85,4 +85,4 @@ EOF
 # Workaround for:
 # Error: Qt license file was not found!
 # Project ERROR: License check failed! Giving up ...
-sed -i -e 's|^QT_EDITION =.*|QT_EDITION = OpenSource|g' "$QTDIR/mkspecs/qconfig.pri"
+find "$QTDIR" -type f -name "qconfig.pri" -exec sed -i -e 's|^QT_EDITION =.*|QT_EDITION = OpenSource|g' {} \;
