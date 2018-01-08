@@ -25,8 +25,8 @@ chmod a+x ./qt-unified-linux-x64-online.run
 export QT_QPA_PLATFORM=minimal
 ./qt-unified-linux-x64-online.run --script qt-installer-noninteractive.qs --no-force-installations --verbose
 export CMAKE_PREFIX_PATH=$(readlink -f ~/Qt/*/gcc_64/lib/cmake)
-export LD_LIBRARY_PATH=$(readlink -f~/Qt/*/gcc_64/lib)
-export PATH=$(readlink -f~/Qt/*/gcc_64/bin/):${PATH}
+export LD_LIBRARY_PATH=$(readlink -f ~/Qt/*/gcc_64/lib)
+export PATH=$(readlink -f ~/Qt/*/gcc_64/bin/):${PATH}
 qmake -v
 
 qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
