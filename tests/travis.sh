@@ -20,7 +20,7 @@ sudo apt-get -y install binutils xpra zsync desktop-file-utils
 # QTSUBCOMPONENT=qtdeclarative ; . qtdownload
 # QTCOMPONENT=qt.qt5.5100.qtwebengine.gcc_64 ;  QTSUBCOMPONENT=qtwebengine ; . qtdownload
 wget -c "https://raw.githubusercontent.com/RPCS3/rpcs3/master/qt-installer-noninteractive.qs"
-sed -i -e 's|.*widget.selectComponent.*|widget.selectComponent("qt.qt5.5100.gcc_64"); widget.selectComponent("qt.qt5.5100.qtwebengine.gcc_64");|g'
+sed -i -e 's|.*widget.selectComponent.*|widget.selectComponent("qt.qt5.5100.gcc_64"); widget.selectComponent("qt.qt5.5100.qtwebengine.gcc_64");|g' qt-installer-noninteractive.qs
 wget -c "http://download.qt.io/official_releases/online_installers/qt-unified-linux-x64-online.run" ; chmod a+x ./*.run
 QT_QPA_PLATFORM=minimal ./qt-unified-linux-x64-online.run --script qt-installer-noninteractive.qs --no-force-installations --verbose
 export CMAKE_PREFIX_PATH=$(readlink -f ~/Qt/*/gcc_64/lib/cmake) ; export LD_LIBRARY_PATH=$(readlink -f ~/Qt/*/gcc_64/lib) ; export PATH=$(readlink -f ~/Qt/*/gcc_64/bin/):${PATH}
