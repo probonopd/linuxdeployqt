@@ -18,6 +18,9 @@ sudo apt-get -y install binutils xpra zsync desktop-file-utils
 # Download Qt from qt.io
 . qtdownload
 QTSUBCOMPONENT=icu ; . qtdownload
+QTSUBCOMPONENT=qtquickcontrols ; . qtdownload
+QTSUBCOMPONENT=qtquickcontrols2 ; . qtdownload
+QTSUBCOMPONENT=icu ; . qtdownload
 QTSUBCOMPONENT=qtdeclarative ; . qtdownload
 QTCOMPONENT=qt.qt5.5100.qtwebengine.gcc_64 ;  QTSUBCOMPONENT=qtwebengine ; . qtdownload
 #wget -c "https://raw.githubusercontent.com/RPCS3/rpcs3/master/qt-installer-noninteractive.qs"
