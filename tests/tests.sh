@@ -33,17 +33,17 @@ cd ../../../
 ###############################################################################
 # Build the sample Qt WebEngine Application
 ###############################################################################
-#
-# cd tests/QtWebEngineApplication/
-# if [ -e build/ ] ; then
-#   rm -rf build/
-# fi
-# mkdir build
-# cd build/
-# qmake ../QtWebEngineApplication.pro
-# make -j2
-#
-# cd ../../../
+
+cd tests/QtWebEngineApplication/
+if [ -e build/ ] ; then
+  rm -rf build/
+fi
+mkdir build
+cd build/
+qmake ../QtWebEngineApplication.pro
+make -j2
+
+cd ../../../
 
 ###############################################################################
 # Workaround for:
