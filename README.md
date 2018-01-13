@@ -24,16 +24,17 @@ Please download __linuxdeployqt-x86_64.AppImage__ from the [Releases](https://gi
 Usage: linuxdeployqt app-binary [options]
 
 Options:
-   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug
-   -no-plugins         : Skip plugin deployment
-   -appimage           : Create an AppImage
-   -no-strip           : Don't run 'strip' on the binaries
-   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries
-   -executable=<path>  : Let the given executable use the deployed libraries too
-   -qmldir=<path>      : Scan for QML imports to bundle from the given directory, determined by Qt's qmlimportscanner
-   -always-overwrite   : Copy files even if the target file exists
-   -qmake=<path>       : The qmake executable to use
-   -no-translations    : Skip deployment of translations
+   -verbose=<0-3>        : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug
+   -no-plugins           : Skip plugin deployment
+   -appimage             : Create an AppImage
+   -no-strip             : Don't run 'strip' on the binaries
+   -bundle-non-qt-libs   : Also bundle non-core, non-Qt libraries
+   -executable=<path>    : Let the given executable use the deployed libraries too
+   -qmldir=<path>        : Scan for QML imports to bundle from the given directory, determined by Qt's qmlimportscanner
+   -always-overwrite     : Copy files even if the target file exists
+   -qmake=<path>         : The qmake executable to use
+   -no-translations      : Skip deployment of translations
+   -extra-plugins=<list> : List of extra plugins which should be deployed, separated by comma
 
 linuxdeployqt takes an application as input and makes it
 self-contained by copying in the Qt libraries and plugins that
@@ -79,6 +80,18 @@ find $HOME/build-*-*_Qt_* \( -name "moc_*" -or -name "*.o" -or -name "qrc_*" -or
 ```
 
 Alternatively, you could use `$DESTDIR`.
+
+#### Adding extra Qt plugins 
+
+If you want aditional plugins which the tool doesn't deploy, for a variety of reasons, you can use the -extra-plugins argument and include a list of plugins separated by a comma.  
+The plugins deployed are from the Qt installation pointed out by `qmake -v`.  
+You can deploy entire plugin directories, a specific directory or a mix of both.
+
+Usage examples: 
+
+1. `-extra-plugins=sqldrivers/libqmsql.so,iconengines/libqsvgicon.so`  
+2. `-extra-plugins=sqldrivers,iconengines/libqsvgicon.so`  
+3. `-extra-plugins=sqldrivers,iconengines,mediaservice,gamepads`
 
 ## Using linuxdeployqt with Travis CI
 
