@@ -6,6 +6,9 @@ source /opt/qt*/bin/qt*-env.sh
 /opt/qt*/bin/qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
 make -j
 
+# exit on failure
+set -e
+
 mkdir -p linuxdeployqt.AppDir/usr/{bin,lib}
 cp /usr/bin/{patchelf,desktop-file-validate} /usr/local/bin/{appimagetool,zsyncmake} linuxdeployqt.AppDir/usr/bin/
 cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
@@ -33,9 +36,14 @@ ulimit -c unlimited
 ulimit -a -S
 ulimit -a -H
 
-bash -e tests/tests.sh
+# error handling performed separately
+set +e
 
-if [ $? -ne 0 ]; then
+#bash -e tests/tests.sh
+true
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
   echo "FAILURE: linuxdeployqt CRASHED -- uploading files for debugging to transfer.sh"
   set -v
   [ -e /tmp/coredump ] && curl --upload-file /tmp/coredump https://transfer.sh/coredump

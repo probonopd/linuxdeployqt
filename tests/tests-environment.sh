@@ -17,4 +17,4 @@ sudo cp squashfs-root/usr/bin/* /usr/local/bin/
 sudo cp -r squashfs-root/usr/lib/appimagekit /usr/local/lib/
 cd -
 
-sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra zsync desktop-file-utils
+sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra zsync desktop-file-utils gcc g++ make libgl1-mesa-dev fuse psmisc qt59translations
