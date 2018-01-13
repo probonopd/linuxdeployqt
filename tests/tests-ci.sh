@@ -6,11 +6,12 @@ source /opt/qt*/bin/qt*-env.sh
 /opt/qt*/bin/qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
 make -j
 
-mkdir -p linuxdeployqt.AppDir/usr/bin/
-cp /usr/bin/{patchelf,desktop-file-validate} /usr/local/bin/{appimagetool,mksquashfs,zsyncmake} linuxdeployqt.AppDir/usr/bin/
+mkdir -p linuxdeployqt.AppDir/usr/{bin,lib}
+cp /usr/bin/{patchelf,desktop-file-validate} /usr/local/bin/{appimagetool,zsyncmake} linuxdeployqt.AppDir/usr/bin/
+cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
+cp -r /usr/local/lib/appimagekit linuxdeployqt.AppDir/usr/lib/
 find linuxdeployqt.AppDir/
 export VERSION=continuous
-cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
 ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/desktop-file-validate -verbose=3 -bundle-non-qt-libs
 ./bin/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt.desktop -verbose=3 -appimage
 ls -lh
