@@ -1158,9 +1158,6 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    LogDebug() << "Changed LD_LIBRARY_PATH:" << newPath;
    setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
 
-   foreach (const QString &executable, QStringList() << applicationBundle.binaryPath << additionalExecutables) {
-       changeIdentification("$ORIGIN/" + QFileInfo(executable).dir().relativeFilePath(libraryPath) + "/" + bundleLibraryDirectory, QFileInfo(executable).canonicalFilePath());
-   }
    applicationBundle.libraryPaths = findAppLibraries(appDirPath);
    LogDebug() << "applicationBundle.libraryPaths:" << applicationBundle.libraryPaths;
 
@@ -1175,17 +1172,24 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    LogDebug() << "allRPaths:" << allRPaths;
 
    QList<LibraryInfo> libraries = getQtLibrariesForPaths(allBinaryPaths, appDirPath, allRPaths);
+
+   DeploymentInfo depInfo;
    if (libraries.isEmpty() && !alwaysOwerwriteEnabled) {
-        LogWarning() << "Could not find any external Qt libraries to deploy in" << appDirPath;
-        LogWarning() << "Perhaps linuxdeployqt was already used on" << appDirPath << "?";
-        LogWarning() << "If so, you will need to rebuild" << appDirPath << "before trying again.";
-        LogWarning() << "Or ldd does not find the external Qt libraries but sees the system ones.";
-        LogWarning() << "If so, you will need to set LD_LIBRARY_PATH to the directory containing the external Qt libraries before trying again.";
-        LogWarning() << "FIXME: https://github.com/probonopd/linuxdeployqt/issues/2";
-        return DeploymentInfo();
+      LogWarning() << "Could not find any external Qt libraries to deploy in" << appDirPath;
+      LogWarning() << "Perhaps linuxdeployqt was already used on" << appDirPath << "?";
+      LogWarning() << "If so, you will need to rebuild" << appDirPath << "before trying again.";
+      LogWarning() << "Or ldd does not find the external Qt libraries but sees the system ones.";
+      LogWarning() << "If so, you will need to set LD_LIBRARY_PATH to the directory containing the external Qt libraries before trying again.";
+      LogWarning() << "FIXME: https://github.com/probonopd/linuxdeployqt/issues/2";
    } else {
-       return deployQtLibraries(libraries, applicationBundle.path, allBinaryPaths, !additionalExecutables.isEmpty());
+      depInfo = deployQtLibraries(libraries, applicationBundle.path, allBinaryPaths, !additionalExecutables.isEmpty());
    }
+
+   foreach (const QString &executable, QStringList() << applicationBundle.binaryPath << additionalExecutables) {
+      changeIdentification("$ORIGIN/" + QFileInfo(executable).dir().relativeFilePath(libraryPath), QFileInfo(executable).canonicalFilePath());
+   }
+
+   return depInfo;
 }
 
 void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath,
