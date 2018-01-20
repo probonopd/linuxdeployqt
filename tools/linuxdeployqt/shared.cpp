@@ -391,7 +391,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         }
     }
 
-    if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) && (!lddOutputContainsLinuxVDSO(output))) {
+    if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) && (!lddOutputContainsLinuxVDSO(output)) && (!binaryPath.contains("platformthemes"))) {
         const QRegularExpressionMatch match = regexp.match(outputLines.first());
         if (match.hasMatch())  {
             info.installName = match.captured(1);
