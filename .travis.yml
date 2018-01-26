@@ -12,11 +12,8 @@ before_install:
   - ./tests/tests-environment.sh
 
 before_script:
-  # populate tags
-  - git fetch origin
+  # fetch all tags
   - git fetch --unshallow
-  - git rev-list --tags --skip=1 --max-count=1
-  - git describe --tags $(git rev-list --tags --skip=1 --max-count=1) --abbrev=0
 
 script:
  - ./tests/tests-ci.sh
