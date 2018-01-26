@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <QSettings>
 #include <QDirIterator>
+#include <sstream>
 
 int main(int argc, char **argv)
 {
@@ -43,41 +44,61 @@ int main(int argc, char **argv)
 
     QString firstArgument = QString::fromLocal8Bit(argv[1]);
 
-    if (argc < 2 || firstArgument.startsWith("-")) {
-        qDebug() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
-        qDebug() << "";
-        qDebug() << "Options:";
-        qDebug() << "   -verbose=<0-3>         : 0 = no output, 1 = error/warning (default),";
-        qDebug() << "                            2 = normal, 3 = debug";
-        qDebug() << "   -no-plugins            : Skip plugin deployment";
-        qDebug() << "   -appimage              : Create an AppImage (implies -bundle-non-qt-libs)";
-        qDebug() << "   -no-strip              : Don't run 'strip' on the binaries";
-        qDebug() << "   -bundle-non-qt-libs    : Also bundle non-core, non-Qt libraries";
-        qDebug() << "   -executable=<path>     : Let the given executable use the deployed libraries";
-        qDebug() << "                            too";
-        qDebug() << "   -qmldir=<path>         : Scan for QML imports in the given path";
-        qDebug() << "   -always-overwrite      : Copy files even if the target file exists";
-        qDebug() << "   -qmake=<path>          : The qmake executable to use";
-        qDebug() << "   -no-translations       : Skip deployment of translations.";
-        qDebug() << "   -extra-plugins=<list>  : List of extra plugins which should be deployed,";
-        qDebug() << "                            separated by comma.";
-        qDebug() << "";
-        qDebug() << "linuxdeployqt takes an application as input and makes it";
-        qDebug() << "self-contained by copying in the Qt libraries and plugins that";
-        qDebug() << "the application uses.";
-        qDebug() << "";
-        qDebug() << "By default it deploys the Qt instance that qmake on the $PATH points to.";
-        qDebug() << "The '-qmake' option can be used to point to the qmake executable";
-        qDebug() << "to be used instead.";
-        qDebug() << "";
-        qDebug() << "Plugins related to a Qt library are copied in with the library.";
+    // print version statement
+    std::stringstream version;
+    version << "linuxdeployqt " << LINUXDEPLOYQT_VERSION
+            << " (commit " << LINUXDEPLOYQT_GIT_COMMIT << "), "
+            << "build " << BUILD_NUMBER << " built on " << BUILD_DATE;
+    qInfo().noquote() << QString::fromStdString(version.str());
+
+    // due to the structure of the argument parser, we have to check all arguments at first to check whether the user
+    // wants to get the version only
+    // TODO: replace argument parser with position independent, less error prone version
+    for (int i = 0; i < argc; i++ ) {
+        QString argument = argv[i];
+        if (argument == "-version" || argument == "-V" || argument == "--version") {
+            // can just exit normally, version has been printed above
+            return 0;
+        }
+    }
+
+    if (argc < 2 || (firstArgument.startsWith("-"))) {
+        qInfo() << "";
+        qInfo() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
+        qInfo() << "";
+        qInfo() << "Options:";
+        qInfo() << "   -verbose=<0-3>         : 0 = no output, 1 = error/warning (default),";
+        qInfo() << "                            2 = normal, 3 = debug";
+        qInfo() << "   -no-plugins            : Skip plugin deployment";
+        qInfo() << "   -appimage              : Create an AppImage (implies -bundle-non-qt-libs)";
+        qInfo() << "   -no-strip              : Don't run 'strip' on the binaries";
+        qInfo() << "   -bundle-non-qt-libs    : Also bundle non-core, non-Qt libraries";
+        qInfo() << "   -executable=<path>     : Let the given executable use the deployed libraries";
+        qInfo() << "                            too";
+        qInfo() << "   -qmldir=<path>         : Scan for QML imports in the given path";
+        qInfo() << "   -always-overwrite      : Copy files even if the target file exists";
+        qInfo() << "   -qmake=<path>          : The qmake executable to use";
+        qInfo() << "   -no-translations       : Skip deployment of translations.";
+        qInfo() << "   -extra-plugins=<list>  : List of extra plugins which should be deployed,";
+        qInfo() << "                            separated by comma.";
+        qInfo() << "   -version               : Print version statement and exit.";
+        qInfo() << "";
+        qInfo() << "linuxdeployqt takes an application as input and makes it";
+        qInfo() << "self-contained by copying in the Qt libraries and plugins that";
+        qInfo() << "the application uses.";
+        qInfo() << "";
+        qInfo() << "By default it deploys the Qt instance that qmake on the $PATH points to.";
+        qInfo() << "The '-qmake' option can be used to point to the qmake executable";
+        qInfo() << "to be used instead.";
+        qInfo() << "";
+        qInfo() << "Plugins related to a Qt library are copied in with the library.";
         /* TODO: To be implemented
         qDebug() << "The accessibility, image formats, and text codec";
         qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
         */
-        qDebug() << "";
-        qDebug() << "See the \"Deploying Applications on Linux\" topic in the";
-        qDebug() << "documentation for more information about deployment on Linux.";
+        qInfo() << "";
+        qInfo() << "See the \"Deploying Applications on Linux\" topic in the";
+        qInfo() << "documentation for more information about deployment on Linux.";
 
         return 1;
     }
@@ -389,8 +410,11 @@ int main(int argc, char **argv)
         } else if (argument.startsWith("-extra-plugins=")) {
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
-            extraQtPlugins = QString(argument.mid(index+1)).split(",");
+            extraQtPlugins = QString(argument.mid(index + 1)).split(",");
         } else if (argument.startsWith("-")) {
+            LogError() << "Error: arguments must not start with --, only -" << "\n";
+            return 1;
+        } else {
             LogError() << "Unknown argument" << argument << "\n";
             return 1;
         }
