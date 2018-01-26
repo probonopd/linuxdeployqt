@@ -14,6 +14,8 @@ before_install:
 before_script:
   # populate tags
   - git fetch origin
+  - git rev-list --tags --skip=1 --max-count=1
+  - git describe --tags $(git rev-list --tags --skip=1 --max-count=1) --abbrev=0
 
 script:
  - ./tests/tests-ci.sh
