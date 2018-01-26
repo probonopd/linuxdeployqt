@@ -13,7 +13,7 @@ before_install:
 
 before_script:
   # populate tags
-  - git fetch --tags
+  - git fetch origin
 
 script:
  - ./tests/tests-ci.sh
