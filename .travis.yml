@@ -11,6 +11,10 @@ env:
 before_install:
   - ./tests/tests-environment.sh
 
+before_script:
+  # populate tags
+  - git fetch --tags
+
 script:
  - ./tests/tests-ci.sh
 
