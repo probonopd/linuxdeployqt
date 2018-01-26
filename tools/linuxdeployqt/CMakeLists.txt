@@ -1,5 +1,11 @@
 set(CMAKE_AUTOMOC ON)
 
+# expose version data as compiler definition
+add_definitions("-DLINUXDEPLOYQT_VERSION=\"${GIT_TAG_NAME}\"")
+add_definitions("-DLINUXDEPLOYQT_GIT_COMMIT=\"${GIT_COMMIT}\"")
+add_definitions("-DBUILD_DATE=\"${DATE}\"")
+add_definitions("-DBUILD_NUMBER=\"${BUILD_NUMBER}\"")
+
 find_package(Qt5 REQUIRED COMPONENTS Core)
 
 add_executable(linuxdeployqt main.cpp shared.cpp)
