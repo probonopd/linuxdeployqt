@@ -20,6 +20,8 @@ script:
 
 after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  # quick fix for issue 223
+  - if [ "$TRAVIS_BRANCH" != "master" ]; then export TRAVIS_EVENT_TYPE=pull_request; fi
   - bash ./upload.sh ./linuxdeployqt-*.AppImage*
 
 after_script:
