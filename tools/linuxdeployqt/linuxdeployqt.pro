@@ -27,7 +27,7 @@ DEFINES += BUILD_DATE="'\"$(shell env LC_ALL=C date -u '+%Y-%m-%d %H:%M:%S %Z')\
 isEmpty($(TRAVIS_BUILD_NUMBER)) {
     DEFINES += BUILD_NUMBER="'\"<local dev build>\"'"
 } else {
-    DEFINES += BUILD_NUMBER="'\"$(TRAVIS_BUILD_NUMBER)"'"
+    DEFINES += BUILD_NUMBER="'\"$(TRAVIS_BUILD_NUMBER)\"'"
 }
 
 DEFINES += LINUXDEPLOYQT_VERSION="'\"$(shell git describe --tags $(shell git rev-list --tags --skip=1 --max-count=1) --abbrev=0)\"'"
