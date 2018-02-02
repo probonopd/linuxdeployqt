@@ -39,6 +39,10 @@ ulimit -a -H
 # error handling performed separately
 set +e
 
+# print version number
+./linuxdeployqt-*-x86_64.AppImage --version
+
+# TODO: reactivate tests
 #bash -e tests/tests.sh
 true
 RESULT=$?
