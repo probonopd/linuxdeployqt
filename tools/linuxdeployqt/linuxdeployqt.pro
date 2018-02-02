@@ -24,10 +24,10 @@ DEFINES += LINUXDEPLOYQT_GIT_COMMIT="'\"$(shell git rev-parse --short HEAD)\"'"
 
 DEFINES += BUILD_DATE="'\"$(shell env LC_ALL=C date -u '+%Y-%m-%d %H:%M:%S %Z')\"'"
 
-equals($$(TRAVIS_BUILD_NUMBER), "") {
+isEmpty($(TRAVIS_BUILD_NUMBER)) {
     DEFINES += BUILD_NUMBER="'\"<local dev build>\"'"
 } else {
-    DEFINES += BUILD_NUMBER="'\"$$(TRAVIS_BUILD_NUMBER)\"'"
+    DEFINES += BUILD_NUMBER="'\"$(TRAVIS_BUILD_NUMBER)"'"
 }
 
 DEFINES += LINUXDEPLOYQT_VERSION="'\"$(shell git describe --tags $(shell git rev-list --tags --skip=1 --max-count=1) --abbrev=0)\"'"
