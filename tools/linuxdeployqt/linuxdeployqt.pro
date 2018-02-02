@@ -24,9 +24,10 @@ DEFINES += LINUXDEPLOYQT_GIT_COMMIT="'\"$(shell git rev-parse --short HEAD)\"'"
 
 DEFINES += BUILD_DATE="'\"$(shell env LC_ALL=C date -u '+%Y-%m-%d %H:%M:%S %Z')\"'"
 
-_BUILD_NUMBER = $$TRAVIS_BUILD_NUMBER
+_BUILD_NUMBER = $$(TRAVIS_BUILD_NUMBER)
 
 isEmpty(_BUILD_NUMBER) {
+    message(Not building on Travis CI, tagging build as local dev build)
     DEFINES += BUILD_NUMBER="'\"<local dev build>\"'"
 } else {
     message(Building on Travis CI build, build number $$_BUILD_NUMBER)
