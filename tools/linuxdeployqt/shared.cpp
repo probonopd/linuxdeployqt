@@ -356,6 +356,11 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     QProcess ldd;
     ldd.start("ldd", QStringList() << binaryPath);
     ldd.waitForFinished();
+	
+    if (binaryPath.contains("platformthemes")) {
+        LogDebug() << "Skipping" << binaryPath << "because we do not bundle dependencies of platformthemes";
+        return info;
+    }
 
     if (ldd.exitStatus() != QProcess::NormalExit || ldd.exitCode() != 0) {
         LogError() << "findDependencyInfo:" << ldd.readAllStandardError();
@@ -391,7 +396,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         }
     }
 
-    if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) && (!lddOutputContainsLinuxVDSO(output)) && (!binaryPath.contains("platformthemes"))) {
+    if ((binaryPath.contains(".so.") || binaryPath.endsWith(".so")) && (!lddOutputContainsLinuxVDSO(output))) {
         const QRegularExpressionMatch match = regexp.match(outputLines.first());
         if (match.hasMatch())  {
             info.installName = match.captured(1);
