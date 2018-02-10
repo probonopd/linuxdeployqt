@@ -351,11 +351,6 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     LddInfo info;
     info.binaryPath = binaryPath;
 
-    if (binaryPath.contains("platformthemes")) {
-        LogDebug() << "Not running ldd on" << binaryPath << "because we do not bundle dependencies of platformthemes";
-        return info;
-    }
-
     LogDebug() << "Using ldd:";
     LogDebug() << " inspecting" << binaryPath;
     QProcess ldd;
@@ -406,6 +401,11 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         outputLines.removeFirst();
     }
 
+    if (binaryPath.contains("platformthemes")) {
+        LogDebug() << "Not adding dependencies of" << binaryPath << "because we do not bundle dependencies of platformthemes";
+        return info;
+    }
+	
     foreach (const QString &outputLine, outputLines) {
         const QRegularExpressionMatch match = regexp.match(outputLine);
         if (match.hasMatch()) {
