@@ -401,11 +401,14 @@ LddInfo findDependencyInfo(const QString &binaryPath)
         outputLines.removeFirst();
     }
 
+/*
+    FIXME: For unknown reasons, this segfaults; see https://travis-ci.org/probonopd/Labrador/builds/339803886#L1320
     if (binaryPath.contains("platformthemes")) {
         LogDebug() << "Not adding dependencies of" << binaryPath << "because we do not bundle dependencies of platformthemes";
         return info;
     }
-	
+*/
+
     foreach (const QString &outputLine, outputLines) {
         const QRegularExpressionMatch match = regexp.match(outputLine);
         if (match.hasMatch()) {
