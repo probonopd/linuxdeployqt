@@ -147,6 +147,10 @@ find: `appdir/': No such file or directory
 
 If `qmake` does not allow for `make install` or does not install the desktop file and icon, then you need to change your `.pro` file it similar to https://github.com/probonopd/FeedTheMonkey/blob/master/FeedTheMonkey.pro.
 
+It is common on Unix to also use the build tool to install applications and libraries; for example, by invoking `make install`. For this reason, `qmake` has the concept of an install set, an object which contains instructions about the way a part of a project is to be installed.
+
+Please see the section "Installing Files" on http://doc.qt.io/qt-5/qmake-advanced-usage.html.
+
 ```
   - make INSTALL_ROOT=appdir install ; find appdir/
 ```
