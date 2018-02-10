@@ -351,16 +351,16 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     LddInfo info;
     info.binaryPath = binaryPath;
 
+    if (binaryPath.contains("platformthemes")) {
+        LogDebug() << "Not running ldd on" << binaryPath << "because we do not bundle dependencies of platformthemes";
+        return info;
+    }
+
     LogDebug() << "Using ldd:";
     LogDebug() << " inspecting" << binaryPath;
     QProcess ldd;
     ldd.start("ldd", QStringList() << binaryPath);
     ldd.waitForFinished();
-	
-    if (binaryPath.contains("platformthemes")) {
-        LogDebug() << "Skipping" << binaryPath << "because we do not bundle dependencies of platformthemes";
-        return info;
-    }
 
     if (ldd.exitStatus() != QProcess::NormalExit || ldd.exitCode() != 0) {
         LogError() << "findDependencyInfo:" << ldd.readAllStandardError();
