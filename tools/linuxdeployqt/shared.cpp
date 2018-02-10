@@ -1223,10 +1223,14 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
             pluginList.append(QStringLiteral("platforminputcontexts/") + plugin);
         }
 	// Platform themes - make Qt look more native e.g., on Gtk+ 3 (if available in Qt installation)
+        // FIXME: Do not do this until we find a good way to do this without also deploying their dependencies
+        // See https://github.com/probonopd/linuxdeployqt/issues/236
+	/*
         QStringList platformThemes = QDir(pluginSourcePath +  QStringLiteral("/platformthemes")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, platformThemes) {
             pluginList.append(QStringLiteral("platformthemes/") + plugin);
         }
+	*/
         // All image formats (svg if QtSvg library is used)
         QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, imagePlugins) {
