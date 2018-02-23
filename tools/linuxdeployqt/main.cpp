@@ -99,10 +99,8 @@ int main(int argc, char **argv)
         qInfo() << "";
         qInfo() << "See the \"Deploying Applications on Linux\" topic in the";
         qInfo() << "documentation for more information about deployment on Linux.";
-
         return 1;
     }
-
     QString desktopFile = "";
     QString desktopExecEntry = "";
     QString desktopIconEntry = "";
@@ -199,6 +197,9 @@ int main(int argc, char **argv)
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
     extern QStringList librarySearchPath;
+    extern QString librarySavePath;
+    extern QString blockedFolder;
+
     extern bool alwaysOwerwriteEnabled;    
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
@@ -234,6 +235,7 @@ int main(int argc, char **argv)
         QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
         relativeBinPath = relativePrefix + "/bin/" + appName;
     }
+
     if(appDirPath == "/"){
         LogError() << "'/' is not a valid AppDir. Please refer to the documentation.";
         LogError() << "Consider adding INSTALL_ROOT or DESTDIR to your install steps.";
@@ -411,6 +413,20 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             extraQtPlugins = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith(QByteArray("-save-lib-path"))) {
+          LogDebug() << "Argument found:" << argument;
+          int index = argument.indexOf('=');
+          if (index == -1)
+              LogError() << "Missing library path";
+          else
+              librarySavePath = argument.mid(index+1);
+        } else if (argument.startsWith(QByteArray("-exclude-libs-in-folder"))) {
+          LogDebug() << "Argument found:" << argument;
+          int index = argument.indexOf('=');
+          if (index == -1)
+              LogError() << "Missing exclude folder path";
+          else
+              blockedFolder = argument.mid(index+1);
         } else if (argument.startsWith("-")) {
             LogError() << "Error: arguments must not start with --, only -" << "\n";
             return 1;
