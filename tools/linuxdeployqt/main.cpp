@@ -102,8 +102,10 @@ int main(int argc, char **argv)
         qInfo() << "";
         qInfo() << "See the \"Deploying Applications on Linux\" topic in the";
         qInfo() << "documentation for more information about deployment on Linux.";
+
         return 1;
     }
+
     QString desktopFile = "";
     QString desktopExecEntry = "";
     QString desktopIconEntry = "";
@@ -202,7 +204,6 @@ int main(int argc, char **argv)
     extern QStringList librarySearchPath;
     extern QString librarySavePath;
     extern QString blockedFolder;
-
     extern bool alwaysOwerwriteEnabled;    
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
@@ -238,7 +239,6 @@ int main(int argc, char **argv)
         QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
         relativeBinPath = relativePrefix + "/bin/" + appName;
     }
-
     if(appDirPath == "/"){
         LogError() << "'/' is not a valid AppDir. Please refer to the documentation.";
         LogError() << "Consider adding INSTALL_ROOT or DESTDIR to your install steps.";

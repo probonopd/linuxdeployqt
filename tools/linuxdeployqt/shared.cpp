@@ -836,6 +836,7 @@ void changeIdentification(const QString &id, const QString &binaryPath)
 {
     LogNormal() << "Checking rpath in" << binaryPath;
     QString oldRpath = runPatchelf(QStringList() << "--print-rpath" << binaryPath);
+    LogDebug() << "oldRpath:" << oldRpath;
     QString newRpath;
     if (oldRpath.startsWith("/")){
         LogDebug() << "Old rpath in" << binaryPath << "starts with /, hence adding it to LD_LIBRARY_PATH";

@@ -46,7 +46,6 @@ Options:
 linuxdeployqt takes an application as input and makes it
 self-contained by copying in the Qt libraries and plugins that
 the application uses.
-
 ```
 
 #### Simplest example
