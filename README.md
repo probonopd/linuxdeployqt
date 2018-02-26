@@ -21,20 +21,27 @@ Please download __linuxdeployqt-x86_64.AppImage__ from the [Releases](https://gi
 ## Usage
 
 ```
-Usage: linuxdeployqt app-binary [options]
+Usage: linuxdeployqt <app-binary|desktop file> [options]
 
 Options:
-   -verbose=<0-3>        : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug
-   -no-plugins           : Skip plugin deployment
-   -appimage             : Create an AppImage
-   -no-strip             : Don't run 'strip' on the binaries
-   -bundle-non-qt-libs   : Also bundle non-core, non-Qt libraries
-   -executable=<path>    : Let the given executable use the deployed libraries too
-   -qmldir=<path>        : Scan for QML imports to bundle from the given directory, determined by Qt's qmlimportscanner
-   -always-overwrite     : Copy files even if the target file exists
-   -qmake=<path>         : The qmake executable to use
-   -no-translations      : Skip deployment of translations
-   -extra-plugins=<list> : List of extra plugins which should be deployed, separated by comma
+   -verbose=<0-3>         : 0 = no output, 1 = error/warning (default),
+                            2 = normal, 3 = debug
+   -no-plugins            : Skip plugin deployment
+   -appimage              : Create an AppImage (implies -bundle-non-qt-libs)
+   -no-strip              : Don't run 'strip' on the binaries
+   -bundle-non-qt-libs    : Also bundle non-core, non-Qt libraries
+   -executable=<path>     : Let the given executable use the deployed libraries
+                            too
+   -qmldir=<path>         : Scan for QML imports in the given path
+   -always-overwrite      : Copy files even if the target file exists
+   -qmake=<path>          : The qmake executable to use
+   -no-translations       : Skip deployment of translations.
+   -extra-plugins=<list>  : List of extra plugins which should be deployed,
+                            separated by comma.
+   -save-lib-path         : Relative path from folder below bin to where to save the deployed libs,
+                            defaults to /lib
+   -exclude-folder:       : Excludes all libs in folder and subfolders.
+   -version               : Print version statement and exit.
 
 linuxdeployqt takes an application as input and makes it
 self-contained by copying in the Qt libraries and plugins that
