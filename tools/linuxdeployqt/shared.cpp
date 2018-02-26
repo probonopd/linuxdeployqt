@@ -467,7 +467,7 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
         excludelist << "libasound.so.2" << "libcom_err.so.2" << "libcrypt.so.1" << "libc.so.6" << "libdl.so.2" << "libdrm.so.2" << "libexpat.so.1" << "libfontconfig.so.1" << "libgcc_s.so.1" << "libgdk_pixbuf-2.0.so.0" << "libgio-2.0.so.0" << "libglib-2.0.so.0" << "libGL.so.1" << "libgobject-2.0.so.0" << "libgpg-error.so.0" << "libICE.so.6" << "libkeyutils.so.1" << "libm.so.6" << "libnsl.so.1" << "libnss3.so" << "libnssutil3.so" << "libp11-kit.so.0" << "libpangoft2-1.0.so.0" << "libpangocairo-1.0.so.0" << "libpango-1.0.so.0" << "libpthread.so.0" << "libresolv.so.2" << "librt.so.1" << "libSM.so.6" << "libstdc++.so.6" << "libusb-1.0.so.0" << "libuuid.so.1" << "libX11.so.6" << "libxcb.so.1" << "libz.so.1";
         LogDebug() << "excludelist:" << excludelist;
         if (! trimmed.contains("libicu")) {
-            if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName()) || QFileInfo(trimmed).absolutePath().startsWith(blockedFolder)) {
+            if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName()) || (!blockedFolder.isEmpty() && QFileInfo(trimmed).absolutePath().startsWith(blockedFolder))) {
                 LogDebug() << "Skipping blacklisted" << trimmed;
                 return info;
             }
@@ -553,7 +553,6 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     }
 
     if (!info.sourceFilePath.isEmpty() && QFile::exists(info.sourceFilePath)) {
-      qInfo() << "TJA";
         info.installName = findDependencyInfo(info.sourceFilePath).installName;
         if (info.installName.startsWith("@rpath/"))
             info.deployedInstallName = info.installName;
@@ -837,7 +836,7 @@ void changeIdentification(const QString &id, const QString &binaryPath)
 {
     LogNormal() << "Checking rpath in" << binaryPath;
     QString oldRpath = runPatchelf(QStringList() << "--print-rpath" << binaryPath);
-//if(oldRpath.startsWith("$")) return;
+    QString newRpath;
     if (oldRpath.startsWith("/")){
         LogDebug() << "Old rpath in" << binaryPath << "starts with /, hence adding it to LD_LIBRARY_PATH";
         // FIXME: Split along ":" characters, check each one, only append to LD_LIBRARY_PATH if not already there
@@ -849,9 +848,13 @@ void changeIdentification(const QString &id, const QString &binaryPath)
             LogDebug() << "Added to LD_LIBRARY_PATH:" << newPath;
             setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
         }
+    } else if(oldRpath.startsWith("$ORIGIN") && oldRpath != id) {
+      newRpath = oldRpath + ":" + id;
+    } else {
+      newRpath = id;
     }
-    LogNormal() << "Changing rpath in" << binaryPath << "to" <<  id;
-    runPatchelf(QStringList() << "--set-rpath" <<  id << binaryPath);
+    LogNormal() << "Changing rpath in" << binaryPath << "to" <<  newRpath;
+    runPatchelf(QStringList() << "--set-rpath" <<  newRpath << binaryPath);
 
     // qt_prfxpath:
     if (binaryPath.contains("libQt5Core")) {
@@ -1143,10 +1146,11 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    qtDetectionComplete = 1;
 
    QString libraryPath;
+   QString prefix = librarySavePath.isEmpty() ? "lib/" : librarySavePath;
    if(fhsLikeMode == false){
-       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("lib/" + bundleLibraryDirectory);
+       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath(prefix + bundleLibraryDirectory);
    } else {
-       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("../lib/" + bundleLibraryDirectory);
+       libraryPath = QFileInfo(applicationBundle.binaryPath).dir().filePath("../" + prefix + bundleLibraryDirectory);
    }
 
    /* Make ldd detect pre-existing libraries in the AppDir.
@@ -1866,18 +1870,8 @@ void handleFshLibPath(const QString& appDirPath)
       bundleLibraryDirectory = librarySavePath.isEmpty() ? "lib" : librarySavePath; // relative to bundle
    } else {
        QString relativePrefix = fhsPrefix.replace(appDirPath+"/", "");
-       bundleLibraryDirectory = relativePrefix + "/" + librarySavePath;
+       QString tmp = librarySavePath.isEmpty() ? "/lib/" : librarySavePath;
+       bundleLibraryDirectory = relativePrefix + tmp;
    }
-}
-
-QString stripAbsolutePathFromRPath(QString& rpath)
-{
-  QString ret;
-  QChar divider = ':';
-  QStringList subPaths = rpath.split(divider);
-  for(QString sub : subPaths) {
-    if(!sub.startsWith("/")) ret += divider + sub;
-  }
-  return ret;
 }
 

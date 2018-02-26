@@ -81,6 +81,9 @@ int main(int argc, char **argv)
         qInfo() << "   -no-translations       : Skip deployment of translations.";
         qInfo() << "   -extra-plugins=<list>  : List of extra plugins which should be deployed,";
         qInfo() << "                            separated by comma.";
+        qInfo() << "   -save-lib-path         : Relative path from folder below bin to where to save the deployed libs,";
+        qInfo() << "                            defaults to /lib, should not be used with -appimage";
+        qInfo() << "   -exclude-folder:       : Excludes all libs in folder and subfolders.";
         qInfo() << "   -version               : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";
@@ -369,6 +372,7 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             appimage = true;
             bundleAllButCoreLibs = true;
+            librarySavePath = "";
         } else if (argument == QByteArray("-no-strip")) {
             LogDebug() << "Argument found:" << argument;
             runStripEnabled = false;
@@ -418,9 +422,9 @@ int main(int argc, char **argv)
           int index = argument.indexOf('=');
           if (index == -1)
               LogError() << "Missing library path";
-          else
+          else if (!appimage)
               librarySavePath = argument.mid(index+1);
-        } else if (argument.startsWith(QByteArray("-exclude-libs-in-folder"))) {
+        } else if (argument.startsWith(QByteArray("-exclude-folder"))) {
           LogDebug() << "Argument found:" << argument;
           int index = argument.indexOf('=');
           if (index == -1)

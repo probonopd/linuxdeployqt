@@ -136,6 +136,5 @@ void findUsedModules(DeploymentInfo &info);
 void deployTranslations(const QString &appDirPath, quint64 usedQtModules);
 bool deployTranslations(const QString &sourcePath, const QString &target, quint64 usedQtModules);
 void handleFshLibPath(const QString& appDirPath);
-QString stripAbsolutePathFromRPath(QString& rPath);
 
 #endif
