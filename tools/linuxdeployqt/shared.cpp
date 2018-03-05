@@ -46,6 +46,7 @@
 #include "shared.h"
 
 QString appBinaryPath;
+bool copyCopyrightEnabled = true;
 bool runStripEnabled = true;
 bool bundleAllButCoreLibs = false;
 bool fhsLikeMode = false;
@@ -276,7 +277,10 @@ bool copyFilePrintStatus(const QString &from, const QString &to)
     }
 }
 
-bool copyCopyrightFile(QString libPath){
+bool copyCopyrightFile(QString libPath)
+{
+    if (!copyCopyrightEnabled)
+        return true;
 
     /* When deploying files (e.g., libraries) from the
      * system, then try to also deploy their copyright file.

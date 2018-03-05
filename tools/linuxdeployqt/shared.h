@@ -41,6 +41,7 @@ extern int logLevel;
 #define LogDebug()      if (logLevel < 3) {} else qDebug() << "Log:"
 
 extern QString appBinaryPath;
+extern bool copyCopyrightEnabled;
 extern bool runStripEnabled;
 extern bool bundleAllButCoreLibs;
 extern bool fhsLikeMode;
