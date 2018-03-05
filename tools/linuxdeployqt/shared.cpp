@@ -58,6 +58,7 @@ int qtDetected = 0;
 bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
 QStringList extraQtPlugins;
+bool copyCopyrightFiles = true;
 
 using std::cout;
 using std::endl;
@@ -283,6 +284,11 @@ bool copyCopyrightFile(QString libPath){
      * This is currently only implemented for dpkg-based,
      * Debian-like systems. Pull requests welcome for other
      * systems. */
+
+    if (!copyCopyrightFiles) {
+        LogNormal() << "Skipping copyright files deployment as requested by the user";
+        return false;
+    }
 
     QString dpkgPath;
     dpkgPath = QStandardPaths::findExecutable("dpkg");
