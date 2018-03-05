@@ -69,6 +69,7 @@ int main(int argc, char **argv)
         qInfo() << "Options:";
         qInfo() << "   -verbose=<0-3>         : 0 = no output, 1 = error/warning (default),";
         qInfo() << "                            2 = normal, 3 = debug";
+        qInfo() << "   -no-copyright          : Don't copy copyright files (increased a speed)";
         qInfo() << "   -no-plugins            : Skip plugin deployment";
         qInfo() << "   -appimage              : Create an AppImage (implies -bundle-non-qt-libs)";
         qInfo() << "   -no-strip              : Don't run 'strip' on the binaries";
@@ -194,6 +195,7 @@ int main(int argc, char **argv)
 
     bool plugins = true;
     bool appimage = false;
+    extern bool copyCopyrightEnabled;
     extern bool runStripEnabled;
     extern bool bundleAllButCoreLibs;
     extern bool fhsLikeMode;
@@ -360,7 +362,10 @@ int main(int argc, char **argv)
 
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
-        if (argument == QByteArray("-no-plugins")) {
+        if (argument == QByteArray("-no-copyright")) {
+            LogDebug() << "Argument found:" << argument;
+            copyCopyrightEnabled = false;
+        } else if (argument == QByteArray("-no-plugins")) {
             LogDebug() << "Argument found:" << argument;
             plugins = false;
         } else if (argument == QByteArray("-appimage")) {
