@@ -67,21 +67,22 @@ int main(int argc, char **argv)
         qInfo() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
         qInfo() << "";
         qInfo() << "Options:";
-        qInfo() << "   -verbose=<0-3>         : 0 = no output, 1 = error/warning (default),";
-        qInfo() << "                            2 = normal, 3 = debug";
-        qInfo() << "   -no-plugins            : Skip plugin deployment";
-        qInfo() << "   -appimage              : Create an AppImage (implies -bundle-non-qt-libs)";
-        qInfo() << "   -no-strip              : Don't run 'strip' on the binaries";
-        qInfo() << "   -bundle-non-qt-libs    : Also bundle non-core, non-Qt libraries";
-        qInfo() << "   -executable=<path>     : Let the given executable use the deployed libraries";
-        qInfo() << "                            too";
-        qInfo() << "   -qmldir=<path>         : Scan for QML imports in the given path";
-        qInfo() << "   -always-overwrite      : Copy files even if the target file exists";
-        qInfo() << "   -qmake=<path>          : The qmake executable to use";
-        qInfo() << "   -no-translations       : Skip deployment of translations.";
-        qInfo() << "   -extra-plugins=<list>  : List of extra plugins which should be deployed,";
-        qInfo() << "                            separated by comma.";
-        qInfo() << "   -version               : Print version statement and exit.";
+        qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
+        qInfo() << "                              2 = normal, 3 = debug";
+        qInfo() << "   -no-plugins              : Skip plugin deployment";
+        qInfo() << "   -appimage                : Create an AppImage (implies -bundle-non-qt-libs)";
+        qInfo() << "   -no-strip                : Don't run 'strip' on the binaries";
+        qInfo() << "   -bundle-non-qt-libs      : Also bundle non-core, non-Qt libraries";
+        qInfo() << "   -executable=<path>       : Let the given executable use the deployed libraries";
+        qInfo() << "                              too";
+        qInfo() << "   -qmldir=<path>           : Scan for QML imports in the given path";
+        qInfo() << "   -always-overwrite        : Copy files even if the target file exists";
+        qInfo() << "   -qmake=<path>            : The qmake executable to use";
+        qInfo() << "   -no-translations         : Skip deployment of translations.";
+        qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
+        qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
+        qInfo() << "                              separated by comma.";
+        qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";
         qInfo() << "self-contained by copying in the Qt libraries and plugins that";
@@ -206,6 +207,7 @@ int main(int argc, char **argv)
     QStringList qmlDirs;
     QString qmakeExecutable;
     extern QStringList extraQtPlugins;
+    extern bool copyCopyrightFiles;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -397,6 +399,9 @@ int main(int argc, char **argv)
                 LogError() << "Missing qml directory path";
             else
                 qmlDirs << argument.mid(index+1);
+        } else if (argument.startsWith("-no-copy-copyright-files")) {
+            LogDebug() << "Argument found:" << argument;
+            copyCopyrightFiles = false;
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
