@@ -46,6 +46,7 @@ extern bool bundleAllButCoreLibs;
 extern bool fhsLikeMode;
 extern QString fhsPrefix;
 extern QStringList extraQtPlugins;
+extern QStringList excludeLibs;
 
 class LibraryInfo
 {

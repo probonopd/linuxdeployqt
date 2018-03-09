@@ -82,6 +82,8 @@ int main(int argc, char **argv)
         qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
         qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
         qInfo() << "                              separated by comma.";
+        qInfo() << "   -exclude-libs=<list>     : List of extra plugins which should be deployed,";
+        qInfo() << "                              separated by comma.";
         qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";
@@ -207,6 +209,7 @@ int main(int argc, char **argv)
     QStringList qmlDirs;
     QString qmakeExecutable;
     extern QStringList extraQtPlugins;
+    extern QStringList excludeLibs;
     extern bool copyCopyrightFiles;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
@@ -416,6 +419,10 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             extraQtPlugins = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith("-exclude-libs=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            excludeLibs = QString(argument.mid(index + 1)).split(",");
         } else if (argument.startsWith("-")) {
             LogError() << "Error: arguments must not start with --, only -" << "\n";
             return 1;

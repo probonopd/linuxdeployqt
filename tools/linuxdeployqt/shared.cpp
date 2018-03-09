@@ -58,6 +58,7 @@ int qtDetected = 0;
 bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may encounter "not found" messages, continue anyway
 bool deployLibrary = false;
 QStringList extraQtPlugins;
+QStringList excludeLibs;
 bool copyCopyrightFiles = true;
 
 using std::cout;
@@ -473,6 +474,7 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
         */
 
         QStringList excludelist;
+        excludelist += excludeLibs;
         excludelist << "libasound.so.2" << "libcom_err.so.2" << "libcrypt.so.1" << "libc.so.6" << "libdl.so.2" << "libdrm.so.2" << "libexpat.so.1" << "libfontconfig.so.1" << "libgcc_s.so.1" << "libgdk_pixbuf-2.0.so.0" << "libgio-2.0.so.0" << "libglib-2.0.so.0" << "libGL.so.1" << "libgobject-2.0.so.0" << "libgpg-error.so.0" << "libICE.so.6" << "libkeyutils.so.1" << "libm.so.6" << "libnsl.so.1" << "libnss3.so" << "libnssutil3.so" << "libp11-kit.so.0" << "libpangoft2-1.0.so.0" << "libpangocairo-1.0.so.0" << "libpango-1.0.so.0" << "libpthread.so.0" << "libresolv.so.2" << "librt.so.1" << "libSM.so.6" << "libstdc++.so.6" << "libusb-1.0.so.0" << "libuuid.so.1" << "libX11.so.6" << "libxcb.so.1" << "libz.so.1";
         LogDebug() << "excludelist:" << excludelist;
         if (! trimmed.contains("libicu")) {
@@ -666,10 +668,13 @@ QList<LibraryInfo> getQtLibrariesForPaths(const QStringList &paths, const QStrin
     QSet<QString> existing;
 
     foreach (const QString &path, paths) {
-        foreach (const LibraryInfo &info, getQtLibraries(path, appDirPath, rpaths)) {
-            if (!existing.contains(info.libraryPath)) { // avoid duplicates
-                existing.insert(info.libraryPath);
-                result << info;
+        if (!excludeLibs.contains(QFileInfo(path).baseName()))
+        {
+            foreach (const LibraryInfo &info, getQtLibraries(path, appDirPath, rpaths)) {
+                if (!existing.contains(info.libraryPath)) { // avoid duplicates
+                    existing.insert(info.libraryPath);
+                    result << info;
+                }
             }
         }
     }
@@ -1017,7 +1022,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
             deploymentInfo.qtPath = library.libraryDirectory;
         }
 
-    if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets.so")) {
+        if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets.so")) {
             deploymentInfo.requiresQtWidgetsLibrary = true;
         }
 
@@ -1394,23 +1399,26 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     foreach (const QString &plugin, pluginList) {
         sourcePath = pluginSourcePath + "/" + plugin;
         destinationPath = pluginDestinationPath + "/" + plugin;
-        QDir dir;
-        dir.mkpath(QFileInfo(destinationPath).path());
-        QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
-        LogDebug() << "Deploying plugin" << sourcePath;
-        if (copyFilePrintStatus(sourcePath, destinationPath)) {
-            runStrip(destinationPath);
-            deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
-            /* See whether this makes any difference */
-            // Find out the relative path to the lib/ directory and set it as the rpath
-            QDir dir(destinationPath);
-            QString relativePath = dir.relativeFilePath(appDirInfo.path + "/" + libraries[0].libraryDestinationDirectory);
-            relativePath.remove(0, 3); // remove initial '../'
-            changeIdentification("$ORIGIN/" + relativePath, QFileInfo(destinationPath).canonicalFilePath());
+        if(!excludeLibs.contains(QFileInfo(sourcePath).baseName()))
+        {
+            QDir dir;
+            dir.mkpath(QFileInfo(destinationPath).path());
+            QList<LibraryInfo> libraries = getQtLibraries(sourcePath, appDirInfo.path, deploymentInfo.rpathsUsed);
+            LogDebug() << "Deploying plugin" << sourcePath;
+            if (copyFilePrintStatus(sourcePath, destinationPath)) {
+                runStrip(destinationPath);
+                deployQtLibraries(libraries, appDirInfo.path, QStringList() << destinationPath, deploymentInfo.useLoaderPath);
+                /* See whether this makes any difference */
+                // Find out the relative path to the lib/ directory and set it as the rpath
+                QDir dir(destinationPath);
+                QString relativePath = dir.relativeFilePath(appDirInfo.path + "/" + libraries[0].libraryDestinationDirectory);
+                relativePath.remove(0, 3); // remove initial '../'
+                changeIdentification("$ORIGIN/" + relativePath, QFileInfo(destinationPath).canonicalFilePath());
 
+            }
+            LogDebug() << "copyCopyrightFile:" << sourcePath;
+            copyCopyrightFile(sourcePath);
         }
-        LogDebug() << "copyCopyrightFile:" << sourcePath;
-        copyCopyrightFile(sourcePath);
     }
 }
 
