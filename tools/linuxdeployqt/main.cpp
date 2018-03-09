@@ -82,7 +82,7 @@ int main(int argc, char **argv)
         qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
         qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
         qInfo() << "                              separated by comma.";
-        qInfo() << "   -exclude-libs=<list>     : List of extra plugins which should be deployed,";
+        qInfo() << "   -exclude-libs=<list>     : List of libraries which should be excluded,";
         qInfo() << "                              separated by comma.";
         qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
