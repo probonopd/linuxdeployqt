@@ -53,10 +53,12 @@ You'll need to provide the basic structure of an `AppDir` which should look some
         ├── applications
         │   └── your_app.desktop
         └── icons
-            └── hicolor
-                └── 256x256
+            └── <theme>
+                └── <resolution> 
                     └── your_app.png
 ```
+Replace `<theme>` and `<resolution>` with (for example) `hicolor` and `256x256` respectively; see [icon theme spec](https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html) for more details.
+
 
 Using the desktop file `linuxdeployqt` can determine the parameters of the build.
 
@@ -77,7 +79,7 @@ Categories=Office;
 
 Read more about desktop files in the [freedesktop specification here](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html).
 
-Now you can say: `linuxdeployqt path/to/AppDir/usr/share/applications/your_app.desktop`
+Now you can say: `linuxdeployqt-continuous-x86_64.AppImage path/to/AppDir/usr/share/applications/your_app.desktop`
 
 For a more detailed example, see "Using linuxdeployqt with Travis CI" below.
 
