@@ -416,11 +416,11 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             extraQtPlugins = QString(argument.mid(index + 1)).split(",");
-        } else if (argument.startsWith("-")) {
-            LogError() << "Error: arguments must not start with --, only -" << "\n";
+        } else if (argument.startsWith("--")) {
+            LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
             return 1;
         } else {
-            LogError() << "Unknown argument" << argument << "\n";
+            LogError() << "Unknown argument:" << argument << "\n";
             return 1;
         }
      }
