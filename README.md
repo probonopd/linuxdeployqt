@@ -43,12 +43,41 @@ the application uses.
 
 #### Simplest example
 
-Given that a desktop file should be provided with an AppImage, `linuxdeployqt` can use that to determine the parameters of the build.
+You'll need to provide the basic structure of an `AppDir` which should look something like this:
+```
+└── usr
+    ├── bin
+    │   └── your_app
+    ├── lib
+    └── share
+        ├── applications
+        │   └── your_app.desktop
+        └── icons
+            └── hicolor
+                └── 256x256
+                    └── your_app.png
+```
 
-`linuxdeployqt path/to/appdir/usr/share/application_name.desktop`
+Using the desktop file `linuxdeployqt` can determine the parameters of the build.
 
-Where the _desktop_ file specifies the executable to be run (with `EXEC=`), the name of the applications and an icon.
-See [desktop file specification](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html).
+Where your desktop file would look something like:
+```
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Amazing Qt App
+Comment=The best Qt Application Ever.
+Exec=your_app
+Icon=your_app
+Categories=Office;
+```
+
+* Notice that both `Exec` and `Icon` only have file names.
+* Also Notice that the `Icon` entry does not include an extension.
+
+Read more about desktop files in the [freedesktop specification here](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html).
+
+Now you can say: `linuxdeployqt path/to/AppDir/usr/share/applications/your_app.desktop`
 
 For a more detailed example, see "Using linuxdeployqt with Travis CI" below.
 
