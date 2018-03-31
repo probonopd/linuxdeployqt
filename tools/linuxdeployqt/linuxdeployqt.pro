@@ -35,3 +35,4 @@ isEmpty(_BUILD_NUMBER) {
 }
 
 DEFINES += LINUXDEPLOYQT_VERSION="'\"$(shell git describe --tags $(shell git rev-list --tags --skip=1 --max-count=1) --abbrev=0)\"'"
+DEFINES += EXCLUDELIST=\""$$system($$_PRO_FILE_PWD_/../excludelist.sh)"\"
