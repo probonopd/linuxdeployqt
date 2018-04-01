@@ -439,6 +439,11 @@ int main(int argc, char **argv)
         }
     }
 
+    if (!excludeLibs.isEmpty())
+    {
+        qWarning() << "WARNING: Excluding the following libraries might break the AppImage. Please double-check the list:" << excludeLibs;
+    }
+
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
                                                       qmakeExecutable);
 
