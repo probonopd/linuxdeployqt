@@ -65,10 +65,9 @@ Using the desktop file `linuxdeployqt` can determine the parameters of the build
 Where your desktop file would look something like:
 ```
 [Desktop Entry]
-Version=1.0
 Type=Application
 Name=Amazing Qt App
-Comment=The best Qt Application Ever.
+Comment=The best Qt Application Ever
 Exec=your_app
 Icon=your_app
 Categories=Office;
