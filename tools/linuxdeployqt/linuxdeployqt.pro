@@ -20,7 +20,7 @@ DEFINES -= QT_USE_QSTRINGBUILDER #leads to compile errors if not disabled
 # don't break the quotes -- at the moment, the shell commands are injected into the Makefile to have them run on every
 # build and not during configure time
 
-DEFINES += LINUXDEPLOYQT_GIT_COMMIT="'\"$(shell git rev-parse --short HEAD)\"'"
+DEFINES += LINUXDEPLOYQT_GIT_COMMIT="'\"$(shell cd $$PWD && git rev-parse --short HEAD)\"'"
 
 DEFINES += BUILD_DATE="'\"$(shell env LC_ALL=C date -u '+%Y-%m-%d %H:%M:%S %Z')\"'"
 
@@ -34,5 +34,5 @@ isEmpty(_BUILD_NUMBER) {
     DEFINES += BUILD_NUMBER="'\"$$_BUILD_NUMBER\"'"
 }
 
-DEFINES += LINUXDEPLOYQT_VERSION="'\"$(shell git describe --tags $(shell git rev-list --tags --skip=1 --max-count=1) --abbrev=0)\"'"
+DEFINES += LINUXDEPLOYQT_VERSION="'\"$(shell cd $$PWD && git describe --tags $(shell cd $$PWD && git rev-list --tags --skip=1 --max-count=1) --abbrev=0)\"'"
 DEFINES += EXCLUDELIST=\""$$system($$_PRO_FILE_PWD_/../excludelist.sh)"\"
