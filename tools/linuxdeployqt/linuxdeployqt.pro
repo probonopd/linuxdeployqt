@@ -35,4 +35,13 @@ isEmpty(_BUILD_NUMBER) {
 }
 
 DEFINES += LINUXDEPLOYQT_VERSION="'\"$(shell cd $$PWD && git describe --tags $(shell cd $$PWD && git rev-list --tags --skip=1 --max-count=1) --abbrev=0)\"'"
-DEFINES += EXCLUDELIST=\""$$system($$_PRO_FILE_PWD_/../excludelist.sh)"\"
+contains(DEFINES, EXCLUDELIST.*) {
+    message("EXCLUDELIST specified, to use the most recent exclude list, please run qmake without EXCLUDELIST definition and with internet.")
+} else {
+    message("Creating exclude list.")
+    EXCLUDELIST = $$system($$_PRO_FILE_PWD_/../excludelist.sh)
+    isEmpty(EXCLUDELIST) {
+        error("You must have internet to update EXCLUDELIST or define it in qmake.")
+    }
+    DEFINES += EXCLUDELIST=\""$$EXCLUDELIST"\"
+}
