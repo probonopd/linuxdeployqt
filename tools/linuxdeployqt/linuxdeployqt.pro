@@ -39,9 +39,17 @@ contains(DEFINES, EXCLUDELIST.*) {
     message("EXCLUDELIST specified, to use the most recent exclude list, please run qmake without EXCLUDELIST definition and with internet.")
 } else {
     message("Creating exclude list.")
+
+    # check whether command _would_ run successfully
+    EXCLUDELIST_GENERATION_WORKS = FALSE
+    system($$_PRO_FILE_PWD_/../excludelist.sh): EXCLUDELIST_GENERATION_WORKS = TRUE
+    isEqual(EXCLUDELIST_GENERATION_WORKS, FALSE) {
+        error("Generating excludelist failed")
+    }
+
     EXCLUDELIST = $$system($$_PRO_FILE_PWD_/../excludelist.sh)
     isEmpty(EXCLUDELIST) {
-        error("You must have internet to update EXCLUDELIST or define it in qmake.")
+        error("Generated excludelist is empty")
     }
     DEFINES += EXCLUDELIST=\""$$EXCLUDELIST"\"
 }
