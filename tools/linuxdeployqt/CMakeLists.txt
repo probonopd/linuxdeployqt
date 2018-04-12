@@ -13,7 +13,12 @@ execute_process(
     COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../excludelist.sh
     OUTPUT_VARIABLE EXCLUDELIST
     TIMEOUT 10
+    RESULT_VARIABLE EXCLUDELIST_RESULT
 )
+if(NOT EXCLUDELIST_RESULT EQUAL 0)
+    message(FATAL_ERROR "Failed to fetch and generate excludelist")
+endif()
+mark_as_advanced(EXCLUDELIST EXCLUDELIST_RESULT)
 
 add_executable(linuxdeployqt main.cpp shared.cpp)
 target_include_directories(linuxdeployqt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
