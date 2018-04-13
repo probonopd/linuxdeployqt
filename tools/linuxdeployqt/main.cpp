@@ -213,82 +213,6 @@ int main(int argc, char **argv)
     extern QStringList excludeLibs;
     extern bool copyCopyrightFiles;
 
-    // Check arguments
-    for (int i = 1; i < argc; ++i) {
-        QByteArray argument = QByteArray(argv[i]);
-
-        if (!argument.startsWith("-")) {
-            continue;
-        } else if (argument == QByteArray("-no-plugins")) {
-            LogDebug() << "Argument found:" << argument;
-            plugins = false;
-        } else if (argument == QByteArray("-appimage")) {
-            LogDebug() << "Argument found:" << argument;
-            appimage = true;
-            bundleAllButCoreLibs = true;
-        } else if (argument == QByteArray("-no-strip")) {
-            LogDebug() << "Argument found:" << argument;
-            runStripEnabled = false;
-        } else if (argument == QByteArray("-bundle-non-qt-libs")) {
-            LogDebug() << "Argument found:" << argument;
-            bundleAllButCoreLibs = true;
-        } else if (argument.startsWith(QByteArray("-verbose"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            bool ok = false;
-            int number = argument.mid(index+1).toInt(&ok);
-            if (!ok)
-                LogError() << "Could not parse verbose level";
-            else
-                logLevel = number;
-        } else if (argument.startsWith(QByteArray("-executable"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf('=');
-            if (index == -1)
-                LogError() << "Missing executable path";
-            else
-                additionalExecutables << argument.mid(index+1);
-        } else if (argument.startsWith(QByteArray("-qmldir"))) {
-            LogDebug() << "Argument found:" << argument;
-            qmldirArgumentUsed = true;
-            int index = argument.indexOf('=');
-            if (index == -1)
-                LogError() << "Missing qml directory path";
-            else
-                qmlDirs << argument.mid(index+1);
-        } else if (argument.startsWith("-no-copy-copyright-files")) {
-            LogDebug() << "Argument found:" << argument;
-            copyCopyrightFiles = false;
-        } else if (argument == QByteArray("-always-overwrite")) {
-            LogDebug() << "Argument found:" << argument;
-            alwaysOwerwriteEnabled = true;
-        } else if (argument.startsWith("-qmake=")) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            qmakeExecutable = argument.mid(index+1);
-        } else if (argument == QByteArray("-no-translations")) {
-            LogDebug() << "Argument found:" << argument;
-            skipTranslations = true;
-        } else if (argument.startsWith("-extra-plugins=")) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            extraQtPlugins = QString(argument.mid(index + 1)).split(",");
-        } else if (argument.startsWith("-exclude-libs=")) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            excludeLibs = QString(argument.mid(index + 1)).split(",");
-        } else if (argument == QByteArray("-show-exclude-libs")) {
-            qInfo() << EXCLUDELIST;
-            return 0;
-        } else if (argument.startsWith("--")) {
-            LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
-            return 1;
-        } else {
-            LogError() << "Unknown argument:" << argument << "\n";
-            return 1;
-        }
-    }
-
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
     if (QDir().exists((QDir::cleanPath(appBinaryPath + "/../../bin"))) == true) {
@@ -437,6 +361,82 @@ int main(int argc, char **argv)
                     exit(1);
                 }
             }
+        }
+    }
+
+    // Check arguments
+    for (int i = 1; i < argc; ++i) {
+        QByteArray argument = QByteArray(argv[i]);
+
+        if (!argument.startsWith("-")) {
+            continue;
+        } else if (argument == QByteArray("-no-plugins")) {
+            LogDebug() << "Argument found:" << argument;
+            plugins = false;
+        } else if (argument == QByteArray("-appimage")) {
+            LogDebug() << "Argument found:" << argument;
+            appimage = true;
+            bundleAllButCoreLibs = true;
+        } else if (argument == QByteArray("-no-strip")) {
+            LogDebug() << "Argument found:" << argument;
+            runStripEnabled = false;
+        } else if (argument == QByteArray("-bundle-non-qt-libs")) {
+            LogDebug() << "Argument found:" << argument;
+            bundleAllButCoreLibs = true;
+        } else if (argument.startsWith(QByteArray("-verbose"))) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            bool ok = false;
+            int number = argument.mid(index+1).toInt(&ok);
+            if (!ok)
+                LogError() << "Could not parse verbose level";
+            else
+                logLevel = number;
+        } else if (argument.startsWith(QByteArray("-executable"))) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf('=');
+            if (index == -1)
+                LogError() << "Missing executable path";
+            else
+                additionalExecutables << argument.mid(index+1);
+        } else if (argument.startsWith(QByteArray("-qmldir"))) {
+            LogDebug() << "Argument found:" << argument;
+            qmldirArgumentUsed = true;
+            int index = argument.indexOf('=');
+            if (index == -1)
+                LogError() << "Missing qml directory path";
+            else
+                qmlDirs << argument.mid(index+1);
+        } else if (argument.startsWith("-no-copy-copyright-files")) {
+            LogDebug() << "Argument found:" << argument;
+            copyCopyrightFiles = false;
+        } else if (argument == QByteArray("-always-overwrite")) {
+            LogDebug() << "Argument found:" << argument;
+            alwaysOwerwriteEnabled = true;
+        } else if (argument.startsWith("-qmake=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            qmakeExecutable = argument.mid(index+1);
+        } else if (argument == QByteArray("-no-translations")) {
+            LogDebug() << "Argument found:" << argument;
+            skipTranslations = true;
+        } else if (argument.startsWith("-extra-plugins=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            extraQtPlugins = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith("-exclude-libs=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            excludeLibs = QString(argument.mid(index + 1)).split(",");
+        } else if (argument == QByteArray("-show-exclude-libs")) {
+            qInfo() << EXCLUDELIST;
+            return 0;
+        } else if (argument.startsWith("--")) {
+            LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
+            return 1;
+        } else {
+            LogError() << "Unknown argument:" << argument << "\n";
+            return 1;
         }
     }
 
