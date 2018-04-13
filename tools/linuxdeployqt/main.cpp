@@ -62,7 +62,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (argc < 2) {
+    if (argc < 2 || (firstArgument.startsWith("-"))) {
         qInfo() << "";
         qInfo() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
         qInfo() << "";
@@ -365,12 +365,10 @@ int main(int argc, char **argv)
     }
 
     // Check arguments
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
 
-        if (!argument.startsWith("-")) {
-            continue;
-        } else if (argument == QByteArray("-no-plugins")) {
+        if (argument == QByteArray("-no-plugins")) {
             LogDebug() << "Argument found:" << argument;
             plugins = false;
         } else if (argument == QByteArray("-appimage")) {
