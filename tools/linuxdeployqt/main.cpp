@@ -34,6 +34,7 @@
 #include <QSettings>
 #include <QDirIterator>
 #include <sstream>
+#include "excludelist.h"
 
 int main(int argc, char **argv)
 {
@@ -58,6 +59,10 @@ int main(int argc, char **argv)
         QString argument = argv[i];
         if (argument == "-version" || argument == "-V" || argument == "--version") {
             // can just exit normally, version has been printed above
+            return 0;
+        }
+        if (argument == QByteArray("-show-exclude-libs")) {
+            qInfo() << generatedExcludelist;
             return 0;
         }
     }
@@ -426,9 +431,6 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             excludeLibs = QString(argument.mid(index + 1)).split(",");
-        } else if (argument == QByteArray("-show-exclude-libs")) {
-            qInfo() << EXCLUDELIST;
-            return 0;
         } else if (argument.startsWith("--")) {
             LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
             return 1;
