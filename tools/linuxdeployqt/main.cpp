@@ -67,23 +67,24 @@ int main(int argc, char **argv)
         qInfo() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
         qInfo() << "";
         qInfo() << "Options:";
-        qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
-        qInfo() << "                              2 = normal, 3 = debug";
-        qInfo() << "   -no-plugins              : Skip plugin deployment";
-        qInfo() << "   -appimage                : Create an AppImage (implies -bundle-non-qt-libs)";
-        qInfo() << "   -no-strip                : Don't run 'strip' on the binaries";
-        qInfo() << "   -bundle-non-qt-libs      : Also bundle non-core, non-Qt libraries";
-        qInfo() << "   -executable=<path>       : Let the given executable use the deployed libraries";
-        qInfo() << "                              too";
-        qInfo() << "   -qmldir=<path>           : Scan for QML imports in the given path";
-        qInfo() << "   -always-overwrite        : Copy files even if the target file exists";
-        qInfo() << "   -qmake=<path>            : The qmake executable to use";
-        qInfo() << "   -no-translations         : Skip deployment of translations.";
-        qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
-        qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
-        qInfo() << "                              separated by comma.";
+        qInfo() << "   -always-overwrite        : Copy files even if the target file exists.";
+        qInfo() << "   -appimage                : Create an AppImage (implies -bundle-non-qt-libs).";
+        qInfo() << "   -bundle-non-qt-libs      : Also bundle non-core, non-Qt libraries.";
         qInfo() << "   -exclude-libs=<list>     : List of libraries which should be excluded,";
         qInfo() << "                              separated by comma.";
+        qInfo() << "   -executable=<path>       : Let the given executable use the deployed libraries";
+        qInfo() << "                              too";
+        qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
+        qInfo() << "                              separated by comma.";
+        qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
+        qInfo() << "   -no-plugins              : Skip plugin deployment.";
+        qInfo() << "   -no-strip                : Don't run 'strip' on the binaries.";
+        qInfo() << "   -no-translations         : Skip deployment of translations.";
+        qInfo() << "   -qmake=<path>            : The qmake executable to use.";
+        qInfo() << "   -qmldir=<path>           : Scan for QML imports in the given path.";
+        qInfo() << "   -show-exclude-libs       : Print exclude libraries list.";
+        qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
+        qInfo() << "                              2 = normal, 3 = debug.";
         qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";
@@ -363,8 +364,10 @@ int main(int argc, char **argv)
         }
     }
 
+    // Check arguments
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
+
         if (argument == QByteArray("-no-plugins")) {
             LogDebug() << "Argument found:" << argument;
             plugins = false;
@@ -423,6 +426,9 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             excludeLibs = QString(argument.mid(index + 1)).split(",");
+        } else if (argument == QByteArray("-show-exclude-libs")) {
+            qInfo() << EXCLUDELIST;
+            return 0;
         } else if (argument.startsWith("--")) {
             LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
             return 1;
@@ -430,7 +436,7 @@ int main(int argc, char **argv)
             LogError() << "Unknown argument:" << argument << "\n";
             return 1;
         }
-     }
+    }
 
     if (appimage) {
         if(checkAppImagePrerequisites(appDirPath) == false){
