@@ -38,18 +38,12 @@ DEFINES += LINUXDEPLOYQT_VERSION="'\"$(shell cd $$PWD && git describe --tags $(s
 contains(DEFINES, EXCLUDELIST.*) {
     message("EXCLUDELIST specified, to use the most recent exclude list, please run qmake without EXCLUDELIST definition and with internet.")
 } else {
-    message("Creating exclude list.")
+    message("Updating exclude list...")
 
     # check whether command _would_ run successfully
     EXCLUDELIST_GENERATION_WORKS = FALSE
-    system($$_PRO_FILE_PWD_/../excludelist.sh): EXCLUDELIST_GENERATION_WORKS = TRUE
+    system($$_PRO_FILE_PWD_/../generate-excludelist.sh): EXCLUDELIST_GENERATION_WORKS = TRUE
     isEqual(EXCLUDELIST_GENERATION_WORKS, FALSE) {
-        error("Generating excludelist failed")
+        warning("Updating excludelist failed, using outdated copy")
     }
-
-    EXCLUDELIST = $$system($$_PRO_FILE_PWD_/../excludelist.sh)
-    isEmpty(EXCLUDELIST) {
-        error("Generated excludelist is empty")
-    }
-    DEFINES += EXCLUDELIST=\""$$EXCLUDELIST"\"
 }

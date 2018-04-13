@@ -44,6 +44,7 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include "shared.h"
+#include "excludelist.h"
 
 QString appBinaryPath;
 bool runStripEnabled = true;
@@ -465,20 +466,13 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
         This is more suitable for bundling in a way that is portable between different distributions and target systems.
         Along the way, this also takes care of non-Qt libraries.
 
-        The excludelist can be updated by running
-        #/bin/bash
-        blacklisted=$(wget https://raw.githubusercontent.com/probonopd/AppImages/master/excludelist -O - | sort | uniq | grep -v "^#.*" | grep "[^-\s]")
-        for item in $blacklisted; do
-          echo -ne '"'$item'" << '
-        done
+        The excludelist can be updated by running the bundled script generate-excludelist.sh
         */
 
-        QStringList excludelist;
-        #ifndef EXCLUDELIST
-            #error "EXCLUDELIST not defined! Please have your build system download run excludelist.sh and add -DEXCLUDE_LIST=<result>"
-        #else
-            excludelist << EXCLUDELIST;
-        #endif
+        // copy generated excludelist
+        QStringList excludelist = generatedExcludelist;
+
+        // append exclude libs
         excludelist += excludeLibs;
 
         LogDebug() << "excludelist:" << excludelist;
