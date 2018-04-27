@@ -37,6 +37,6 @@ EOF
 for item in ${blacklisted[@]:0:${#blacklisted[@]}-1}; do
     echo -e '    "'"$item"'",' >> "$filename"
 done
-echo -e '    "'"${blacklisted[-1]}"'"' >> "$filename"
+echo -e '    "'"${blacklisted[$((${#blacklisted[@]}-1))]}"'"' >> "$filename"
 
 echo "};" >> "$filename"
