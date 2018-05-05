@@ -1260,6 +1260,14 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         }
     }
 
+    // Positioning plugins if QtPositioning library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Positioning")) {
+        QStringList posPlugins = QDir(pluginSourcePath +  QStringLiteral("/position")).entryList(QStringList() << QStringLiteral("*.so"));
+        foreach (const QString &plugin, posPlugins) {
+            pluginList.append(QStringLiteral("position/") + plugin);
+        }
+    }
+
     // multimedia plugins if QtMultimedia library is in use
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Multimedia")) {
         QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.so"));
