@@ -193,7 +193,7 @@ int main(int argc, char **argv)
     LogDebug() << newPath;
     setenv("PATH",newPath.toUtf8().constData(),1);
 
-    QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).completeBaseName());
+    QString appName = QDir::cleanPath(QFileInfo(appBinaryPath).fileName());
 
     QString appDir = QDir::cleanPath(appBinaryPath + "/../");
     if (QDir().exists(appDir) == false) {
