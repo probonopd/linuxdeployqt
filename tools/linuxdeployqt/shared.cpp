@@ -1070,6 +1070,11 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        // Use the qmake executable passed in by the user:
        QString qmakePath = qmake;
 
+       if (qmakePath.isEmpty())   {
+          // Try to find qmake in the same path as the executable
+          QString path = QCoreApplication::applicationDirPath();
+          qmakePath = QStandardPaths::findExecutable("qmake", QStringList(path));
+       }
        if (qmakePath.isEmpty()) {
            // Try to find a version specific qmake first
            // openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
@@ -1083,13 +1088,13 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
                LogDebug() << "qmake 4";
            }
 
-           if(qmakePath == ""){
+           if(qmakePath.isEmpty()){
              // The upstream name of the binary is "qmake", for Qt 4 and Qt 5
              qmakePath = QStandardPaths::findExecutable("qmake");
            }
        }
 
-       if(qmakePath == ""){
+       if(qmakePath.isEmpty()){
            LogError() << "qmake not found on the $PATH";
            exit(1);
        }
