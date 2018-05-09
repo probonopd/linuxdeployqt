@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd. and Simon Peter
+** Copyright (C) 2016-18 The Qt Company Ltd. and Simon Peter
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the tools applications of the Qt Toolkit.
@@ -33,6 +33,8 @@
 #include <stdlib.h>
 #include <QSettings>
 #include <QDirIterator>
+#include <sstream>
+#include "excludelist.h"
 
 int main(int argc, char **argv)
 {
@@ -43,37 +45,69 @@ int main(int argc, char **argv)
 
     QString firstArgument = QString::fromLocal8Bit(argv[1]);
 
-    if (argc < 2 || firstArgument.startsWith("-")) {
-        qDebug() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
-        qDebug() << "";
-        qDebug() << "Options:";
-        qDebug() << "   -verbose=<0-3>      : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug";
-        qDebug() << "   -no-plugins         : Skip plugin deployment";
-        qDebug() << "   -appimage           : Create an AppImage (implies -bundle-non-qt-libs)";
-        qDebug() << "   -no-strip           : Don't run 'strip' on the binaries";
-        qDebug() << "   -bundle-non-qt-libs : Also bundle non-core, non-Qt libraries";
-        qDebug() << "   -executable=<path>  : Let the given executable use the deployed libraries too";
-        qDebug() << "   -qmldir=<path>      : Scan for QML imports in the given path";
-        qDebug() << "   -always-overwrite   : Copy files even if the target file exists";
-        qDebug() << "   -qmake=<path>       : The qmake executable to use";
-        qDebug() << "   -no-translations    : Skip deployment of translations.";
-        qDebug() << "";
-        qDebug() << "linuxdeployqt takes an application as input and makes it";
-        qDebug() << "self-contained by copying in the Qt libraries and plugins that";
-        qDebug() << "the application uses.";
-        qDebug() << "";
-        qDebug() << "By default it deploys the Qt instance that qmake on the $PATH points to.";
-        qDebug() << "The '-qmake' option can be used to point to the qmake executable";
-        qDebug() << "to be used instead.";
-        qDebug() << "";
-        qDebug() << "Plugins related to a Qt library are copied in with the library.";
+    // print version statement
+    std::stringstream version;
+    version << "linuxdeployqt " << LINUXDEPLOYQT_VERSION
+            << " (commit " << LINUXDEPLOYQT_GIT_COMMIT << "), "
+            << "build " << BUILD_NUMBER << " built on " << BUILD_DATE;
+    qInfo().noquote() << QString::fromStdString(version.str());
+
+    // due to the structure of the argument parser, we have to check all arguments at first to check whether the user
+    // wants to get the version only
+    // TODO: replace argument parser with position independent, less error prone version
+    for (int i = 0; i < argc; i++ ) {
+        QString argument = argv[i];
+        if (argument == "-version" || argument == "-V" || argument == "--version") {
+            // can just exit normally, version has been printed above
+            return 0;
+        }
+        if (argument == QByteArray("-show-exclude-libs")) {
+            qInfo() << generatedExcludelist;
+            return 0;
+        }
+    }
+
+    if (argc < 2 || (firstArgument.startsWith("-"))) {
+        qInfo() << "";
+        qInfo() << "Usage: linuxdeployqt <app-binary|desktop file> [options]";
+        qInfo() << "";
+        qInfo() << "Options:";
+        qInfo() << "   -always-overwrite        : Copy files even if the target file exists.";
+        qInfo() << "   -appimage                : Create an AppImage (implies -bundle-non-qt-libs).";
+        qInfo() << "   -bundle-non-qt-libs      : Also bundle non-core, non-Qt libraries.";
+        qInfo() << "   -exclude-libs=<list>     : List of libraries which should be excluded,";
+        qInfo() << "                              separated by comma.";
+        qInfo() << "   -executable=<path>       : Let the given executable use the deployed libraries";
+        qInfo() << "                              too";
+        qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
+        qInfo() << "                              separated by comma.";
+        qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
+        qInfo() << "   -no-plugins              : Skip plugin deployment.";
+        qInfo() << "   -no-strip                : Don't run 'strip' on the binaries.";
+        qInfo() << "   -no-translations         : Skip deployment of translations.";
+        qInfo() << "   -qmake=<path>            : The qmake executable to use.";
+        qInfo() << "   -qmldir=<path>           : Scan for QML imports in the given path.";
+        qInfo() << "   -show-exclude-libs       : Print exclude libraries list.";
+        qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
+        qInfo() << "                              2 = normal, 3 = debug.";
+        qInfo() << "   -version                 : Print version statement and exit.";
+        qInfo() << "";
+        qInfo() << "linuxdeployqt takes an application as input and makes it";
+        qInfo() << "self-contained by copying in the Qt libraries and plugins that";
+        qInfo() << "the application uses.";
+        qInfo() << "";
+        qInfo() << "By default it deploys the Qt instance that qmake on the $PATH points to.";
+        qInfo() << "The '-qmake' option can be used to point to the qmake executable";
+        qInfo() << "to be used instead.";
+        qInfo() << "";
+        qInfo() << "Plugins related to a Qt library are copied in with the library.";
         /* TODO: To be implemented
         qDebug() << "The accessibility, image formats, and text codec";
         qDebug() << "plugins are always copied, unless \"-no-plugins\" is specified.";
         */
-        qDebug() << "";
-        qDebug() << "See the \"Deploying Applications on Linux\" topic in the";
-        qDebug() << "documentation for more information about deployment on Linux.";
+        qInfo() << "";
+        qInfo() << "See the \"Deploying Applications on Linux\" topic in the";
+        qInfo() << "documentation for more information about deployment on Linux.";
 
         return 1;
     }
@@ -88,6 +122,12 @@ int main(int argc, char **argv)
          * to do when using linuxdeployqt. */
         if (firstArgument.endsWith(".desktop")){
             qDebug() << "Desktop file as first argument:" << firstArgument;
+
+            /* Check if the desktop file really exists */
+            if (! QFile::exists(firstArgument)) {
+                LogError() << "Desktop file in first argument does not exist!";
+                return 1;
+            }
             QSettings * settings = 0;
             settings = new QSettings(firstArgument, QSettings::IniFormat);
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
@@ -167,13 +207,16 @@ int main(int argc, char **argv)
     extern bool bundleAllButCoreLibs;
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
-    extern bool alwaysOwerwriteEnabled;
     extern QStringList librarySearchPath;
+    extern bool alwaysOwerwriteEnabled;    
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
     QString qmakeExecutable;
+    extern QStringList extraQtPlugins;
+    extern QStringList excludeLibs;
+    extern bool copyCopyrightFiles;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -299,7 +342,7 @@ int main(int argc, char **argv)
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svgz").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svgz";
-                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
+                if(QFileInfo(appDirPath + "/.DirIcon").exists() == false) QFile::copy(preExistingToplevelIcon, appDirPath + "/.DirIcon");
             }
             if(QFileInfo(appDirPath + "/" + desktopIconEntry + ".svg").exists() == true){
                 preExistingToplevelIcon = appDirPath + "/" + desktopIconEntry + ".svg";
@@ -326,8 +369,10 @@ int main(int argc, char **argv)
         }
     }
 
+    // Check arguments
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
+
         if (argument == QByteArray("-no-plugins")) {
             LogDebug() << "Argument found:" << argument;
             plugins = false;
@@ -365,6 +410,9 @@ int main(int argc, char **argv)
                 LogError() << "Missing qml directory path";
             else
                 qmlDirs << argument.mid(index+1);
+        } else if (argument.startsWith("-no-copy-copyright-files")) {
+            LogDebug() << "Argument found:" << argument;
+            copyCopyrightFiles = false;
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
@@ -375,17 +423,33 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
-        } else if (argument.startsWith("-")) {
-            LogError() << "Unknown argument" << argument << "\n";
+        } else if (argument.startsWith("-extra-plugins=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            extraQtPlugins = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith("-exclude-libs=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            excludeLibs = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith("--")) {
+            LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
+            return 1;
+        } else {
+            LogError() << "Unknown argument:" << argument << "\n";
             return 1;
         }
-     }
+    }
 
     if (appimage) {
         if(checkAppImagePrerequisites(appDirPath) == false){
             LogError() << "checkAppImagePrerequisites failed\n";
             return 1;
         }
+    }
+
+    if (!excludeLibs.isEmpty())
+    {
+        qWarning() << "WARNING: Excluding the following libraries might break the AppImage. Please double-check the list:" << excludeLibs;
     }
 
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
