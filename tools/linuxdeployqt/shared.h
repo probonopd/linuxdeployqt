@@ -47,6 +47,7 @@ extern bool fhsLikeMode;
 extern QString fhsPrefix;
 extern QStringList extraQtPlugins;
 extern QStringList excludeLibs;
+extern QStringList blockedFolders;
 
 class LibraryInfo
 {

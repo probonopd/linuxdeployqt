@@ -60,6 +60,7 @@ bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may enco
 bool deployLibrary = false;
 QStringList extraQtPlugins;
 QStringList excludeLibs;
+QStringList blockedFolders;
 bool copyCopyrightFiles = true;
 
 using std::cout;
@@ -463,6 +464,11 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
         if (!trimmed.contains("libicu") && !trimmed.contains("lib/libQt") && !trimmed.contains("lib/libqgsttools")) {
             if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
                 return info;
+            }
+            for (int i = 0; i < blockedFolders.size(); ++i) {
+                if (trimmed.startsWith(blockedFolders.at(i))) {
+                    return info;
+                }
             }
         }
     }
