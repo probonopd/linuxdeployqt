@@ -21,24 +21,41 @@ Please download __linuxdeployqt-x86_64.AppImage__ from the [Releases](https://gi
 ## Usage
 
 ```
-Usage: linuxdeployqt app-binary [options]
+Usage: linuxdeployqt <app-binary|desktop file> [options]
 
 Options:
-   -verbose=<0-3>        : 0 = no output, 1 = error/warning (default), 2 = normal, 3 = debug
-   -no-plugins           : Skip plugin deployment
-   -appimage             : Create an AppImage
-   -no-strip             : Don't run 'strip' on the binaries
-   -bundle-non-qt-libs   : Also bundle non-core, non-Qt libraries
-   -executable=<path>    : Let the given executable use the deployed libraries too
-   -qmldir=<path>        : Scan for QML imports to bundle from the given directory, determined by Qt's qmlimportscanner
-   -always-overwrite     : Copy files even if the target file exists
-   -qmake=<path>         : The qmake executable to use
-   -no-translations      : Skip deployment of translations
-   -extra-plugins=<list> : List of extra plugins which should be deployed, separated by comma
+   -always-overwrite        : Copy files even if the target file exists.
+   -appimage                : Create an AppImage (implies -bundle-non-qt-libs).
+   -bundle-non-qt-libs      : Also bundle non-core, non-Qt libraries.
+   -exclude-libs=<list>     : List of libraries which should be excluded,
+                              separated by comma.
+   -executable=<path>       : Let the given executable use the deployed libraries
+                              too
+   -extra-plugins=<list>    : List of extra plugins which should be deployed,
+                              separated by comma.
+   -no-copy-copyright-files : Skip deployment of copyright files.
+   -no-plugins              : Skip plugin deployment.
+   -no-strip                : Don't run 'strip' on the binaries.
+   -no-translations         : Skip deployment of translations.
+   -qmake=<path>            : The qmake executable to use.
+   -qmldir=<path>           : Scan for QML imports in the given path.
+   -show-exclude-libs       : Print exclude libraries list.
+   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),
+                              2 = normal, 3 = debug.
+   -version                 : Print version statement and exit.
 
 linuxdeployqt takes an application as input and makes it
 self-contained by copying in the Qt libraries and plugins that
 the application uses.
+
+By default it deploys the Qt instance that qmake on the $PATH points to.
+The '-qmake' option can be used to point to the qmake executable
+to be used instead.
+
+Plugins related to a Qt library are copied in with the library.
+
+See the "Deploying Applications on Linux" topic in the
+documentation for more information about deployment on Linux.
 ```
 
 #### Simplest example
