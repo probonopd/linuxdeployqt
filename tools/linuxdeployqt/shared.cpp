@@ -219,7 +219,7 @@ inline QDebug operator<<(QDebug debug, const AppDirInfo &info)
 bool copyFilePrintStatus(const QString &from, const QString &to)
 {
     if (QFile(to).exists()) {
-        if (alwaysOwerwriteEnabled) {
+        if (alwaysOwerwriteEnabled && QFileInfo(to) != QFileInfo(from)) {
             QFile(to).remove();
         } else {
             LogDebug() << QFileInfo(to).fileName() << "already exists at target location";
