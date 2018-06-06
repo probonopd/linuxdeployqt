@@ -838,7 +838,7 @@ void changeIdentification(const QString &id, const QString &binaryPath)
         }
     }
     LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
-    runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
+    runPatchelf(QStringList() << "--set-rpath" << id << "--force-rpath" << binaryPath);
 
     // qt_prfxpath:
     if (binaryPath.contains("libQt5Core")) {
