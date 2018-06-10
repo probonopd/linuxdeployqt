@@ -12,7 +12,6 @@ before_install:
   - ./tests/tests-environment.sh
 
 before_script:
-  # fetch all tags
   - git fetch --unshallow
 
 script:
