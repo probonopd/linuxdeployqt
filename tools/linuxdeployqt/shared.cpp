@@ -1504,14 +1504,13 @@ void deployQmlImport(const QString &appDirPath, const QSet<QString> &rpaths, con
 
     // Skip already deployed imports. This can happen in cases like "QtQuick.Controls.Styles",
     // where deploying QtQuick.Controls will also deploy the "Styles" sub-import.
-    // NOTE: this stops the deployment of certain imports if there is a folder in them, for example
-    //       - if QtQuick.Controls.Styles is already there QtQuick.Controls is skipped
-    //       - if QtQuick.Extras.Private is there QtQuick.Extras is skipped
+    // Because it's possible that there is already a directory in the destination path,
+    // we need to check if it has any files in it, simply checking if it exists is not enough.
+    // Some examples: QtQuick.Controls.Styles deployed before QtQuick.Controls
+    //                QtQuick.Extras.Private deployed before there QtQuick.Extras
     QDir destDir(importDestinationPath);
-    if (destDir.exists()) {
-        destDir.setFilter(QDir::Files | QDir::NoDotAndDotDot);
-        if(destDir.entryInfoList().length() > 0)
-            return;
+    if (destDir.exists() && destDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot).length() > 0) {
+        return;
     }
 
     recursiveCopyAndDeploy(appDirPath, rpaths, importSourcePath, importDestinationPath);
