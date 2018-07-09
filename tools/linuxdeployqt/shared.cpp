@@ -1366,11 +1366,11 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                         LogDebug() << plugin << "appended";
                     }
                     else {
-                        LogDebug() << "The plugin" << plugin << "was already deployed." ;
+                        LogWarning() <<"The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
                     }
                 }
                 else {
-                    LogWarning() << "The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
+                    LogDebug() <<  "The plugin" << plugin << "was already deployed." ;
                 }
             }
         }
