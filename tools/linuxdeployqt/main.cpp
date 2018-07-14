@@ -77,6 +77,8 @@ int main(int argc, char **argv)
         qInfo() << "   -bundle-non-qt-libs      : Also bundle non-core, non-Qt libraries.";
         qInfo() << "   -exclude-libs=<list>     : List of libraries which should be excluded,";
         qInfo() << "                              separated by comma.";
+        qInfo() << "   -ignore-glob=<glob>      : Glob pattern relative to appdir to ignore when";
+        qInfo() << "                              searching for libraries.";
         qInfo() << "   -executable=<path>       : Let the given executable use the deployed libraries";
         qInfo() << "                              too";
         qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
@@ -216,6 +218,7 @@ int main(int argc, char **argv)
     QString qmakeExecutable;
     extern QStringList extraQtPlugins;
     extern QStringList excludeLibs;
+    extern QStringList ignoreGlob;
     extern bool copyCopyrightFiles;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
@@ -431,6 +434,10 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             excludeLibs = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith("-ignore-glob=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            ignoreGlob += argument.mid(index + 1);
         } else if (argument.startsWith("--")) {
             LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
             return 1;
