@@ -60,6 +60,7 @@ bool qtDetectionComplete = 0; // As long as Qt is not detected yet, ldd may enco
 bool deployLibrary = false;
 QStringList extraQtPlugins;
 QStringList excludeLibs;
+QStringList ignoreGlob;
 bool copyCopyrightFiles = true;
 
 using std::cout;
@@ -542,22 +543,25 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
 
 QStringList findAppLibraries(const QString &appDirPath)
 {
+	QStringList ignoreGlobAbs;
+	QDir appDir(appDirPath);
+	foreach (const QString &glob, ignoreGlob) {
+		QString globAbs = appDir.filePath(glob);
+		LogDebug() << "Ignoring libraries matching" << globAbs;
+		ignoreGlobAbs += globAbs;
+	}
+
     QStringList result;
-    // .so
-    QDirIterator iter(appDirPath, QStringList() << QString::fromLatin1("*.so"),
+    // .so, .so.*
+    QDirIterator iter(appDirPath, QStringList() << QString::fromLatin1("*.so") << QString::fromLatin1("*.so.*"),
             QDir::Files, QDirIterator::Subdirectories);
 
     while (iter.hasNext()) {
         iter.next();
+		if (QDir::match(ignoreGlobAbs, iter.fileInfo().absoluteFilePath())) {
+			continue;
+		}
         result << iter.fileInfo().filePath();
-    }
-    // .so.*, FIXME: Is the above really needed or is it covered by the below too?
-    QDirIterator iter2(appDirPath, QStringList() << QString::fromLatin1("*.so*"),
-            QDir::Files, QDirIterator::Subdirectories);
-
-    while (iter2.hasNext()) {
-        iter2.next();
-        result << iter2.fileInfo().filePath();
     }
     return result;
 }

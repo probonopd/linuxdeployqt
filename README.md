@@ -29,6 +29,8 @@ Options:
    -bundle-non-qt-libs      : Also bundle non-core, non-Qt libraries.
    -exclude-libs=<list>     : List of libraries which should be excluded,
                               separated by comma.
+   -ignore-glob=<glob>      : Glob pattern relative to appdir to ignore when
+                              searching for libraries.
    -executable=<path>       : Let the given executable use the deployed libraries
                               too
    -extra-plugins=<list>    : List of extra plugins which should be deployed,
