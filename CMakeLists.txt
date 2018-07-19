@@ -7,51 +7,59 @@ project(linuxdeployqt)
 
 find_program(GIT git)
 
-# make sure Git revision ID and latest tag is not stored in the CMake cache
-# otherwise, one would have to reset the CMake cache on every new commit to make sure the Git commit ID is up to date
-unset(GIT_COMMIT CACHE)
-unset(GIT_LATEST_TAG CACHE)
-
 if("${GIT}" STREQUAL "GIT-NOTFOUND")
-    message(FATAL_ERROR "Could not find git")
-endif()
+    message(WARNING "Could not find git, commit and tag info cannot be updated")
 
-# read Git revision ID and latest tag number
-execute_process(
-    COMMAND "${GIT}" rev-parse --short HEAD
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE GIT_COMMIT_RESULT
-)
-if(NOT GIT_COMMIT_RESULT EQUAL 0)
-    message(FATAL_ERROR "Failed to determine git commit ID")
-endif()
-mark_as_advanced(GIT_COMMIT GIT_COMMIT_RESULT)
+    if(NOT GIT_COMMIT)
+        message(FATAL_ERROR "Commit ID not set, please call with -DGIT_COMMIT=...")
+    endif()
 
-execute_process(
-    COMMAND "${GIT}" rev-list --tags --skip=1 --max-count=1
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_TAG_ID
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE GIT_TAG_ID_RESULT
-)
-if(NOT GIT_TAG_ID_RESULT EQUAL 0)
-    message(FATAL_ERROR "Failed to determine git tag ID")
-endif()
-mark_as_advanced(GIT_TAG_ID GIT_TAG_ID_RESULT)
+    if(NOT GIT_TAG_NAME)
+        message(FATAL_ERROR "Tag name not set, please call with -DGIT_TAG_NAME=...")
+    endif()
+else()
+    # make sure Git revision ID and latest tag is not stored in the CMake cache
+    # otherwise, one would have to reset the CMake cache on every new commit to make sure the Git commit ID is up to date
+    unset(GIT_COMMIT CACHE)
+    unset(GIT_LATEST_TAG CACHE)
 
-execute_process(
-    COMMAND "${GIT}" describe --tags ${GIT_TAG_ID} --abbrev=0
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_TAG_NAME
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE GIT_TAG_NAME_RESULT
-)
-if(NOT GIT_TAG_NAME_RESULT EQUAL 0)
-    message(FATAL_ERROR "Failed to determine git tag name")
+    # read Git revision ID and latest tag number
+    execute_process(
+        COMMAND "${GIT}" rev-parse --short HEAD
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE GIT_COMMIT_RESULT
+    )
+    if(NOT GIT_COMMIT_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to determine git commit ID")
+    endif()
+    mark_as_advanced(GIT_COMMIT GIT_COMMIT_RESULT)
+
+    execute_process(
+        COMMAND "${GIT}" rev-list --tags --skip=1 --max-count=1
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_TAG_ID
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE GIT_TAG_ID_RESULT
+    )
+    if(NOT GIT_TAG_ID_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to determine git tag ID")
+    endif()
+    mark_as_advanced(GIT_TAG_ID GIT_TAG_ID_RESULT)
+
+    execute_process(
+        COMMAND "${GIT}" describe --tags ${GIT_TAG_ID} --abbrev=0
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_TAG_NAME
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE GIT_TAG_NAME_RESULT
+    )
+    if(NOT GIT_TAG_NAME_RESULT EQUAL 0)
+        message(FATAL_ERROR "Failed to determine git tag name")
+    endif()
+    mark_as_advanced(GIT_TAG_NAME GIT_TAG_NAME_RESULT)
 endif()
-mark_as_advanced(GIT_TAG_NAME GIT_TAG_NAME_RESULT)
 
 # set version and build number
 set(VERSION 1-alpha)
