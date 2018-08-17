@@ -62,6 +62,7 @@ QStringList extraQtPlugins;
 QStringList excludeLibs;
 QStringList ignoreGlob;
 bool copyCopyrightFiles = true;
+bool ignoreUnknownLib = false;
 
 using std::cout;
 using std::endl;
@@ -375,7 +376,9 @@ LddInfo findDependencyInfo(const QString &binaryPath)
             LogError() << "ldd outputLine:" << outputLine.replace("\t", "");
             LogError() << "for binary:" << binaryPath;
             LogError() << "Please ensure that all libraries can be found by ldd. Aborting.";
-            exit(1);
+            if (!ignoreUnknownLib) {
+                exit(1);
+            }
         }
     }
 

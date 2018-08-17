@@ -79,6 +79,7 @@ int main(int argc, char **argv)
         qInfo() << "                              separated by comma.";
         qInfo() << "   -ignore-glob=<glob>      : Glob pattern relative to appdir to ignore when";
         qInfo() << "                              searching for libraries.";
+        qInfo() << "   -ignore-unknownlib       : Ignores not found libraries.";
         qInfo() << "   -executable=<path>       : Let the given executable use the deployed libraries";
         qInfo() << "                              too";
         qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
@@ -220,6 +221,8 @@ int main(int argc, char **argv)
     extern QStringList excludeLibs;
     extern QStringList ignoreGlob;
     extern bool copyCopyrightFiles;
+    extern bool ignoreUnknownLib;
+
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -416,6 +419,9 @@ int main(int argc, char **argv)
         } else if (argument.startsWith("-no-copy-copyright-files")) {
             LogDebug() << "Argument found:" << argument;
             copyCopyrightFiles = false;
+        } else if (argument.startsWith("-ignore-unknownlib")) {
+            LogDebug() << "Argument found:" << argument;
+            ignoreUnknownLib = true;
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
