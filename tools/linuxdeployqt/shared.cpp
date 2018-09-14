@@ -949,10 +949,11 @@ void runStrip(const QString &binaryPath)
     if (strip.exitCode() == 0)
         return;
 
-    if (strip.readAllStandardError().contains("Not enough room for program headers")) {
+    QString stdErr = QString::fromLocal8Bit(strip.readAllStandardError());
+    if (stdErr.contains("Not enough room for program headers")) {
         LogNormal() << QFileInfo(resolvedPath).completeBaseName() << "already stripped.";
     } else {
-        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << QString::fromLocal8Bit(strip.readAllStandardError());
+        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << stdErr;
         LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << QString::fromLocal8Bit(strip.readAllStandardOutput());
         exit(1);
     }
