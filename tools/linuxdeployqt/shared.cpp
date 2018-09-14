@@ -346,13 +346,13 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     ldd.waitForFinished();
 
     if (ldd.exitStatus() != QProcess::NormalExit || ldd.exitCode() != 0) {
-        LogError() << "findDependencyInfo:" << ldd.readAllStandardError();
+        LogError() << "findDependencyInfo:" << QString::fromLocal8Bit(ldd.readAllStandardError());
         return info;
     }
 
     static const QRegularExpression regexp(QStringLiteral("^.+ => (.+) \\("));
 
-    QString output = ldd.readAllStandardOutput();
+    QString output = QString::fromLocal8Bit(ldd.readAllStandardOutput());
     QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
     if (outputLines.size() < 2) {
         if ((output.contains("statically linked") == false)){
@@ -601,7 +601,7 @@ QSet<QString> getBinaryRPaths(const QString &path, bool resolve = true, QString 
     objdump.waitForFinished();
 
     if (objdump.exitCode() != 0) {
-        LogError() << "getBinaryRPaths:" << objdump.readAllStandardError();
+        LogError() << "getBinaryRPaths:" << QString::fromLocal8Bit(objdump.readAllStandardError());
     }
 
     if (resolve && executablePath.isEmpty()) {
@@ -769,7 +769,7 @@ QString runPatchelf(QStringList options)
     }
     patchelftool.waitForFinished();
     if (patchelftool.exitCode() != 0) {
-        LogError() << "runPatchelf:" << patchelftool.readAllStandardError();
+        LogError() << "runPatchelf:" << QString::fromLocal8Bit(patchelftool.readAllStandardError());
         // LogError() << "runPatchelf:" << patchelftool.readAllStandardOutput();
         // exit(1); // Do not exit because this could be a script that patchelf can't work on
     }
@@ -918,8 +918,8 @@ void runStrip(const QString &binaryPath)
     patchelfread.waitForFinished();
 
     if (patchelfread.exitCode() != 0){
-        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardError();
-        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << patchelfread.readAllStandardOutput();
+        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << QString::fromLocal8Bit(patchelfread.readAllStandardError());
+        LogError() << "Error reading rpath with patchelf" << QFileInfo(resolvedPath).completeBaseName() << ":" << QString::fromLocal8Bit(patchelfread.readAllStandardOutput());
         exit(1);
     }
 
@@ -927,7 +927,7 @@ void runStrip(const QString &binaryPath)
 
     if (rpath.startsWith("$")){
         LogDebug() << "Already contains rpath starting with $, hence not stripping";
-        LogDebug() << patchelfread.readAllStandardOutput();
+        LogDebug() << QString::fromLocal8Bit(patchelfread.readAllStandardOutput());
         return;
     }
 
@@ -952,8 +952,8 @@ void runStrip(const QString &binaryPath)
     if (strip.readAllStandardError().contains("Not enough room for program headers")) {
         LogNormal() << QFileInfo(resolvedPath).completeBaseName() << "already stripped.";
     } else {
-        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << strip.readAllStandardError();
-        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << strip.readAllStandardOutput();
+        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << QString::fromLocal8Bit(strip.readAllStandardError());
+        LogError() << "Error stripping" << QFileInfo(resolvedPath).completeBaseName() << ":" << QString::fromLocal8Bit(strip.readAllStandardOutput());
         exit(1);
     }
 
@@ -1046,12 +1046,12 @@ static QString captureOutput(const QString &command)
     process.waitForFinished();
 
     if (process.exitStatus() != QProcess::NormalExit) {
-        LogError() << command << "crashed:" << process.readAllStandardError();
+        LogError() << command << "crashed:" << QString::fromLocal8Bit(process.readAllStandardError());
     } else if (process.exitCode() != 0) {
-        LogError() << command << "exited with" << process.exitCode() << ":" << process.readAllStandardError();
+        LogError() << command << "exited with" << process.exitCode() << ":" << QString::fromLocal8Bit(process.readAllStandardError());
     }
 
-    return process.readAllStandardOutput();
+    return QString::fromLocal8Bit(process.readAllStandardOutput());
 }
 
 DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &additionalExecutables, const QString& qmake)
