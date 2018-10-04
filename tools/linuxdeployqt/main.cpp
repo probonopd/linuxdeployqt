@@ -89,6 +89,7 @@ int main(int argc, char **argv)
         qInfo() << "   -no-translations         : Skip deployment of translations.";
         qInfo() << "   -qmake=<path>            : The qmake executable to use.";
         qInfo() << "   -qmldir=<path>           : Scan for QML imports in the given path.";
+        qInfo() << "   -qmlimport=<path>        : Add the given path to QML module search locations.";
         qInfo() << "   -show-exclude-libs       : Print exclude libraries list.";
         qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
         qInfo() << "                              2 = normal, 3 = debug.";
@@ -215,6 +216,7 @@ int main(int argc, char **argv)
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     QStringList qmlDirs;
+    QStringList qmlImportPaths;
     QString qmakeExecutable;
     extern QStringList extraQtPlugins;
     extern QStringList excludeLibs;
@@ -413,6 +415,13 @@ int main(int argc, char **argv)
                 LogError() << "Missing qml directory path";
             else
                 qmlDirs << argument.mid(index+1);
+        } else if (argument.startsWith(QByteArray("-qmlimport"))) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf('=');
+            if (index == -1)
+                LogError() << "Missing qml import path";
+            else
+                qmlImportPaths << argument.mid(index+1);
         } else if (argument.startsWith("-no-copy-copyright-files")) {
             LogDebug() << "Argument found:" << argument;
             copyCopyrightFiles = false;
@@ -471,7 +480,7 @@ int main(int argc, char **argv)
     }
 
     if (!qmlDirs.isEmpty()) {
-        bool ok = deployQmlImports(appDirPath, deploymentInfo, qmlDirs);
+        bool ok = deployQmlImports(appDirPath, deploymentInfo, qmlDirs, qmlImportPaths);
         if (!ok && qmldirArgumentUsed)
             return 1; // exit if the user explicitly asked for qml import deployment
         // Update deploymentInfo.deployedLibraries - the QML imports

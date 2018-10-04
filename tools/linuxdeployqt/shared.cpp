@@ -1522,7 +1522,7 @@ void deployQmlImport(const QString &appDirPath, const QSet<QString> &rpaths, con
 }
 
 // Scan qml files in qmldirs for import statements, deploy used imports from Qml2ImportsPath to ./qml.
-bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs)
+bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs, QStringList &qmlImportPaths)
 {
     if(!qtDetected){
         LogDebug() << "Skipping QML imports since no Qt detected";
@@ -1531,7 +1531,8 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
 
     LogNormal() << "";
     LogNormal() << "Deploying QML imports ";
-    LogNormal() << "Application QML file search path(s) is" << qmlDirs;
+    LogNormal() << "Application QML file path(s) is" << qmlDirs;
+    LogNormal() << "QML module search path(s) is" << qmlImportPaths;
 
     // Use qmlimportscanner from QLibraryInfo::BinariesPath
     QString qmlImportScannerPath = QDir::cleanPath(qtToBeBundledInfo.value("QT_INSTALL_BINS")) + "/qmlimportscanner";
@@ -1556,6 +1557,11 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     foreach (const QString &qmlDir, qmlDirs) {
         argumentList.append("-rootPath");
         argumentList.append(qmlDir);
+    }
+
+    foreach (const QString &importPath, qmlImportPaths) {
+        argumentList.append("-importPath");
+        argumentList.append(importPath);
     }
 
     argumentList.append( "-importPath");
