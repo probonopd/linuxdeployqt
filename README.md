@@ -131,9 +131,9 @@ find $HOME/build-*-*_Qt_* \( -name "moc_*" -or -name "*.o" -or -name "qrc_*" -or
 
 Alternatively, you could use `$DESTDIR`.
 
-#### Adding Icon & Icon Theme Support
+#### Adding icon and icon theme support
 
-To enable icon & icon-theme support you must add `iconengines` as an extra Qt plugin while running linuxdeployqt.
+To enable icon and icon theme support you must add `iconengines` as an extra Qt plugin while running `linuxdeployqt`.
 
 `-extra-plugins=iconengines`
 
