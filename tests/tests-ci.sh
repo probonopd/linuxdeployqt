@@ -15,7 +15,7 @@ cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
 cp -r /usr/local/lib/appimagekit linuxdeployqt.AppDir/usr/lib/
 find linuxdeployqt.AppDir/
 export VERSION=continuous
-[ if ! -z $TRAVIS_TAG ] ; then export VERSION=$TRAVIS_TAG ; fi
+if [ ! -z $TRAVIS_TAG ] ; then export VERSION=$TRAVIS_TAG ; fi
 ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/desktop-file-validate -verbose=3 -bundle-non-qt-libs
 ./bin/linuxdeployqt linuxdeployqt.AppDir/linuxdeployqt.desktop -verbose=3 -appimage
 ls -lh
