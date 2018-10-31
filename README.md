@@ -36,6 +36,8 @@ Options:
    -extra-plugins=<list>    : List of extra plugins which should be deployed,
                               separated by comma.
    -no-copy-copyright-files : Skip deployment of copyright files.
+   -no-copy-packaged-libs   : Don't copy libraries that are already contained in
+                              the package (e.g. in a subdirectory)
    -no-plugins              : Skip plugin deployment.
    -no-strip                : Don't run 'strip' on the binaries.
    -no-translations         : Skip deployment of translations.

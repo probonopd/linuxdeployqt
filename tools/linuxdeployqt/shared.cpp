@@ -62,6 +62,7 @@ QStringList extraQtPlugins;
 QStringList excludeLibs;
 QStringList ignoreGlob;
 bool copyCopyrightFiles = true;
+bool copyPackagedLibs = true;
 
 using std::cout;
 using std::endl;
@@ -520,7 +521,11 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
             info.deployedInstallName = "$ORIGIN"; // + info.binaryName;
             info.libraryPath = info.libraryDirectory + info.binaryName;
             info.sourceFilePath = info.libraryPath;
-            info.libraryDestinationDirectory = bundleLibraryDirectory + "/";
+            if (!copyPackagedLibs && info.libraryPath.contains(appDirPath))
+                // leave libs that are already in the appdir in their current location
+                info.libraryDestinationDirectory = QDir(appDirPath).relativeFilePath(info.libraryDirectory);
+            else
+                info.libraryDestinationDirectory = bundleLibraryDirectory + "/";
             info.binaryDestinationDirectory = info.libraryDestinationDirectory;
             info.binaryDirectory = info.libraryDirectory;
             info.binaryPath = info.libraryPath;
