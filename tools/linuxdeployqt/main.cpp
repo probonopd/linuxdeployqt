@@ -84,8 +84,6 @@ int main(int argc, char **argv)
         qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
         qInfo() << "                              separated by comma.";
         qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
-        qInfo() << "   -no-copy-packaged-libs   : Don't copy libraries that are already contained in";
-        qInfo() << "                              the package (e.g. in a subdirectory)";
         qInfo() << "   -no-plugins              : Skip plugin deployment.";
         qInfo() << "   -no-strip                : Don't run 'strip' on the binaries.";
         qInfo() << "   -no-translations         : Skip deployment of translations.";
@@ -224,7 +222,6 @@ int main(int argc, char **argv)
     extern QStringList excludeLibs;
     extern QStringList ignoreGlob;
     extern bool copyCopyrightFiles;
-    extern bool copyPackagedLibs;
 
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
@@ -428,9 +425,6 @@ int main(int argc, char **argv)
         } else if (argument.startsWith("-no-copy-copyright-files")) {
             LogDebug() << "Argument found:" << argument;
             copyCopyrightFiles = false;
-        } else if (argument.startsWith("-no-copy-packaged-libs")) {
-            LogDebug() << "Argument found:" << argument;
-            copyPackagedLibs = false;
         } else if (argument == QByteArray("-always-overwrite")) {
             LogDebug() << "Argument found:" << argument;
             alwaysOwerwriteEnabled = true;
