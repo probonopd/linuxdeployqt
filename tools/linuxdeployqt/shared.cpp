@@ -520,7 +520,11 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
             info.deployedInstallName = "$ORIGIN"; // + info.binaryName;
             info.libraryPath = info.libraryDirectory + info.binaryName;
             info.sourceFilePath = info.libraryPath;
-            info.libraryDestinationDirectory = bundleLibraryDirectory + "/";
+            if (info.libraryPath.contains(appDirPath))
+                // leave libs that are already in the appdir in their current location
+                info.libraryDestinationDirectory = QDir(appDirPath).relativeFilePath(info.libraryDirectory);
+            else
+                info.libraryDestinationDirectory = bundleLibraryDirectory + "/";
             info.binaryDestinationDirectory = info.libraryDestinationDirectory;
             info.binaryDirectory = info.libraryDirectory;
             info.binaryPath = info.libraryPath;
@@ -841,8 +845,21 @@ void changeIdentification(const QString &id, const QString &binaryPath)
             setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
         }
     }
-    LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
-    runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
+
+    QStringList rpath = oldRpath.split(":", QString::SkipEmptyParts);
+    rpath.prepend(id);
+    rpath.removeDuplicates();
+    foreach(QString path, QStringList(rpath)) {
+        // remove any non-relative path that would point outside the package
+        if (!path.startsWith("$ORIGIN"))
+        {
+            LogWarning() << "Removing absolute rpath of " << path << " in " << binaryPath;
+            rpath.removeAll(path);
+        }
+    }
+
+    LogNormal() << "Changing rpath in" << binaryPath << "to" << rpath.join(":");
+    runPatchelf(QStringList() << "--set-rpath" << rpath.join(":") << binaryPath);
 
     // qt_prfxpath:
     if (binaryPath.contains("libQt5Core")) {
