@@ -260,10 +260,10 @@ int main(int argc, char **argv)
 
     QFile appRun(appDirPath + "/AppRun");
     if(appRun.exists()){
-        appRun.remove();
+        qDebug() << "Keeping existing AppRun";
+    } else {
+        QFile::link(relativeBinPath, appDirPath + "/AppRun");
     }
-
-    QFile::link(relativeBinPath, appDirPath + "/AppRun");
 
     /* Copy the desktop file in place, into the top level of the AppDir */
     if(desktopFile != ""){
