@@ -223,6 +223,8 @@ __CMake__ wants `DESTDIR` instead:
   - make DESTDIR=appdir -j$(nproc) install ; find appdir/
 ```
 
+Under some circumstances it may also be required to add `-DCMAKE_INSTALL_LIBDIR=/usr/lib` to the `cmake` call.
+
 __autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
 
 ```
