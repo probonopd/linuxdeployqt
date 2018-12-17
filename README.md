@@ -223,6 +223,12 @@ __CMake__ wants `DESTDIR` instead:
   - make DESTDIR=appdir -j$(nproc) install ; find appdir/
 ```
 
+Some applications have the bad habit of relying on CMake versions newer than what comes with the oldest still-supported distributions. In this case, install a newer CMake with
+
+```
+  - wget "https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz" ; sudo tar xf  cmake*.tar.gz --strip-components=1 -C /usr
+```
+
 Under some circumstances it may also be required to add `-DCMAKE_INSTALL_LIBDIR=/usr/lib` to the `cmake` call.
 
 __autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
