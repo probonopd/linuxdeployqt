@@ -249,6 +249,14 @@ Here, `CONFIG+=use_qt_paths` needs to be removed, otherwise it will install ever
 
 The exception is that you are building Qt libraries that _should_ be installed to the same location where Qt resides on your system, from where it will be picked up by `linuxdeployqt`.
 
+### A note on DESTDIR
+
+According to https://dwheeler.com/essays/automating-destdir.html, 
+
+> Automating DESTDIR can be a pain, so it’s best if the program supports it to start with; my package Auto-DESTDIR can automatically support DESTDIR in some cases if the program installation does not support it to begin with.
+
+Also see https://www.gnu.org/prep/standards/html_node/DESTDIR.html for more information.
+
 ### Sending Pull Requests on GitHub
 
 `linuxdeployqt` is great for upstream application projects that want to release their software in binary form to Linux users quickly and without much overhead. If you would like to see a particular application use `linuxdeployqt`, then sending a Pull Request may be an option to get the upstream application project to consider it. You can use the following template text for Pull Requests but make sure to customize it to the project in question.
