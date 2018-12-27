@@ -136,8 +136,7 @@ int main(int argc, char **argv)
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
             qDebug() << "desktopExecEntry:" << desktopExecEntry;
             desktopFile = firstArgument;
-            int lastPoint = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().lastIndexOf(".");
-            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().left(lastPoint);
+            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first();
             qDebug() << "desktopIconEntry:" << desktopIconEntry;
 
             QString candidateBin = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + desktopExecEntry); // Not FHS-like
