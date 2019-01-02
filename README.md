@@ -276,7 +276,7 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - Can optionally GPG2-sign your AppImages (inside the file)
 - Works on Live ISOs
 - Can use the same AppImages when dual-booting multiple distributions
-- Can be listed in the [AppImageHub](https://appimage.github.io/apps) central directory of available AppImages
+- Can be listed in the [AppImageHub](https://appimage.github.io/) central directory of available AppImages
 - Can double as a self-extracting compressed archive with the `--appimage-extract` parameter
 - No repositories needed. Suitable/optimized for air-gapped (offline) machines
 
