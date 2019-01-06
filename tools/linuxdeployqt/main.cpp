@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     // We need to catch those errors at the source of the problem
     // https://github.com/AppImage/appimage.github.io/search?q=GLIBC&unscoped_q=GLIBC&type=Issues
     const char *glcv = gnu_get_libc_version ();
-    if (strverscmp (glcv, "2.20") >= 0)
+    if (strverscmp (glcv, "2.21") >= 0)
     {
         qInfo() << "Please run on a system no newer than the oldest still-supported Ubuntu LTS release.";
         qInfo() << "This is so that the resulting bundle can run on all still-supported releases of Ubuntu.";
