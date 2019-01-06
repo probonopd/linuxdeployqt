@@ -35,6 +35,7 @@
 #include <QDirIterator>
 #include <sstream>
 #include "excludelist.h"
+# include <gnu/libc-version.h>
 
 int main(int argc, char **argv)
 {
@@ -51,7 +52,17 @@ int main(int argc, char **argv)
             << " (commit " << LINUXDEPLOYQT_GIT_COMMIT << "), "
             << "build " << BUILD_NUMBER << " built on " << BUILD_DATE;
     qInfo().noquote() << QString::fromStdString(version.str());
-
+    
+    // We need to catch those errors at the source of the problem
+    // https://github.com/AppImage/appimage.github.io/search?q=GLIBC&unscoped_q=GLIBC&type=Issues
+    const char *glcv = gnu_get_libc_version ();
+    if (strverscmp (glcv, "2.20") >= 0)
+    {
+        qInfo() << "Please run on a system no newer than the oldest still-supported Ubuntu LTS release.";
+        qInfo() << "This is so that the resulting bundle can run on all still-supported releases of Ubuntu.";
+        return 1;
+    }
+    
     // due to the structure of the argument parser, we have to check all arguments at first to check whether the user
     // wants to get the version only
     // TODO: replace argument parser with position independent, less error prone version
