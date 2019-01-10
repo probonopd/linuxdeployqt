@@ -133,9 +133,9 @@ Alternatively, you could use `$DESTDIR`.
 
 #### Adding icon and icon theme support
 
-To enable icon and icon theme support you must add `iconengines` as an extra Qt plugin while running `linuxdeployqt`.
+To enable icon and icon theme support you must add `iconengines` as an extra Qt plugin while running `linuxdeployqt`. In order for your application to locate the system theme icons, the `libqgtk3.so` platform theme must also be added:
 
-`-extra-plugins=iconengines`
+`-extra-plugins=iconengines,platformthemes/libqgtk3.so`
 
 #### Adding extra Qt plugins 
 
