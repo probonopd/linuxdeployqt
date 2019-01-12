@@ -226,6 +226,7 @@ __CMake__ wants `DESTDIR` instead:
 Some applications have the bad habit of relying on CMake versions newer than what comes with the oldest still-supported distributions. In this case, install a newer CMake with
 
 ```
+  - sudo rm -rf /usr/bin/cmake /usr/local/cmake-* /usr/local/bin/cmake || true # Needed on Travis CI; don't do this on other systems!
   - wget "https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz" ; sudo tar xf  cmake*.tar.gz --strip-components=1 -C /usr
 ```
 
