@@ -49,6 +49,7 @@
 QString appBinaryPath;
 bool runStripEnabled = true;
 bool bundleAllButCoreLibs = false;
+bool bundleEverything = false;
 bool fhsLikeMode = false;
 QString fhsPrefix;
 bool alwaysOwerwriteEnabled = false;
@@ -429,43 +430,44 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     if (trimmed.isEmpty())
         return info;
 
+    if(!bundleEverything) {
+	    if(bundleAllButCoreLibs) {
+		/*
+		Bundle every lib including the low-level ones except those that are explicitly blacklisted.
+		This is more suitable for bundling in a way that is portable between different distributions and target systems.
+		Along the way, this also takes care of non-Qt libraries.
 
-    if(bundleAllButCoreLibs) {
-        /*
-        Bundle every lib including the low-level ones except those that are explicitly blacklisted.
-        This is more suitable for bundling in a way that is portable between different distributions and target systems.
-        Along the way, this also takes care of non-Qt libraries.
+		The excludelist can be updated by running the bundled script generate-excludelist.sh
+		*/
 
-        The excludelist can be updated by running the bundled script generate-excludelist.sh
-        */
+		// copy generated excludelist
+		QStringList excludelist = generatedExcludelist;
 
-        // copy generated excludelist
-        QStringList excludelist = generatedExcludelist;
+		// append exclude libs
+		excludelist += excludeLibs;
 
-        // append exclude libs
-        excludelist += excludeLibs;
-
-        LogDebug() << "excludelist:" << excludelist;
-        if (! trimmed.contains("libicu")) {
-            if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName())) {
-                LogDebug() << "Skipping blacklisted" << trimmed;
-                return info;
-            }
-        }
-    } else {
-        /*
-        Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
-        TODO: Could make bundling these low-level libraries optional but then the bundles might need to
-        use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
-        With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
-        Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
-        */
-        // Manual make of Qt deploys it to /usr/local/Qt-x.x.x so we cannot remove this path just like that, so let's allow known libs of Qt.
-        if (!trimmed.contains("libicu") && !trimmed.contains("lib/libQt") && !trimmed.contains("lib/libqgsttools")) {
-            if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
-                return info;
-            }
-        }
+		LogDebug() << "excludelist:" << excludelist;
+		if (! trimmed.contains("libicu")) {
+		    if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName())) {
+			LogDebug() << "Skipping blacklisted" << trimmed;
+			return info;
+		    }
+		}
+	    } else {
+		/*
+		Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
+		TODO: Could make bundling these low-level libraries optional but then the bundles might need to
+		use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
+		With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
+		Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
+		*/
+		// Manual make of Qt deploys it to /usr/local/Qt-x.x.x so we cannot remove this path just like that, so let's allow known libs of Qt.
+		if (!trimmed.contains("libicu") && !trimmed.contains("lib/libQt") && !trimmed.contains("lib/libqgsttools")) {
+		    if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
+			return info;
+		    }
+		}
+	    }
     }
 
     enum State {QtPath, LibraryName, Version, End};
