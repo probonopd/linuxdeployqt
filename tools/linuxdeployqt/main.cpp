@@ -57,6 +57,7 @@ int main(int argc, char **argv)
     bool appimage = false;
     extern bool runStripEnabled;
     extern bool bundleAllButCoreLibs;
+    extern bool bundleEverything;
     extern bool fhsLikeMode;
     extern QString fhsPrefix;
     extern QStringList librarySearchPath;
@@ -98,6 +99,10 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             appimage = true;
             bundleAllButCoreLibs = true;
+        } else if (argument == QByteArray("-unsupported-bundle-everything")) {
+            LogDebug() << "Argument found:" << argument;
+            skipGlibcCheck = true;
+            bundleEverything = true;
         } else if (argument == QByteArray("-no-strip")) {
             LogDebug() << "Argument found:" << argument;
             runStripEnabled = false;
