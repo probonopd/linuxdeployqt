@@ -10,9 +10,9 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 * Instead of an `.app` bundle for macOS, this produces an [AppDir](http://rox.sourceforge.net/desktop/AppDirs.html) for Linux
 * Instead of a `.dmg` disk image for macOS, this produces an [AppImage](http://appimage.org/) for Linux which is quite similar to a dmg but executes the contained application rather than just opening a window on the desktop from where the application can be launched
 
-## Known issues
+## A note on binary compatibility
 
-__This may not be fully working yet.__ See [GitHub Issues](https://github.com/probonopd/linuxdeployqt/issues) for known issues. Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated.
+__To produce binaries that are compatible with many target systems, build on the oldest still-supported build system.__ The oldest still-supported release of Ubuntu (which is 14.04 trusty at this time) is currently tested and supported by the team. See [GitHub Issues](https://github.com/probonopd/linuxdeployqt/issues) for known issues. Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated.
 
 ## Installation
 
