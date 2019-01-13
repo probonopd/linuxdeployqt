@@ -96,7 +96,7 @@ Categories=Office;
 * Notice that both `Exec` and `Icon` only have file names.
 * Also Notice that the `Icon` entry does not include an extension.
 
-Read more about desktop files in the [freedesktop specification here](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html).
+Read more about desktop files in the [Desktop Entry Specification 1.0](https://standards.freedesktop.org/desktop-entry-spec/1.0/).
 
 Now you can say: `linuxdeployqt-continuous-x86_64.AppImage path/to/AppDir/usr/share/applications/your_app.desktop`
 
