@@ -64,6 +64,7 @@ int main(int argc, char **argv)
     QStringList additionalExecutables;
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
+    bool skipGlibcCheck = false;
     QStringList qmlDirs;
     QStringList qmlImportPaths;
     QString qmakeExecutable;
@@ -73,6 +74,20 @@ int main(int argc, char **argv)
     extern bool copyCopyrightFiles;
 
     // Check arguments
+    // Due to the structure of the argument parser, we have to check all arguments at first to check whether the user
+    // wants to get the version only
+    // TODO: replace argument parser with position independent, less error prone version
+    for (int i = 0; i < argc; i++ ) {
+        QString argument = argv[i];
+        if (argument == "-version" || argument == "-V" || argument == "--version") {
+            // can just exit normally, version has been printed above
+            return 0;
+        }
+        if (argument == QByteArray("-show-exclude-libs")) {
+            qInfo() << generatedExcludelist;
+            return 0;
+        }
+    }
     for (int i = 2; i < argc; ++i) {
         QByteArray argument = QByteArray(argv[i]);
 
@@ -133,6 +148,9 @@ int main(int argc, char **argv)
         } else if (argument == QByteArray("-no-translations")) {
             LogDebug() << "Argument found:" << argument;
             skipTranslations = true;
+        } else if (argument == QByteArray("-unsupported-allow-new-glibc")) {
+            LogDebug() << "Argument found:" << argument;
+            skipGlibcCheck = true;
         } else if (argument.startsWith("-extra-plugins=")) {
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
@@ -157,29 +175,21 @@ int main(int argc, char **argv)
     // We need to catch those errors at the source of the problem
     // https://github.com/AppImage/appimage.github.io/search?q=GLIBC&unscoped_q=GLIBC&type=Issues
     const char *glcv = gnu_get_libc_version ();
-    if (strverscmp (glcv, "2.21") >= 0)
-    {
-        qInfo() << "ERROR: The host system is too new.";
-        qInfo() << "Please run on a system with a glibc version no newer than what comes with the oldest";
-        qInfo() << "still-supported mainstream distribution, which currently is glibc 2.20.";
-        qInfo() << "This is so that the resulting bundle will work on most still-supported Linux distributions.";
-        qInfo() << "For more information, please see";
-        qInfo() << "https://github.com/probonopd/linuxdeployqt/issues/340";
-        return 1;
-    }
-    
-    // due to the structure of the argument parser, we have to check all arguments at first to check whether the user
-    // wants to get the version only
-    // TODO: replace argument parser with position independent, less error prone version
-    for (int i = 0; i < argc; i++ ) {
-        QString argument = argv[i];
-        if (argument == "-version" || argument == "-V" || argument == "--version") {
-            // can just exit normally, version has been printed above
-            return 0;
-        }
-        if (argument == QByteArray("-show-exclude-libs")) {
-            qInfo() << generatedExcludelist;
-            return 0;
+    if(skipGlibcCheck) {
+        qInfo() << "WARNING: Not checking glibc on the host system.";
+        qInfo() << "         The resulting AppDir or AppImage may not run on older systems.";
+        qInfo() << "         This mode is unsupported and discouraged.";
+        qInfo() << "         For more information, please see";
+        qInfo() << "         https://github.com/probonopd/linuxdeployqt/issues/340";
+     } else {
+        if (strverscmp (glcv, "2.21") >= 0) {
+            qInfo() << "ERROR: The host system is too new.";
+            qInfo() << "Please run on a system with a glibc version no newer than what comes with the oldest";
+            qInfo() << "still-supported mainstream distribution, which currently is glibc 2.20.";
+            qInfo() << "This is so that the resulting bundle will work on most still-supported Linux distributions.";
+            qInfo() << "For more information, please see";
+            qInfo() << "https://github.com/probonopd/linuxdeployqt/issues/340";
+            return 1;
         }
     }
 
