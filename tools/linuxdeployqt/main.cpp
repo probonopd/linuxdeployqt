@@ -193,8 +193,11 @@ int main(int argc, char **argv)
             qInfo().noquote() << QString(
                 "ERROR: The host system is too new.\n"
                 "       Please run on a system with a glibc version no newer than what comes with the oldest\n"
-                "       still-supported mainstream distribution, which currently is glibc) %1.\n"
+                "       still-supported mainstream distribution, which currently is glibc %1.\n"
                 "       This is so that the resulting bundle will work on most still-supported Linux distributions.\n"
+                "       It's possible to force linuxdeployqt to run with unsupported glibc versions with:\n"
+                "       '-unsupported-allow-new-glibc', the usage of this flag is discouraged, since it will generate\n"
+                "       AppImages that will not pass tests for AppImageHub, will not run on older operating systems and are not supported.\n"
                 "       For more information, please see\n"
                 "       https://github.com/probonopd/linuxdeployqt/issues/340\n").arg(supportedGlcv);
             return 1;
