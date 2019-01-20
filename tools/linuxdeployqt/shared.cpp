@@ -855,7 +855,7 @@ void changeIdentification(const QString &id, const QString &binaryPath)
         // remove any non-relative path that would point outside the package
         if (!path.startsWith("$ORIGIN"))
         {
-            LogWarning() << "Removing absolute rpath of " << path << " in " << binaryPath;
+            LogNormal() << "Removing absolute rpath of " << path << " in " << binaryPath;
             rpath.removeAll(path);
         }
     }
