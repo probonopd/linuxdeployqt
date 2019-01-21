@@ -1218,6 +1218,15 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // Plugin white list:
     QStringList pluginList;
 
+    // Make the bundled application look good on, e.g., Xfce
+    // Note: http://code.qt.io/qt/qtstyleplugins.git must be compiled (using libgtk2.0-dev)
+    // https://askubuntu.com/a/910143
+    // https://askubuntu.com/a/748186
+    // This functionality used to come as part of Qt by default in earlier versions
+    // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
+    pluginList.append("platformthemes/libqgtk2.so");
+    pluginList.append("styles/libqgtk2style.so");
+
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
     // Platform plugin:
