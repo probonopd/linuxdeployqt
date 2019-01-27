@@ -1230,8 +1230,12 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // Always bundle iconengines,imageformats
     // https://github.com/probonopd/linuxdeployqt/issues/82
     // https://github.com/probonopd/linuxdeployqt/issues/325
-    pluginList.append("iconengines");
-    pluginList.append("imageformats");
+    // FIXME
+    // The following does NOT work;
+    // findDependencyInfo: "ldd: /usr/local/Qt-5.9.3/plugins/iconengines: not regular file"
+    // pluginList.append("iconengines");
+    // pluginList.append("imageformats");
+    // TODO: Need to traverse the directories and add each contained plugin individually
 
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
