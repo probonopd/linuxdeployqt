@@ -1226,6 +1226,12 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
     pluginList.append("platformthemes/libqgtk2.so");
     pluginList.append("styles/libqgtk2style.so");
+	
+    // Always bundle iconengines,imageformats
+    // https://github.com/probonopd/linuxdeployqt/issues/82
+    // https://github.com/probonopd/linuxdeployqt/issues/325
+    pluginList.append("iconengines");
+    pluginList.append("imageformats");
 
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
