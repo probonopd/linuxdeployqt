@@ -287,7 +287,7 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 
 [Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
-__PLEASE NOTE:__ For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so. Also, You need to set up `GITHUB_TOKEN` in Travis CI for this to work; please see https://github.com/probonopd/uploadtool.
+__PLEASE NOTE:__ For this to work, you need to set up `GITHUB_TOKEN` in Travis CI for this to work; please see https://github.com/probonopd/uploadtool.
 If you would like to see only one entry for the Pull Request in your project's history, then please enable [this GitHub functionality](https://help.github.com/articles/configuring-commit-squashing-for-pull-requests/) on your repo. It allows you to squash (combine) the commits when merging.
 
 If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
