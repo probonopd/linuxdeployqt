@@ -194,7 +194,7 @@ int main(int argc, char **argv)
                 "ERROR: The host system is too new.\n"
                 "       Please run on a system with a glibc version no newerthan what comes\n"
                 "       with the oldest still-supported mainstream distribution, which\n"
-                "       currently is glibc %1.\n"
+                "       currently is glibc %1, actual version is %2.\n"
                 "       This is so that the resulting bundle will work on most still-supported\n"
                 "       Linux distributions.\n"
                 "       It's possible to force linuxdeployqt to run with unsupported glibc\n"
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
                 "       is discouraged, since it will generate AppImages that will not pass\n"
                 "       tests for AppImageHub, will not run on older operating systems and are\n"
                 "       not supported. For more information, please see:\n"
-                "       https://github.com/probonopd/linuxdeployqt/issues/340\n").arg(supportedGlcv);
+                "       https://github.com/probonopd/linuxdeployqt/issues/340\n").arg(supportedGlcv, glcv);
             return 1;
         }
     }
