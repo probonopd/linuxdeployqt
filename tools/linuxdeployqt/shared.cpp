@@ -1224,8 +1224,14 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // https://askubuntu.com/a/748186
     // This functionality used to come as part of Qt by default in earlier versions
     // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
-    pluginList.append("platformthemes/libqgtk2.so");
-    pluginList.append("styles/libqgtk2style.so");
+    QStringList extraQtPluginsAdded = { "platformthemes/libqgtk2.so", "styles/libqgtk2style.so" };
+    foreach (const QString &plugin, extraQtPluginsAdded) {
+    if (QFile::exists(pluginSourcePath + "/" + plugin)) {
+        pluginList.append(plugin);
+        LogDebug() << plugin << "appended";
+    } else {
+        LogWarning() <<"The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
+    }
 	
     // Always bundle iconengines,imageformats
     // https://github.com/probonopd/linuxdeployqt/issues/82
@@ -1236,7 +1242,19 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // pluginList.append("iconengines");
     // pluginList.append("imageformats");
     // TODO: Need to traverse the directories and add each contained plugin individually
-
+    QStringList extraQtPluginDirs = { "iconengines", "imageformats" };
+    foreach (const QString &plugin, extraQtPluginDirs) {
+        QDir pluginDirectory(pluginSourcePath + "/" + plugin);
+        if (pluginDirectory.exists()) {
+            //If it is a plugin directory we will deploy the entire directory
+            QStringList plugins = pluginDirectory.entryList(QStringList() << QStringLiteral("*.so"));
+            foreach (const QString &pluginFile, plugins) {
+                pluginList.append(plugin + "/" + pluginFile);
+                LogDebug() << plugin + "/" + pluginFile << "appended";
+            }
+        }
+    }
+		
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
     // Platform plugin:
