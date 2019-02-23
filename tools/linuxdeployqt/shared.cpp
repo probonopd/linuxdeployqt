@@ -1217,44 +1217,6 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 
     // Plugin white list:
     QStringList pluginList;
-
-    // Make the bundled application look good on, e.g., Xfce
-    // Note: http://code.qt.io/qt/qtstyleplugins.git must be compiled (using libgtk2.0-dev)
-    // https://askubuntu.com/a/910143
-    // https://askubuntu.com/a/748186
-    // This functionality used to come as part of Qt by default in earlier versions
-    // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
-    QStringList extraQtPluginsAdded = { "platformthemes/libqgtk2.so", "styles/libqgtk2style.so" };
-    foreach (const QString &plugin, extraQtPluginsAdded) {
-        if (QFile::exists(pluginSourcePath + "/" + plugin)) {
-            pluginList.append(plugin);
-            LogDebug() << plugin << "appended";
-        } else {
-            LogWarning() <<"The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
-	}
-    }
-	
-    // Always bundle iconengines,imageformats
-    // https://github.com/probonopd/linuxdeployqt/issues/82
-    // https://github.com/probonopd/linuxdeployqt/issues/325
-    // FIXME
-    // The following does NOT work;
-    // findDependencyInfo: "ldd: /usr/local/Qt-5.9.3/plugins/iconengines: not regular file"
-    // pluginList.append("iconengines");
-    // pluginList.append("imageformats");
-    // TODO: Need to traverse the directories and add each contained plugin individually
-    QStringList extraQtPluginDirs = { "iconengines", "imageformats" };
-    foreach (const QString &plugin, extraQtPluginDirs) {
-        QDir pluginDirectory(pluginSourcePath + "/" + plugin);
-        if (pluginDirectory.exists()) {
-            //If it is a plugin directory we will deploy the entire directory
-            QStringList plugins = pluginDirectory.entryList(QStringList() << QStringLiteral("*.so"));
-            foreach (const QString &pluginFile, plugins) {
-                pluginList.append(plugin + "/" + pluginFile);
-                LogDebug() << plugin + "/" + pluginFile << "appended";
-            }
-        }
-    }
 		
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
@@ -1276,16 +1238,42 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
             pluginList.append(QStringLiteral("platformthemes/") + plugin);
         }
 	*/
-        // All image formats (svg if QtSvg library is used)
-        QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, imagePlugins) {
-            if (plugin.contains(QStringLiteral("qsvg"))) {
-                if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
-                    pluginList.append(QStringLiteral("imageformats/") + plugin);
-                }
+
+        // Make the bundled application look good on, e.g., Xfce
+        // Note: http://code.qt.io/qt/qtstyleplugins.git must be compiled (using libgtk2.0-dev)
+        // https://askubuntu.com/a/910143
+        // https://askubuntu.com/a/748186
+        // This functionality used to come as part of Qt by default in earlier versions
+        // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
+        QStringList extraQtPluginsAdded = { "platformthemes/libqgtk2.so", "styles/libqgtk2style.so" };
+        foreach (const QString &plugin, extraQtPluginsAdded) {
+            if (QFile::exists(pluginSourcePath + "/" + plugin)) {
+                pluginList.append(plugin);
+                LogDebug() << plugin << "appended";
             } else {
-                pluginList.append(QStringLiteral("imageformats/") + plugin);
+                LogWarning() <<"The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
+	    }
         }
+	// Always bundle iconengines,imageformats
+        // https://github.com/probonopd/linuxdeployqt/issues/82
+        // https://github.com/probonopd/linuxdeployqt/issues/325
+        // FIXME
+        // The following does NOT work;
+        // findDependencyInfo: "ldd: /usr/local/Qt-5.9.3/plugins/iconengines: not regular file"
+        // pluginList.append("iconengines");
+        // pluginList.append("imageformats");
+        // TODO: Need to traverse the directories and add each contained plugin individually
+        QStringList extraQtPluginDirs = { "iconengines", "imageformats" };
+        foreach (const QString &plugin, extraQtPluginDirs) {
+            QDir pluginDirectory(pluginSourcePath + "/" + plugin);
+            if (pluginDirectory.exists()) {
+                //If it is a plugin directory we will deploy the entire directory
+                QStringList plugins = pluginDirectory.entryList(QStringList() << QStringLiteral("*.so"));
+                foreach (const QString &pluginFile, plugins) {
+                    pluginList.append(plugin + "/" + pluginFile);
+                    LogDebug() << plugin + "/" + pluginFile << "appended";
+                }
+            }
         }
     }
 
