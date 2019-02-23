@@ -1226,11 +1226,12 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
     QStringList extraQtPluginsAdded = { "platformthemes/libqgtk2.so", "styles/libqgtk2style.so" };
     foreach (const QString &plugin, extraQtPluginsAdded) {
-    if (QFile::exists(pluginSourcePath + "/" + plugin)) {
-        pluginList.append(plugin);
-        LogDebug() << plugin << "appended";
-    } else {
-        LogWarning() <<"The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
+        if (QFile::exists(pluginSourcePath + "/" + plugin)) {
+            pluginList.append(plugin);
+            LogDebug() << plugin << "appended";
+        } else {
+            LogWarning() <<"The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
+	}
     }
 	
     // Always bundle iconengines,imageformats
