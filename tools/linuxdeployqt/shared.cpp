@@ -1251,7 +1251,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 pluginList.append(plugin);
                 LogDebug() << plugin << "appended";
             } else {
-                LogWarning() <<"The plugin" << pluginSourcePath + "/" + plugin << "could not be found. Please check spelling and try again!";
+                LogWarning() <<"Plugin" << pluginSourcePath + "/" + plugin << "not found, skipping";
 	    }
         }
 	// Always bundle iconengines,imageformats
