@@ -12,7 +12,11 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 ## A note on binary compatibility
 
-__To produce binaries that are compatible with many target systems, build on the oldest still-supported build system.__ The oldest still-supported release of Ubuntu (which is 14.04 trusty at this time) is currently tested and supported by the team. See [GitHub Issues](https://github.com/probonopd/linuxdeployqt/issues) for known issues. Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated.
+__To produce binaries that are compatible with many target systems, build on the oldest still-supported build system.__ The oldest still-supported release of Ubuntu is currently targeteed, tested and supported by the team. 
+
+We recommend to target the oldest still-supported Ubuntu LTS release and build your applications on that. If you do this, the resulting binaries should be able to run on newer (but not older) systems (Ubuntu and other distributions).
+
+We do not support linuxdeployqt on systems newer than the oldest Ubuntu LTS release, because we want to encourage developers to build applications in a way that makes them possible to run on all still-supported distribution releases. For an overview about the support cycles of Ubuntu LTS releases, please see https://wiki.ubuntu.com/Releases.
 
 ## Installation
 
