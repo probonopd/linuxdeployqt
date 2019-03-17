@@ -10,7 +10,7 @@ echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf
 sudo dpkg -i patchelf_0.8-2_amd64.deb
 
 cd /tmp/
-wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2032/appimagetool-x86_64.AppImage
+wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2034/appimagetool-x86_64.AppImage
 # wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2009/appimagetool-x86_64.AppImage # GOOD, https://github.com/probonopd/linuxdeployqt/issues/355
 # wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
 chmod +x appimagetool*AppImage
