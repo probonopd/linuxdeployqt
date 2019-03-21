@@ -10,8 +10,8 @@ echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf
 sudo dpkg -i patchelf_0.8-2_amd64.deb
 
 cd /tmp/
-wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit//travis-2056/appimagetool-x86_64.AppImage # https://github.com/AppImage/AppImageKit/pull/937#issuecomment-474560095
-# wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2052/appimagetool-x86_64.AppImage # branch last-good, https://travis-ci.org/AppImage/AppImageKit/jobs/507462541
+# wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit//travis-2056/appimagetool-x86_64.AppImage # https://github.com/AppImage/AppImageKit/pull/937#issuecomment-474560095
+wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2052/appimagetool-x86_64.AppImage # branch last-good, https://travis-ci.org/AppImage/AppImageKit/jobs/507462541
 # wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2034/appimagetool-x86_64.AppImage # last good according to https://github.com/AppImage/AppImageKit/issues/934
 # wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" # Broken
 chmod +x appimagetool*AppImage
