@@ -254,6 +254,14 @@ Here, `CONFIG+=use_qt_paths` needs to be removed, otherwise it will install ever
 
 The exception is that you are building Qt libraries that _should_ be installed to the same location where Qt resides on your system, from where it will be picked up by `linuxdeployqt`.
 
+__meson__ [apparently](https://github.com/openAVproductions/openAV-Luppp/pull/270/commits/fa160a46d908e57b2c5b7bdb47cb5a089e08c212) wants
+
+```
+  - meson --prefix /usr build
+  - ninja -C build	- ninja -C build
+  - DESTDIR=./appdir -C build install
+```
+
 ### When using Qt from distribution packages
 
 On Ubuntu 14.04, you will need to pass in `-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake` when using distribution packages.
