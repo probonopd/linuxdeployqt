@@ -258,8 +258,8 @@ __meson__ [apparently](https://github.com/openAVproductions/openAV-Luppp/pull/27
 
 ```
   - meson --prefix /usr build
-  - ninja -C build	- ninja -C build
-  - DESTDIR=./appdir -C build install
+  - ninja -C build
+  - DESTDIR=./appdir ninja -C build install
 ```
 
 ### When using Qt from distribution packages
