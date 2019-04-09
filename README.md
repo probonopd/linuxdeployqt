@@ -213,7 +213,7 @@ It is common on Unix to also use the build tool to install applications and libr
 
 Please see the section "Installing Files" on http://doc.qt.io/qt-5/qmake-advanced-usage.html.
 
-### For projects that use CMake or autotools instead of qmake
+### For projects that use CMake, autotools, or meson with ninja instead of qmake
 
 ```
   - make INSTALL_ROOT=appdir install ; find appdir/
@@ -254,12 +254,12 @@ Here, `CONFIG+=use_qt_paths` needs to be removed, otherwise it will install ever
 
 The exception is that you are building Qt libraries that _should_ be installed to the same location where Qt resides on your system, from where it will be picked up by `linuxdeployqt`.
 
-__meson__ [apparently](https://github.com/openAVproductions/openAV-Luppp/pull/270/commits/fa160a46d908e57b2c5b7bdb47cb5a089e08c212) wants
+__meson with ninja__ [apparently](https://github.com/openAVproductions/openAV-Luppp/pull/270/commits/fa160a46d908e57b2c5b7bdb47cb5a089e08c212) wants
 
 ```
   - meson --prefix /usr build
   - ninja -C build
-  - DESTDIR=./appdir ninja -C build install
+  - DESTDIR=./appdir ninja -C build install ; find build/appdir
 ```
 
 ### When using Qt from distribution packages
