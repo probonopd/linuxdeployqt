@@ -191,7 +191,7 @@ int main(int argc, char **argv)
         if (strverscmp (glcv, "2.27") >= 0) {
             qInfo() << "ERROR: The host system is too new.";
             qInfo() << "Please run on a system with a glibc version no newer than what comes with the oldest";
-            qInfo() << "still-supported mainstream distribution, which currently is glibc 2.20.";
+            qInfo() << "currently still-supported mainstream distribution (xenial), which is glibc 2.23.";
             qInfo() << "This is so that the resulting bundle will work on most still-supported Linux distributions.";
             qInfo() << "For more information, please see";
             qInfo() << "https://github.com/probonopd/linuxdeployqt/issues/340";
