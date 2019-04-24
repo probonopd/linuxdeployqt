@@ -9,7 +9,7 @@ sudo apt-get update -qq
 # echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf_0.8-2_amd64.deb" | sha256sum -c
 # sudo dpkg -i patchelf_0.8-2_amd64.deb
 # We want a newer patchelf since the one above is missing e.g., '--add-needed' which our users might want to use
-git clone -o e1e39f3 https://github.com/NixOS/patchel
+git clone -o e1e39f3 https://github.com/NixOS/patchelf
 cd patchelf
 bash ./bootstrap.sh
 ./configure
