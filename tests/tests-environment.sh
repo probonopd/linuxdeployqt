@@ -12,8 +12,8 @@ sudo apt-get update -qq
 git clone -o e1e39f3 https://github.com/NixOS/patchelf
 cd patchelf
 bash ./bootstrap.sh
-./configure
-make -j2
+./configure --prefix=/usr
+make -j$(nproc)
 sudo make install
 
 cd /tmp/
