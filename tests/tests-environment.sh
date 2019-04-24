@@ -5,9 +5,16 @@ set -e
 sudo add-apt-repository --yes ppa:beineri/opt-qt593-trusty
 sudo apt-get update -qq
 
-wget https://ftp.fau.de/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
-echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf_0.8-2_amd64.deb" | sha256sum -c
-sudo dpkg -i patchelf_0.8-2_amd64.deb
+# wget https://ftp.fau.de/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
+# echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf_0.8-2_amd64.deb" | sha256sum -c
+# sudo dpkg -i patchelf_0.8-2_amd64.deb
+# We want a newer patchelf since the one above is missing e.g., '--add-needed' which our users might want to use
+git clone -o e1e39f3 https://github.com/NixOS/patchel
+cd patchelf
+bash ./bootstrap.sh
+./configure
+make -j2
+sudo make install
 
 cd /tmp/
 # wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2052/appimagetool-x86_64.AppImage # branch last-good, https://travis-ci.org/AppImage/AppImageKit/jobs/507462541
