@@ -1868,7 +1868,7 @@ bool deployTranslations(const QString &sourcePath, const QString &target, quint6
     // Find available languages prefixes by checking on qtbase.
     QStringList prefixes;
     QDir sourceDir(sourcePath);
-    const QStringList qmFilter = QStringList(QStringLiteral("qtbase_*.qm"));
+    const QStringList qmFilter = QStringList(QStringLiteral("qt*.qm"));
     foreach (QString qmFile, sourceDir.entryList(qmFilter)) {
         qmFile.chop(3);
         qmFile.remove(0, 7);
