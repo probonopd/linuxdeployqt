@@ -13,6 +13,7 @@ mkdir -p linuxdeployqt.AppDir/usr/{bin,lib}
 cp /usr/bin/{patchelf,desktop-file-validate} /usr/local/bin/{appimagetool,zsyncmake} linuxdeployqt.AppDir/usr/bin/
 cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
 cp -r /usr/local/lib/appimagekit linuxdeployqt.AppDir/usr/lib/
+chmod +x linuxdeployqt.AppDir/AppRun
 find linuxdeployqt.AppDir/
 export VERSION=continuous
 if [ ! -z $TRAVIS_TAG ] ; then export VERSION=$TRAVIS_TAG ; fi
