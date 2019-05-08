@@ -295,6 +295,7 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - Can be listed in the [AppImageHub](https://appimage.github.io/) central directory of available AppImages
 - Can double as a self-extracting compressed archive with the `--appimage-extract` parameter
 - No repositories needed. Suitable/optimized for air-gapped (offline) machines
+- Decentralized
 
 [Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
