@@ -12,7 +12,7 @@ This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt
 
 ## A note on binary compatibility
 
-__To produce binaries that are compatible with many target systems, build on the oldest still-supported build system.__ The oldest still-supported release of Ubuntu is currently targeteed, tested and supported by the team. 
+__To produce binaries that are compatible with many target systems, build on the oldest still-supported build system.__ The oldest still-supported release of Ubuntu is currently targeted, tested and supported by the team. 
 
 We recommend to target the oldest still-supported Ubuntu LTS release and build your applications on that. If you do this, the resulting binaries should be able to run on newer (but not older) systems (Ubuntu and other distributions).
 
