@@ -168,7 +168,7 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get -y install qt59base
+  - sudo apt-get -y install qt59base libgl1-mesa-dev
   - source /opt/qt*/bin/qt*-env.sh
 
 script:
