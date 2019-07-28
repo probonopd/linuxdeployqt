@@ -12,7 +12,7 @@ sudo wget -O /etc/apt/sources.list.d/viva64.list http://files.viva64.com/etc/viv
 sudo apt-get update
 sudo apt-get -y install --no-install-recommends pvs-studio
 pvs-studio-analyzer credentials probono@puredarwin.org $PVS_KEY -o ./licence.lic
-pvs-tool trace -- make -j$(nproc)
+pvs-studio-analyzer trace -- make -j$(nproc)
 pvs-studio-analyzer analyze -o pvs-studio.log -e ./src -j 4 -l ./licence.lic
 plog-converter -a GA:1,2 -t fullhtml -o /test_output/pvs-studio-html-report.html pvs-studio.log
 plog-converter -a GA:1,2 -t tasklist -o /test_output/pvs-studio-task-report.txt pvs-studio.log
