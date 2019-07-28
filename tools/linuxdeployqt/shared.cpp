@@ -514,7 +514,7 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
             }
             qtPath += (currentPart + "/");
 
-        } if (state == LibraryName) {
+        } else if (state == LibraryName) {
             name = currentPart;
             info.isDylib = true;
             info.libraryName = name;
