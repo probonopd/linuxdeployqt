@@ -785,7 +785,7 @@ QString runPatchelf(QStringList options)
 bool patchQtCore(const QString &path, const QString &variable, const QString &value)
 {
     return true; // ################################### Disabling for now since using qt.conf
-    QFile file(path);
+    /* QFile file(path);
     if (!file.open(QIODevice::ReadWrite)) {
         LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
                     QDir::toNativeSeparators(path), file.errorString());
@@ -828,6 +828,7 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
         return false;
     }
     return true;
+    */
 }
 
 void changeIdentification(const QString &id, const QString &binaryPath)
