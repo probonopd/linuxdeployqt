@@ -6,6 +6,18 @@ source /opt/qt*/bin/qt*-env.sh
 /opt/qt*/bin/qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
 make -j
 
+# Test
+wget -q -O - http://files.viva64.com/etc/pubkey.txt | sudo apt-key add -
+sudo wget -O /etc/apt/sources.list.d/viva64.list http://files.viva64.com/etc/viva64.list
+sudo apt-get update
+sudo apt-get -y install --no-install-recommends pvs-studio
+pvs-studio-analyzer credentials probono@puredarwin.org $PVS_KEY -o ./licence.lic
+pvs-studio-analyzer analyze -o pvs-studio.log -e ./src -j 4 -l ./licence.lic
+plog-converter -a GA:1,2 -t fullhtml -o /test_output/pvs-studio-html-report.html pvs-studio.log
+plog-converter -a GA:1,2 -t tasklist -o /test_output/pvs-studio-task-report.txt pvs-studio.log
+rm ./licence.lic
+ls -lh pvs-*
+
 # exit on failure
 set -e
 
