@@ -251,7 +251,7 @@ int main(int argc, char **argv)
     QString desktopExecEntry = "";
     QString desktopIconEntry = "";
 
-    if (argc > 1) {
+    if (argc > 2) {
         /* If we got a desktop file as the argument, try to figure out the application binary from it.
          * This has the advantage that we can also figure out the icon file this way, and have less work
          * to do when using linuxdeployqt. */
