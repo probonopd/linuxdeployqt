@@ -73,6 +73,7 @@ int main(int argc, char **argv)
     extern QStringList excludeLibs;
     extern QStringList ignoreGlob;
     extern bool copyCopyrightFiles;
+    extern QString updateInformation;
 
     // Check arguments
     // Due to the structure of the argument parser, we have to check all arguments at first to check whether the user
@@ -168,6 +169,10 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             ignoreGlob += argument.mid(index + 1);
+        } else if (argument.startsWith("-updateinformation=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            updateInformation = QString(argument.mid(index+1));
         } else if (argument.startsWith("--")) {
             LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
             return 1;
@@ -225,6 +230,7 @@ int main(int argc, char **argv)
         qInfo() << "   -show-exclude-libs       : Print exclude libraries list.";
         qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
         qInfo() << "                              2 = normal, 3 = debug.";
+        qInfo() << "   -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file";
         qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";

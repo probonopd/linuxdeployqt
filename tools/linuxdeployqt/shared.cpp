@@ -63,6 +63,7 @@ QStringList extraQtPlugins;
 QStringList excludeLibs;
 QStringList ignoreGlob;
 bool copyCopyrightFiles = true;
+QString updateInformation;
 
 using std::cout;
 using std::endl;
@@ -1777,7 +1778,17 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
 
 int createAppImage(const QString &appDirPath)
 {
-    QString appImageCommand = "appimagetool '" + appDirPath + "' -n -g"; // +"' '" + appImagePath + "'";
+    QString updateInfoArgument;
+
+    if (updateInformation.isEmpty()) {
+        // if there is no user-supplied update info, guess
+        updateInfoArgument = "-g";
+    } else {
+        updateInfoArgument = QString("-u '%1'").arg(updateInformation);
+    }
+
+    QString appImageCommand = "appimagetool -v '" + appDirPath + "' -n " + updateInfoArgument; // +"' '" + appImagePath + "'";
+    LogNormal() << appImageCommand;
     int ret = system(appImageCommand.toUtf8().constData());
     LogNormal() << "ret" << ret;
     LogNormal() << "WEXITSTATUS(ret)" << WEXITSTATUS(ret);

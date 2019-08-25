@@ -48,6 +48,7 @@ Options:
    -show-exclude-libs       : Print exclude libraries list.
    -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),
                               2 = normal, 3 = debug.
+   -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file
    -version                 : Print version statement and exit.
 
 linuxdeployqt takes an application as input and makes it
