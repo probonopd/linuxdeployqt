@@ -165,11 +165,11 @@ sudo: require
 dist: trusty
 
 before_install:
-  - sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get -y install qt59base libgl1-mesa-dev
+  - sudo apt-get -y install qt510base libgl1-mesa-dev
   - source /opt/qt*/bin/qt*-env.sh
 
 script:
