@@ -455,6 +455,14 @@ int main(int argc, char **argv)
             }
         }
 
+        /* Additional check to make sure that the undocumented, unsupported and not recommended
+         * -unsupported-allow-new-glibc option is not abused to create results that are broken; see
+         * https://github.com/probonopd/linuxdeployqt/issues/340 for more information
+         * TODO: Add funtionality that would automatically bundle glibc fully and correctly in this case */
+        if(skipGlibcCheck == true){
+            if(QFileInfo(appDirPath + "/usr/share/doc/libc6/copyright").exists() == false) exit(1);
+        }
+
         /* Copy in place */
         if(iconToBeUsed != ""){
             /* Check if there is already an icon and only if there is not, copy it to the AppDir.
