@@ -2,17 +2,21 @@
 
 set -e
 
-# download excludelist
-blacklisted=($(wget --quiet https://raw.githubusercontent.com/probonopd/AppImages/master/excludelist -O - | sort | uniq | grep -v "^#.*" | grep "[^-\s]"))
+# Download excludelist
+blacklisted=($(wget --quiet https://raw.githubusercontent.com/probonopd/AppImages/master/excludelist -O - | sort | uniq | cut -d '#' -f 1 | grep -v "^#.*" | grep "[^-\s]"))
 
-# sanity check
+# Sanity check
 if [ "$blacklisted" == "" ]; then
     exit 1;
 fi
 
+# If the linuxdeployqt source is not available locally, generate the file anyway
 filename=$(readlink -f $(dirname "$0"))/linuxdeployqt/excludelist.h
+if [ ! -e "$filename" ] ; then
+    filename=$(readlink -f $(dirname "$0"))/linuxdeployqt/excludelist.h
+fi
 
-# overwrite existing source file
+# Overwrite existing source file
 cat > "$filename" <<EOF
 /*
  * List of libraries to exclude for different reasons.
