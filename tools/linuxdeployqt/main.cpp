@@ -381,7 +381,9 @@ int main(int argc, char **argv)
     if(appRun.exists()){
         qDebug() << "Keeping existing AppRun";
     } else {
-        QFile::link(relativeBinPath, appDirPath + "/AppRun");
+        if (!QFile::link(relativeBinPath, appDirPath + "/AppRun")) {
+            LogError() << "Could not create AppRun link";
+        }
     }
 
     /* Copy the desktop file in place, into the top level of the AppDir */
