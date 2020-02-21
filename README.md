@@ -339,6 +339,9 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
 
+This GitHub template invokes linuxdeployqt during a GitHub CI Action:
+- https://github.com/219-design/qt-qml-project-template-with-ci
+
 These projects are already using linuxdeployqt:
 - Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
 - https://github.com/bjorn/tiled/
