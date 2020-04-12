@@ -5,7 +5,7 @@ This Linux Deployment Tool, `linuxdeployqt`, takes an application as input and m
 ![](https://user-images.githubusercontent.com/2480569/34471167-d44bd55e-ef41-11e7-941e-e091a83cae38.png)
 
 ## Differences to macdeployqt
-This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt-5/osx-deployment.html), `macdeployqt` in the tools applications of the Qt Toolkit, but has been changed to a slightly different logic and other tools needed for Linux.
+This tool is conceptually based on the [Mac Deployment Tool](https://doc-snapshots.qt.io/qt5-5.9/osx-deployment.html#the-mac-deployment-tool), `macdeployqt` in the tools applications of the Qt Toolkit, but has been changed to a slightly different logic and other tools needed for Linux.
 
 * Instead of an `.app` bundle for macOS, this produces an [AppDir](http://rox.sourceforge.net/desktop/AppDirs.html) for Linux
 * Instead of a `.dmg` disk image for macOS, this produces an [AppImage](http://appimage.org/) for Linux which is quite similar to a dmg but executes the contained application rather than just opening a window on the desktop from where the application can be launched
