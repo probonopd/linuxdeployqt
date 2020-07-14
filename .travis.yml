@@ -13,6 +13,7 @@ matrix:
    - os: linux
      arch: amd64
    - os: linux
+     dist: xenial
      arch: arm64
 
 env:
