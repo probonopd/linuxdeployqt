@@ -337,6 +337,9 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/patrickelectric/mini-qml
 - https://github.com/vaibhavpandeyvpz/apkstudio
 
+This project is using GitHub Actions and linuxdeployqt to provide AppImages of their builds:
+- https://github.com/pbek/QOwnNotes ([build-release.yml](https://github.com/pbek/QOwnNotes/blob/develop/.github/workflows/build-release.yml))
+
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
 
