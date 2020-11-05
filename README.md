@@ -337,8 +337,9 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/patrickelectric/mini-qml
 - https://github.com/vaibhavpandeyvpz/apkstudio
 
-This project is using GitHub Actions and linuxdeployqt to provide AppImages of their builds:
+These projects are using GitHub Actions and linuxdeployqt to provide AppImages of their builds:
 - https://github.com/pbek/QOwnNotes ([build-release.yml](https://github.com/pbek/QOwnNotes/blob/develop/.github/workflows/build-release.yml))
+- https://github.com/bjorn/tiled/ ([workflow](https://github.com/bjorn/tiled/blob/master/.github/workflows/packages.yml))
 
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
@@ -348,7 +349,6 @@ This GitHub template invokes linuxdeployqt during a GitHub CI Action:
 
 These projects are already using linuxdeployqt:
 - Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
-- https://github.com/bjorn/tiled/
 - https://github.com/evpo/EncryptPad
 - https://github.com/grahamrow/Muview2
 - https://github.com/freemountain/quark/
@@ -358,9 +358,8 @@ This project on GitLab uses linuxdeployqt:
 
 - https://gitlab.com/rpdev/opentodolist
 
-These can be bundled successfully using linuxdeployqt:
+This project can be bundled successfully using linuxdeployqt:
 
-- https://github.com/probonopd/tiled/blob/patch-1/.travis.yml
 - https://gitlab.com/rpdev/opentodolist/issues/96
 
 
