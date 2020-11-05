@@ -49,6 +49,7 @@
 QString appBinaryPath;
 bool runStripEnabled = true;
 bool bundleAllButCoreLibs = false;
+bool bundleEverything = false;
 bool fhsLikeMode = false;
 QString fhsPrefix;
 bool alwaysOwerwriteEnabled = false;
@@ -62,6 +63,7 @@ QStringList extraQtPlugins;
 QStringList excludeLibs;
 QStringList ignoreGlob;
 bool copyCopyrightFiles = true;
+QString updateInformation;
 
 using std::cout;
 using std::endl;
@@ -429,43 +431,44 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
     if (trimmed.isEmpty())
         return info;
 
+    if(!bundleEverything) {
+	    if(bundleAllButCoreLibs) {
+		/*
+		Bundle every lib including the low-level ones except those that are explicitly blacklisted.
+		This is more suitable for bundling in a way that is portable between different distributions and target systems.
+		Along the way, this also takes care of non-Qt libraries.
 
-    if(bundleAllButCoreLibs) {
-        /*
-        Bundle every lib including the low-level ones except those that are explicitly blacklisted.
-        This is more suitable for bundling in a way that is portable between different distributions and target systems.
-        Along the way, this also takes care of non-Qt libraries.
+		The excludelist can be updated by running the bundled script generate-excludelist.sh
+		*/
 
-        The excludelist can be updated by running the bundled script generate-excludelist.sh
-        */
+		// copy generated excludelist
+		QStringList excludelist = generatedExcludelist;
 
-        // copy generated excludelist
-        QStringList excludelist = generatedExcludelist;
+		// append exclude libs
+		excludelist += excludeLibs;
 
-        // append exclude libs
-        excludelist += excludeLibs;
-
-        LogDebug() << "excludelist:" << excludelist;
-        if (! trimmed.contains("libicu")) {
-            if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName())) {
-                LogDebug() << "Skipping blacklisted" << trimmed;
-                return info;
-            }
-        }
-    } else {
-        /*
-        Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
-        TODO: Could make bundling these low-level libraries optional but then the bundles might need to
-        use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
-        With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
-        Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
-        */
-        // Manual make of Qt deploys it to /usr/local/Qt-x.x.x so we cannot remove this path just like that, so let's allow known libs of Qt.
-        if (!trimmed.contains("libicu") && !trimmed.contains("lib/libQt") && !trimmed.contains("lib/libqgsttools")) {
-            if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
-                return info;
-            }
-        }
+		LogDebug() << "excludelist:" << excludelist;
+		if (! trimmed.contains("libicu")) {
+		    if (containsHowOften(excludelist, QFileInfo(trimmed).completeBaseName())) {
+			LogDebug() << "Skipping blacklisted" << trimmed;
+			return info;
+		    }
+		}
+	    } else {
+		/*
+		Don't deploy low-level libraries in /usr or /lib because these tend to break if moved to a system with a different glibc.
+		TODO: Could make bundling these low-level libraries optional but then the bundles might need to
+		use something like patchelf --set-interpreter or http://bitwagon.com/rtldi/rtldi.html
+		With the Qt provided by qt.io the libicu libraries come bundled, but that is not the case with e.g.,
+		Qt from ppas. Hence we make sure libicu is always bundled since it cannot be assumed to be on target sytems
+		*/
+		// Manual make of Qt deploys it to /usr/local/Qt-x.x.x so we cannot remove this path just like that, so let's allow known libs of Qt.
+		if (!trimmed.contains("libicu") && !trimmed.contains("lib/libQt") && !trimmed.contains("lib/libqgsttools")) {
+		    if ((trimmed.startsWith("/usr") or (trimmed.startsWith("/lib")))) {
+			return info;
+		    }
+		}
+	    }
     }
 
     enum State {QtPath, LibraryName, Version, End};
@@ -512,7 +515,7 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
             }
             qtPath += (currentPart + "/");
 
-        } if (state == LibraryName) {
+        } else if (state == LibraryName) {
             name = currentPart;
             info.isDylib = true;
             info.libraryName = name;
@@ -520,7 +523,11 @@ LibraryInfo parseLddLibraryLine(const QString &line, const QString &appDirPath, 
             info.deployedInstallName = "$ORIGIN"; // + info.binaryName;
             info.libraryPath = info.libraryDirectory + info.binaryName;
             info.sourceFilePath = info.libraryPath;
-            info.libraryDestinationDirectory = bundleLibraryDirectory + "/";
+            if (info.libraryPath.contains(appDirPath))
+                // leave libs that are already in the appdir in their current location
+                info.libraryDestinationDirectory = QDir(appDirPath).relativeFilePath(info.libraryDirectory);
+            else
+                info.libraryDestinationDirectory = bundleLibraryDirectory + "/";
             info.binaryDestinationDirectory = info.libraryDestinationDirectory;
             info.binaryDirectory = info.libraryDirectory;
             info.binaryPath = info.libraryPath;
@@ -779,7 +786,7 @@ QString runPatchelf(QStringList options)
 bool patchQtCore(const QString &path, const QString &variable, const QString &value)
 {
     return true; // ################################### Disabling for now since using qt.conf
-    QFile file(path);
+    /* QFile file(path);
     if (!file.open(QIODevice::ReadWrite)) {
         LogWarning() << QString::fromLatin1("Unable to patch %1: %2").arg(
                     QDir::toNativeSeparators(path), file.errorString());
@@ -822,6 +829,7 @@ bool patchQtCore(const QString &path, const QString &variable, const QString &va
         return false;
     }
     return true;
+    */
 }
 
 void changeIdentification(const QString &id, const QString &binaryPath)
@@ -841,8 +849,21 @@ void changeIdentification(const QString &id, const QString &binaryPath)
             setenv("LD_LIBRARY_PATH",newPath.toUtf8().constData(),1);
         }
     }
-    LogNormal() << "Changing rpath in" << binaryPath << "to" << id;
-    runPatchelf(QStringList() << "--set-rpath" << id << binaryPath);
+
+    QStringList rpath = oldRpath.split(":", QString::SkipEmptyParts);
+    rpath.prepend(id);
+    rpath.removeDuplicates();
+    foreach(QString path, QStringList(rpath)) {
+        // remove any non-relative path that would point outside the package
+        if (!path.startsWith("$ORIGIN"))
+        {
+            LogNormal() << "Removing absolute rpath of " << path << " in " << binaryPath;
+            rpath.removeAll(path);
+        }
+    }
+
+    LogNormal() << "Changing rpath in" << binaryPath << "to" << rpath.join(":");
+    runPatchelf(QStringList() << "--set-rpath" << rpath.join(":") << binaryPath);
 
     // qt_prfxpath:
     if (binaryPath.contains("libQt5Core")) {
@@ -1199,7 +1220,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 
     // Plugin white list:
     QStringList pluginList;
-
+		
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
     // Platform plugin:
@@ -1220,16 +1241,42 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
             pluginList.append(QStringLiteral("platformthemes/") + plugin);
         }
 	*/
-        // All image formats (svg if QtSvg library is used)
-        QStringList imagePlugins = QDir(pluginSourcePath +  QStringLiteral("/imageformats")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, imagePlugins) {
-            if (plugin.contains(QStringLiteral("qsvg"))) {
-                if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
-                    pluginList.append(QStringLiteral("imageformats/") + plugin);
-                }
+
+        // Make the bundled application look good on, e.g., Xfce
+        // Note: http://code.qt.io/qt/qtstyleplugins.git must be compiled (using libgtk2.0-dev)
+        // https://askubuntu.com/a/910143
+        // https://askubuntu.com/a/748186
+        // This functionality used to come as part of Qt by default in earlier versions
+        // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
+        QStringList extraQtPluginsAdded = { "platformthemes/libqgtk2.so", "styles/libqgtk2style.so" };
+        foreach (const QString &plugin, extraQtPluginsAdded) {
+            if (QFile::exists(pluginSourcePath + "/" + plugin)) {
+                pluginList.append(plugin);
+                LogDebug() << plugin << "appended";
             } else {
-                pluginList.append(QStringLiteral("imageformats/") + plugin);
+                LogWarning() <<"Plugin" << pluginSourcePath + "/" + plugin << "not found, skipping";
+	    }
         }
+	// Always bundle iconengines,imageformats
+        // https://github.com/probonopd/linuxdeployqt/issues/82
+        // https://github.com/probonopd/linuxdeployqt/issues/325
+        // FIXME
+        // The following does NOT work;
+        // findDependencyInfo: "ldd: /usr/local/Qt-5.9.3/plugins/iconengines: not regular file"
+        // pluginList.append("iconengines");
+        // pluginList.append("imageformats");
+        // TODO: Need to traverse the directories and add each contained plugin individually
+        QStringList extraQtPluginDirs = { "iconengines", "imageformats" };
+        foreach (const QString &plugin, extraQtPluginDirs) {
+            QDir pluginDirectory(pluginSourcePath + "/" + plugin);
+            if (pluginDirectory.exists()) {
+                //If it is a plugin directory we will deploy the entire directory
+                QStringList plugins = pluginDirectory.entryList(QStringList() << QStringLiteral("*.so"));
+                foreach (const QString &pluginFile, plugins) {
+                    pluginList.append(plugin + "/" + pluginFile);
+                    LogDebug() << plugin + "/" + pluginFile << "appended";
+                }
+            }
         }
     }
 
@@ -1523,7 +1570,7 @@ void deployQmlImport(const QString &appDirPath, const QSet<QString> &rpaths, con
 }
 
 // Scan qml files in qmldirs for import statements, deploy used imports from Qml2ImportsPath to ./qml.
-bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs)
+bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs, QStringList &qmlImportPaths)
 {
     if(!qtDetected){
         LogDebug() << "Skipping QML imports since no Qt detected";
@@ -1532,7 +1579,8 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
 
     LogNormal() << "";
     LogNormal() << "Deploying QML imports ";
-    LogNormal() << "Application QML file search path(s) is" << qmlDirs;
+    LogNormal() << "Application QML file path(s) is" << qmlDirs;
+    LogNormal() << "QML module search path(s) is" << qmlImportPaths;
 
     // Use qmlimportscanner from QLibraryInfo::BinariesPath
     QString qmlImportScannerPath = QDir::cleanPath(qtToBeBundledInfo.value("QT_INSTALL_BINS")) + "/qmlimportscanner";
@@ -1557,6 +1605,11 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     foreach (const QString &qmlDir, qmlDirs) {
         argumentList.append("-rootPath");
         argumentList.append(qmlDir);
+    }
+
+    foreach (const QString &importPath, qmlImportPaths) {
+        argumentList.append("-importPath");
+        argumentList.append(importPath);
     }
 
     argumentList.append( "-importPath");
@@ -1726,7 +1779,17 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
 
 int createAppImage(const QString &appDirPath)
 {
-    QString appImageCommand = "appimagetool '" + appDirPath + "' --verbose -n -g"; // +"' '" + appImagePath + "'";
+    QString updateInfoArgument;
+
+    if (updateInformation.isEmpty()) {
+        // if there is no user-supplied update info, guess
+        updateInfoArgument = "-g";
+    } else {
+        updateInfoArgument = QString("-u '%1'").arg(updateInformation);
+    }
+
+    QString appImageCommand = "appimagetool -v '" + appDirPath + "' -n " + updateInfoArgument; // +"' '" + appImagePath + "'";
+    LogNormal() << appImageCommand;
     int ret = system(appImageCommand.toUtf8().constData());
     LogNormal() << "ret" << ret;
     LogNormal() << "WEXITSTATUS(ret)" << WEXITSTATUS(ret);
@@ -1818,7 +1881,7 @@ bool deployTranslations(const QString &sourcePath, const QString &target, quint6
     // Find available languages prefixes by checking on qtbase.
     QStringList prefixes;
     QDir sourceDir(sourcePath);
-    const QStringList qmFilter = QStringList(QStringLiteral("qtbase_*.qm"));
+    const QStringList qmFilter = QStringList(QStringLiteral("qt*.qm"));
     foreach (QString qmFile, sourceDir.entryList(qmFilter)) {
         qmFile.chop(3);
         qmFile.remove(0, 7);

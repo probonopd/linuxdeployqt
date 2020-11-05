@@ -1,0 +1,5 @@
+#!/bin/bash
+# This file is being used so that users don't have to unset env vars manually
+HERE="$(dirname "$(readlink -f "${0}")")"
+unset QTDIR; unset QT_PLUGIN_PATH # Do not unset LD_LIBRARY_PATH; https://github.com/probonopd/linuxdeployqt/pull/370#issuecomment-489515772
+exec "${HERE}/usr/bin/linuxdeployqt" "$@"

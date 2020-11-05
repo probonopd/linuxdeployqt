@@ -43,6 +43,7 @@ extern int logLevel;
 extern QString appBinaryPath;
 extern bool runStripEnabled;
 extern bool bundleAllButCoreLibs;
+extern bool bundleEverything;
 extern bool fhsLikeMode;
 extern QString fhsPrefix;
 extern QStringList extraQtPlugins;
@@ -123,7 +124,7 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,const QString &bun
 void createQtConf(const QString &appDirPath);
 void createQtConfForQtWebEngineProcess(const QString &appDirPath);
 void deployPlugins(const QString &appDirPath, DeploymentInfo deploymentInfo);
-bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs);
+bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, QStringList &qmlDirs, QStringList &qmlImportPaths);
 void changeIdentification(const QString &id, const QString &binaryPath);
 void changeInstallName(const QString &oldName, const QString &newName, const QString &binaryPath);
 void runStrip(const QString &binaryPath);

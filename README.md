@@ -1,18 +1,22 @@
-# linuxdeployqt [![Build Status](https://travis-ci.org/probonopd/linuxdeployqt.svg?branch=master)](https://travis-ci.org/probonopd/linuxdeployqt) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/93b4a359057e412b8a7673b4b61d7cb7)](https://www.codacy.com/app/probonopd/linuxdeployqt?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=probonopd/linuxdeployqt&amp;utm_campaign=Badge_Grade) [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org/t/linuxdeployqt-new-linux-deployment-tool-for-qt/57) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage)
+# linuxdeployqt [![Build Status](https://travis-ci.org/probonopd/linuxdeployqt.svg?branch=master)](https://travis-ci.org/probonopd/linuxdeployqt) ![Downloads](https://img.shields.io/github/downloads/probonopd/linuxdeployqt/total.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/93b4a359057e412b8a7673b4b61d7cb7)](https://www.codacy.com/app/probonopd/linuxdeployqt?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=probonopd/linuxdeployqt&amp;utm_campaign=Badge_Grade) [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org/t/linuxdeployqt-new-linux-deployment-tool-for-qt/57) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage)
 
 This Linux Deployment Tool, `linuxdeployqt`, takes an application as input and makes it self-contained by copying in the resources that the application uses (like libraries, graphics, and plugins) into a bundle. The resulting bundle can be distributed as an AppDir or as an [AppImage](https://appimage.org/) to users, or can be put into cross-distribution packages. It can be used as part of the build process to deploy applications written in C, C++, and other compiled languages with systems like `CMake`, `qmake`, and `make`. When used on Qt-based applications, it can bundle a specific minimal subset of Qt required to run the application.
 
 ![](https://user-images.githubusercontent.com/2480569/34471167-d44bd55e-ef41-11e7-941e-e091a83cae38.png)
 
 ## Differences to macdeployqt
-This tool is conceptually based on the [Mac Deployment Tool](http://doc.qt.io/qt-5/osx-deployment.html), `macdeployqt` in the tools applications of the Qt Toolkit, but has been changed to a slightly different logic and other tools needed for Linux.
+This tool is conceptually based on the [Mac Deployment Tool](https://doc-snapshots.qt.io/qt5-5.9/osx-deployment.html#the-mac-deployment-tool), `macdeployqt` in the tools applications of the Qt Toolkit, but has been changed to a slightly different logic and other tools needed for Linux.
 
 * Instead of an `.app` bundle for macOS, this produces an [AppDir](http://rox.sourceforge.net/desktop/AppDirs.html) for Linux
 * Instead of a `.dmg` disk image for macOS, this produces an [AppImage](http://appimage.org/) for Linux which is quite similar to a dmg but executes the contained application rather than just opening a window on the desktop from where the application can be launched
 
-## Known issues
+## A note on binary compatibility
 
-__This may not be fully working yet.__ See [GitHub Issues](https://github.com/probonopd/linuxdeployqt/issues) for known issues. Use with care, run with maximum verbosity, submit issues and pull requests. Help is appreciated.
+__To produce binaries that are compatible with many target systems, build on the oldest still-supported build system.__ The oldest still-supported release of Ubuntu is currently targeted, tested and supported by the team. 
+
+We recommend to target the oldest still-supported Ubuntu LTS release and build your applications on that. If you do this, the resulting binaries should be able to run on newer (but not older) systems (Ubuntu and other distributions).
+
+We do not support linuxdeployqt on systems newer than the oldest Ubuntu LTS release, because we want to encourage developers to build applications in a way that makes them possible to run on all still-supported distribution releases. For an overview about the support cycles of Ubuntu LTS releases, please see https://wiki.ubuntu.com/Releases.
 
 ## Installation
 
@@ -44,6 +48,7 @@ Options:
    -show-exclude-libs       : Print exclude libraries list.
    -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),
                               2 = normal, 3 = debug.
+   -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file
    -version                 : Print version statement and exit.
 
 linuxdeployqt takes an application as input and makes it
@@ -96,7 +101,7 @@ Categories=Office;
 * Notice that both `Exec` and `Icon` only have file names.
 * Also Notice that the `Icon` entry does not include an extension.
 
-Read more about desktop files in the [freedesktop specification here](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html).
+Read more about desktop files in the [Desktop Entry Specification 1.0](https://standards.freedesktop.org/desktop-entry-spec/1.0/).
 
 Now you can say: `linuxdeployqt-continuous-x86_64.AppImage path/to/AppDir/usr/share/applications/your_app.desktop`
 
@@ -121,7 +126,7 @@ If this does not show the correct path to your Qt instance that you want to be b
 
 Alternatively, use the `-qmake` command line option to point the tool directly to the qmake executable to be used.
 
-#### Remove unecessary files
+#### Remove unnecessary files
 
 Before running linuxdeployqt it may be wise to delete unneeded files that you do not wish to distribute from the build directory. These may be autogenerated during the build. You can delete them like so:
 
@@ -130,6 +135,12 @@ find $HOME/build-*-*_Qt_* \( -name "moc_*" -or -name "*.o" -or -name "qrc_*" -or
 ```
 
 Alternatively, you could use `$DESTDIR`.
+
+#### Adding icon and icon theme support
+
+To enable icon and icon theme support you must add `iconengines` as an extra Qt plugin while running `linuxdeployqt`. In order for your application to locate the system theme icons, the `libqgtk3.so` platform theme must also be added:
+
+`-extra-plugins=iconengines,platformthemes/libqgtk3.so`
 
 #### Adding extra Qt plugins 
 
@@ -154,11 +165,11 @@ sudo: require
 dist: trusty
 
 before_install:
-  - sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get -y install qt59base
+  - sudo apt-get -y install qt510base libgl1-mesa-dev
   - source /opt/qt*/bin/qt*-env.sh
 
 script:
@@ -167,13 +178,12 @@ script:
   - make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
   - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-  - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
-  - export VERSION=$(git rev-parse --short HEAD) # linuxdeployqt uses this for naming the file
+  # export VERSION=... # linuxdeployqt uses this for naming the file
   - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
 
 after_success:
-  - find appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq
-  - # curl --upload-file APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+  # find appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
+  # curl --upload-file APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash upload.sh APPNAME*.AppImage*
   
@@ -185,7 +195,7 @@ branches:
 
 When you save your change, then Travis CI should build and upload an AppImage for you. More likely than not, some fine-tuning will still be required.
 
-For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so.
+For this to work, you need to set up `GITHUB_TOKEN` in Travis CI; please see https://github.com/probonopd/uploadtool.
 
 By default, qmake `.pro` files generated by Qt Creator unfortunately don't support `make install` out of the box. In this case you will get
 
@@ -203,7 +213,7 @@ It is common on Unix to also use the build tool to install applications and libr
 
 Please see the section "Installing Files" on http://doc.qt.io/qt-5/qmake-advanced-usage.html.
 
-### For projects that use CMake or autotools instead of qmake
+### For projects that use CMake, autotools, or meson with ninja instead of qmake
 
 ```
   - make INSTALL_ROOT=appdir install ; find appdir/
@@ -216,6 +226,15 @@ __CMake__ wants `DESTDIR` instead:
   - make -j$(nproc)
   - make DESTDIR=appdir -j$(nproc) install ; find appdir/
 ```
+
+Some applications have the bad habit of relying on CMake versions newer than what comes with the oldest still-supported distributions. In this case, install a newer CMake with
+
+```
+  - sudo rm -rf /usr/bin/cmake /usr/local/cmake-* /usr/local/bin/cmake || true # Needed on Travis CI; don't do this on other systems!
+  - wget "https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2-Linux-x86_64.tar.gz" ; sudo tar xf  cmake*.tar.gz --strip-components=1 -C /usr
+```
+
+Under some circumstances it may also be required to add `-DCMAKE_INSTALL_LIBDIR=/usr/lib` to the `cmake` call.
 
 __autotools__ (the dinosaur that spends precious minutes "checking...") wants `DESTDIR` too but insists on an absolute link which we can feed it using readlink:
 
@@ -234,6 +253,26 @@ qmake PREFIX=/usr CONFIG+=use_qt_paths
 Here, `CONFIG+=use_qt_paths` needs to be removed, otherwise it will install everything under the Qt installation paths in `/opt/qt58` when using the beineri ppa.
 
 The exception is that you are building Qt libraries that _should_ be installed to the same location where Qt resides on your system, from where it will be picked up by `linuxdeployqt`.
+
+__meson with ninja__ [apparently](https://github.com/openAVproductions/openAV-Luppp/pull/270/commits/fa160a46d908e57b2c5b7bdb47cb5a089e08c212) wants
+
+```
+  - meson --prefix /usr build
+  - ninja -C build
+  - DESTDIR=./appdir ninja -C build install ; find build/appdir
+```
+
+### When using Qt from distribution packages
+
+On Ubuntu 14.04, you will need to pass in `-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake` when using distribution packages.
+
+### A note on DESTDIR
+
+According to https://dwheeler.com/essays/automating-destdir.html, 
+
+> Automating DESTDIR can be a pain, so it’s best if the program supports it to start with; my package Auto-DESTDIR can automatically support DESTDIR in some cases if the program installation does not support it to begin with.
+
+Also see https://www.gnu.org/prep/standards/html_node/DESTDIR.html for more information.
 
 ### Sending Pull Requests on GitHub
 
@@ -254,12 +293,14 @@ Providing an [AppImage](http://appimage.org/) would have, among others, these ad
 - Can optionally GPG2-sign your AppImages (inside the file)
 - Works on Live ISOs
 - Can use the same AppImages when dual-booting multiple distributions
-- Can be listed in the [AppImageHub](https://appimage.github.io/apps) central directory of available AppImages
+- Can be listed in the [AppImageHub](https://appimage.github.io/) central directory of available AppImages
 - Can double as a self-extracting compressed archive with the `--appimage-extract` parameter
+- No repositories needed. Suitable/optimized for air-gapped (offline) machines
+- Decentralized
 
 [Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
-__PLEASE NOTE:__ For this to work, you need to enable Travis CI for your repository as [described here](https://travis-ci.org/getting_started) __prior to merging this__, if you haven't already done so. Also, You need to set up `GITHUB_TOKEN` in Travis CI for this to work; please see https://github.com/probonopd/uploadtool.
+__PLEASE NOTE:__ For this to work, you need to set up `GITHUB_TOKEN` in Travis CI for this to work; please see https://github.com/probonopd/uploadtool.
 If you would like to see only one entry for the Pull Request in your project's history, then please enable [this GitHub functionality](https://help.github.com/articles/configuring-commit-squashing-for-pull-requests/) on your repo. It allows you to squash (combine) the commits when merging.
 
 If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
@@ -293,13 +334,21 @@ These projects are already using [Travis CI](http://travis-ci.org/) and linuxdep
 - https://github.com/xdgurl/xdgurl
 - https://github.com/QNapi/qnapi
 - https://github.com/m-o-s-t-a-f-a/dana
+- https://github.com/patrickelectric/mini-qml
+- https://github.com/vaibhavpandeyvpz/apkstudio
+
+These projects are using GitHub Actions and linuxdeployqt to provide AppImages of their builds:
+- https://github.com/pbek/QOwnNotes ([build-release.yml](https://github.com/pbek/QOwnNotes/blob/develop/.github/workflows/build-release.yml))
+- https://github.com/bjorn/tiled/ ([workflow](https://github.com/bjorn/tiled/blob/master/.github/workflows/packages.yml))
 
 This project is already using linuxdeployqt in a custom Jenkins workflow:
 - https://github.com/appimage-packages/
 
+This GitHub template invokes linuxdeployqt during a GitHub CI Action:
+- https://github.com/219-design/qt-qml-project-template-with-ci
+
 These projects are already using linuxdeployqt:
 - Autodesk EAGLE for Linux http://www.autodesk.com/products/eagle/free-download
-- https://github.com/bjorn/tiled/
 - https://github.com/evpo/EncryptPad
 - https://github.com/grahamrow/Muview2
 - https://github.com/freemountain/quark/
@@ -309,9 +358,8 @@ This project on GitLab uses linuxdeployqt:
 
 - https://gitlab.com/rpdev/opentodolist
 
-These can be bundled successfully using linuxdeployqt:
+This project can be bundled successfully using linuxdeployqt:
 
-- https://github.com/probonopd/tiled/blob/patch-1/.travis.yml
 - https://gitlab.com/rpdev/opentodolist/issues/96
 
 

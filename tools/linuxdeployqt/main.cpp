@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016-18 The Qt Company Ltd. and Simon Peter
+** Copyright (C) 2016-19 The Qt Company Ltd. and Simon Peter
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the tools applications of the Qt Toolkit.
@@ -35,6 +35,7 @@
 #include <QDirIterator>
 #include <sstream>
 #include "excludelist.h"
+# include <gnu/libc-version.h>
 
 int main(int argc, char **argv)
 {
@@ -52,7 +53,30 @@ int main(int argc, char **argv)
             << "build " << BUILD_NUMBER << " built on " << BUILD_DATE;
     qInfo().noquote() << QString::fromStdString(version.str());
 
-    // due to the structure of the argument parser, we have to check all arguments at first to check whether the user
+    bool plugins = true;
+    bool appimage = false;
+    extern bool runStripEnabled;
+    extern bool bundleAllButCoreLibs;
+    extern bool bundleEverything;
+    extern bool fhsLikeMode;
+    extern QString fhsPrefix;
+    extern QStringList librarySearchPath;
+    extern bool alwaysOwerwriteEnabled;    
+    QStringList additionalExecutables;
+    bool qmldirArgumentUsed = false;
+    bool skipTranslations = false;
+    bool skipGlibcCheck = false;
+    QStringList qmlDirs;
+    QStringList qmlImportPaths;
+    QString qmakeExecutable;
+    extern QStringList extraQtPlugins;
+    extern QStringList excludeLibs;
+    extern QStringList ignoreGlob;
+    extern bool copyCopyrightFiles;
+    extern QString updateInformation;
+
+    // Check arguments
+    // Due to the structure of the argument parser, we have to check all arguments at first to check whether the user
     // wants to get the version only
     // TODO: replace argument parser with position independent, less error prone version
     for (int i = 0; i < argc; i++ ) {
@@ -64,6 +88,119 @@ int main(int argc, char **argv)
         if (argument == QByteArray("-show-exclude-libs")) {
             qInfo() << generatedExcludelist;
             return 0;
+        }
+    }
+    for (int i = 2; i < argc; ++i) {
+        QByteArray argument = QByteArray(argv[i]);
+
+        if (argument == QByteArray("-no-plugins")) {
+            LogDebug() << "Argument found:" << argument;
+            plugins = false;
+        } else if (argument == QByteArray("-appimage")) {
+            LogDebug() << "Argument found:" << argument;
+            appimage = true;
+            bundleAllButCoreLibs = true;
+        } else if (argument == QByteArray("-unsupported-bundle-everything")) {
+            LogDebug() << "Argument found:" << argument;
+            skipGlibcCheck = true;
+            bundleEverything = true;
+        } else if (argument == QByteArray("-no-strip")) {
+            LogDebug() << "Argument found:" << argument;
+            runStripEnabled = false;
+        } else if (argument == QByteArray("-bundle-non-qt-libs")) {
+            LogDebug() << "Argument found:" << argument;
+            bundleAllButCoreLibs = true;
+        } else if (argument.startsWith(QByteArray("-verbose"))) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            bool ok = false;
+            int number = argument.mid(index+1).toInt(&ok);
+            if (!ok)
+                LogError() << "Could not parse verbose level";
+            else
+                logLevel = number;
+        } else if (argument.startsWith(QByteArray("-executable"))) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf('=');
+            if (index == -1)
+                LogError() << "Missing executable path";
+            else
+                additionalExecutables << argument.mid(index+1);
+        } else if (argument.startsWith(QByteArray("-qmldir"))) {
+            LogDebug() << "Argument found:" << argument;
+            qmldirArgumentUsed = true;
+            int index = argument.indexOf('=');
+            if (index == -1)
+                LogError() << "Missing qml directory path";
+            else
+                qmlDirs << argument.mid(index+1);
+        } else if (argument.startsWith(QByteArray("-qmlimport"))) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf('=');
+            if (index == -1)
+                LogError() << "Missing qml import path";
+            else
+                qmlImportPaths << argument.mid(index+1);
+        } else if (argument.startsWith("-no-copy-copyright-files")) {
+            LogDebug() << "Argument found:" << argument;
+            copyCopyrightFiles = false;
+        } else if (argument == QByteArray("-always-overwrite")) {
+            LogDebug() << "Argument found:" << argument;
+            alwaysOwerwriteEnabled = true;
+        } else if (argument.startsWith("-qmake=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            qmakeExecutable = argument.mid(index+1);
+        } else if (argument == QByteArray("-no-translations")) {
+            LogDebug() << "Argument found:" << argument;
+            skipTranslations = true;
+        } else if (argument == QByteArray("-unsupported-allow-new-glibc")) {
+            LogDebug() << "Argument found:" << argument;
+            skipGlibcCheck = true;
+        } else if (argument.startsWith("-extra-plugins=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            extraQtPlugins = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith("-exclude-libs=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            excludeLibs = QString(argument.mid(index + 1)).split(",");
+        } else if (argument.startsWith("-ignore-glob=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            ignoreGlob += argument.mid(index + 1);
+        } else if (argument.startsWith("-updateinformation=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            updateInformation = QString(argument.mid(index+1));
+        } else if (argument.startsWith("--")) {
+            LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
+            return 1;
+        } else {
+            LogError() << "Unknown argument:" << argument << "\n";
+            return 1;
+        }
+    }
+    
+    // We need to catch those errors at the source of the problem
+    // https://github.com/AppImage/appimage.github.io/search?q=GLIBC&unscoped_q=GLIBC&type=Issues
+    const char *glcv = gnu_get_libc_version ();
+    if(skipGlibcCheck) {
+        qInfo() << "WARNING: Not checking glibc on the host system.";
+        qInfo() << "         The resulting AppDir or AppImage may not run on older systems.";
+        qInfo() << "         This mode is unsupported and discouraged.";
+        qInfo() << "         For more information, please see";
+        qInfo() << "         https://github.com/probonopd/linuxdeployqt/issues/340";
+     } else {
+        // openSUSE Leap 15.0 uses glibc 2.26 and is used on OBS
+        if (strverscmp (glcv, "2.27") >= 0) {
+            qInfo() << "ERROR: The host system is too new.";
+            qInfo() << "Please run on a system with a glibc version no newer than what comes with the oldest";
+            qInfo() << "currently still-supported mainstream distribution (xenial), which is glibc 2.23.";
+            qInfo() << "This is so that the resulting bundle will work on most still-supported Linux distributions.";
+            qInfo() << "For more information, please see";
+            qInfo() << "https://github.com/probonopd/linuxdeployqt/issues/340";
+            return 1;
         }
     }
 
@@ -89,9 +226,11 @@ int main(int argc, char **argv)
         qInfo() << "   -no-translations         : Skip deployment of translations.";
         qInfo() << "   -qmake=<path>            : The qmake executable to use.";
         qInfo() << "   -qmldir=<path>           : Scan for QML imports in the given path.";
+        qInfo() << "   -qmlimport=<path>        : Add the given path to QML module search locations.";
         qInfo() << "   -show-exclude-libs       : Print exclude libraries list.";
         qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
         qInfo() << "                              2 = normal, 3 = debug.";
+        qInfo() << "   -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file";
         qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";
@@ -118,7 +257,7 @@ int main(int argc, char **argv)
     QString desktopExecEntry = "";
     QString desktopIconEntry = "";
 
-    if (argc > 1) {
+    if (argc > 2) {
         /* If we got a desktop file as the argument, try to figure out the application binary from it.
          * This has the advantage that we can also figure out the icon file this way, and have less work
          * to do when using linuxdeployqt. */
@@ -135,7 +274,7 @@ int main(int argc, char **argv)
             desktopExecEntry = settings->value("Desktop Entry/Exec", "r").toString().split(' ').first().split('/').last().trimmed();
             qDebug() << "desktopExecEntry:" << desktopExecEntry;
             desktopFile = firstArgument;
-            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first().split('.').first().trimmed();
+            desktopIconEntry = settings->value("Desktop Entry/Icon", "r").toString().split(' ').first();
             qDebug() << "desktopIconEntry:" << desktopIconEntry;
 
             QString candidateBin = QDir::cleanPath(QFileInfo(firstArgument).absolutePath() + desktopExecEntry); // Not FHS-like
@@ -203,24 +342,6 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    bool plugins = true;
-    bool appimage = false;
-    extern bool runStripEnabled;
-    extern bool bundleAllButCoreLibs;
-    extern bool fhsLikeMode;
-    extern QString fhsPrefix;
-    extern QStringList librarySearchPath;
-    extern bool alwaysOwerwriteEnabled;    
-    QStringList additionalExecutables;
-    bool qmldirArgumentUsed = false;
-    bool skipTranslations = false;
-    QStringList qmlDirs;
-    QString qmakeExecutable;
-    extern QStringList extraQtPlugins;
-    extern QStringList excludeLibs;
-    extern QStringList ignoreGlob;
-    extern bool copyCopyrightFiles;
-
     /* FHS-like mode is for an application that has been installed to a $PREFIX which is otherwise empty, e.g., /path/to/usr.
      * In this case, we want to construct an AppDir in /path/to. */
     if (QDir().exists((QDir::cleanPath(appBinaryPath + "/../../bin"))) == true) {
@@ -258,10 +379,12 @@ int main(int argc, char **argv)
 
     QFile appRun(appDirPath + "/AppRun");
     if(appRun.exists()){
-        appRun.remove();
+        qDebug() << "Keeping existing AppRun";
+    } else {
+        if (!QFile::link(relativeBinPath, appDirPath + "/AppRun")) {
+            LogError() << "Could not create AppRun link";
+        }
     }
-
-    QFile::link(relativeBinPath, appDirPath + "/AppRun");
 
     /* Copy the desktop file in place, into the top level of the AppDir */
     if(desktopFile != ""){
@@ -334,6 +457,14 @@ int main(int argc, char **argv)
             }
         }
 
+        /* Additional check to make sure that the undocumented, unsupported and not recommended
+         * -unsupported-allow-new-glibc option is not abused to create results that are broken; see
+         * https://github.com/probonopd/linuxdeployqt/issues/340 for more information
+         * TODO: Add funtionality that would automatically bundle glibc fully and correctly in this case */
+        if(skipGlibcCheck == true){
+            if(QFileInfo(appDirPath + "/usr/share/doc/libc6/copyright").exists() == false) exit(1);
+        }
+
         /* Copy in place */
         if(iconToBeUsed != ""){
             /* Check if there is already an icon and only if there is not, copy it to the AppDir.
@@ -372,81 +503,6 @@ int main(int argc, char **argv)
         }
     }
 
-    // Check arguments
-    for (int i = 2; i < argc; ++i) {
-        QByteArray argument = QByteArray(argv[i]);
-
-        if (argument == QByteArray("-no-plugins")) {
-            LogDebug() << "Argument found:" << argument;
-            plugins = false;
-        } else if (argument == QByteArray("-appimage")) {
-            LogDebug() << "Argument found:" << argument;
-            appimage = true;
-            bundleAllButCoreLibs = true;
-        } else if (argument == QByteArray("-no-strip")) {
-            LogDebug() << "Argument found:" << argument;
-            runStripEnabled = false;
-        } else if (argument == QByteArray("-bundle-non-qt-libs")) {
-            LogDebug() << "Argument found:" << argument;
-            bundleAllButCoreLibs = true;
-        } else if (argument.startsWith(QByteArray("-verbose"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            bool ok = false;
-            int number = argument.mid(index+1).toInt(&ok);
-            if (!ok)
-                LogError() << "Could not parse verbose level";
-            else
-                logLevel = number;
-        } else if (argument.startsWith(QByteArray("-executable"))) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf('=');
-            if (index == -1)
-                LogError() << "Missing executable path";
-            else
-                additionalExecutables << argument.mid(index+1);
-        } else if (argument.startsWith(QByteArray("-qmldir"))) {
-            LogDebug() << "Argument found:" << argument;
-            qmldirArgumentUsed = true;
-            int index = argument.indexOf('=');
-            if (index == -1)
-                LogError() << "Missing qml directory path";
-            else
-                qmlDirs << argument.mid(index+1);
-        } else if (argument.startsWith("-no-copy-copyright-files")) {
-            LogDebug() << "Argument found:" << argument;
-            copyCopyrightFiles = false;
-        } else if (argument == QByteArray("-always-overwrite")) {
-            LogDebug() << "Argument found:" << argument;
-            alwaysOwerwriteEnabled = true;
-        } else if (argument.startsWith("-qmake=")) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            qmakeExecutable = argument.mid(index+1);
-        } else if (argument == QByteArray("-no-translations")) {
-            LogDebug() << "Argument found:" << argument;
-            skipTranslations = true;
-        } else if (argument.startsWith("-extra-plugins=")) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            extraQtPlugins = QString(argument.mid(index + 1)).split(",");
-        } else if (argument.startsWith("-exclude-libs=")) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            excludeLibs = QString(argument.mid(index + 1)).split(",");
-        } else if (argument.startsWith("-ignore-glob=")) {
-            LogDebug() << "Argument found:" << argument;
-            int index = argument.indexOf("=");
-            ignoreGlob += argument.mid(index + 1);
-        } else if (argument.startsWith("--")) {
-            LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
-            return 1;
-        } else {
-            LogError() << "Unknown argument:" << argument << "\n";
-            return 1;
-        }
-    }
-
     if (appimage) {
         if(checkAppImagePrerequisites(appDirPath) == false){
             LogError() << "checkAppImagePrerequisites failed\n";
@@ -471,7 +527,7 @@ int main(int argc, char **argv)
     }
 
     if (!qmlDirs.isEmpty()) {
-        bool ok = deployQmlImports(appDirPath, deploymentInfo, qmlDirs);
+        bool ok = deployQmlImports(appDirPath, deploymentInfo, qmlDirs, qmlImportPaths);
         if (!ok && qmldirArgumentUsed)
             return 1; // exit if the user explicitly asked for qml import deployment
         // Update deploymentInfo.deployedLibraries - the QML imports
