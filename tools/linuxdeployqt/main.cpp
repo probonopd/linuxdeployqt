@@ -74,6 +74,7 @@ int main(int argc, char **argv)
     extern QStringList ignoreGlob;
     extern bool copyCopyrightFiles;
     extern QString updateInformation;
+    extern QString qtLibInfix;
 
     // Check arguments
     // Due to the structure of the argument parser, we have to check all arguments at first to check whether the user
@@ -173,6 +174,10 @@ int main(int argc, char **argv)
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             updateInformation = QString(argument.mid(index+1));
+        } else if (argument.startsWith("-qtlibinfix=")) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf("=");
+            qtLibInfix = QString(argument.mid(index+1));
         } else if (argument.startsWith("--")) {
             LogError() << "Error: arguments must not start with --, only -:" << argument << "\n";
             return 1;
@@ -231,6 +236,7 @@ int main(int argc, char **argv)
         qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
         qInfo() << "                              2 = normal, 3 = debug.";
         qInfo() << "   -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file";
+        qInfo() << "   -qtlibinfix=<infix>      : Adapt the .so search if your Qt distribution has infix.";
         qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";
