@@ -1,7 +1,11 @@
 language: cpp
-sudo: required
 dist: xenial
-
+virt: vm
+group: edge
+arch:
+    - arm64-graviton2
+    - amd64
+    
 os: linux
 
 env:
