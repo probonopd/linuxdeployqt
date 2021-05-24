@@ -1,7 +1,13 @@
 language: cpp
-sudo: required
-dist: trusty
-
+dist: xenial
+virt: vm
+group: edge
+arch:
+    # The following seems not to work; still runs on an amd64 host;
+    # maybe because we have not been migrated from travis-ci.org to travis-ci.com yet?
+    # arm64-graviton2
+    - amd64
+    
 os: linux
 
 env:

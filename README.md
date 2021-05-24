@@ -45,6 +45,7 @@ Options:
    -no-translations         : Skip deployment of translations.
    -qmake=<path>            : The qmake executable to use.
    -qmldir=<path>           : Scan for QML imports in the given path.
+   -qmlimport=<path>        : Add the given path to QML module search locations.
    -show-exclude-libs       : Print exclude libraries list.
    -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),
                               2 = normal, 3 = debug.
