@@ -32,7 +32,6 @@
 #include <iostream>
 #include <QProcess>
 #include <QDir>
-#include <QRegExp>
 #include <QSet>
 #include <QStack>
 #include <QDirIterator>
@@ -306,7 +305,7 @@ bool copyCopyrightFile(QString libPath){
     myProcess->waitForFinished();
     strOut = myProcess->readAllStandardOutput();
 
-     QStringList outputLines = strOut.split("\n", QString::SkipEmptyParts);
+     QStringList outputLines = strOut.split("\n", Qt::SkipEmptyParts);
 
      foreach (QString outputLine, outputLines) {
         if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright")) && (outputLine.contains(" "))){
@@ -355,7 +354,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     static const QRegularExpression regexp(QStringLiteral("^.+ => (.+) \\("));
 
     QString output = ldd.readAllStandardOutput();
-    QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
+    QStringList outputLines = output.split("\n", Qt::SkipEmptyParts);
     if (outputLines.size() < 2) {
         if ((output.contains("statically linked") == false)){
             LogError() << "Could not parse ldd output under 2 lines:" << output;
@@ -850,7 +849,7 @@ void changeIdentification(const QString &id, const QString &binaryPath)
         }
     }
 
-    QStringList rpath = oldRpath.split(":", QString::SkipEmptyParts);
+    QStringList rpath = oldRpath.split(":", Qt::SkipEmptyParts);
     rpath.prepend(id);
     rpath.removeDuplicates();
     foreach(QString path, QStringList(rpath)) {
@@ -1063,7 +1062,11 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
 static QString captureOutput(const QString &command)
 {
     QProcess process;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     process.start(command, QIODevice::ReadOnly);
+#else
+    process.startCommand(command, QIODevice::ReadOnly);
+#endif
     process.waitForFinished();
 
     if (process.exitStatus() != QProcess::NormalExit) {
@@ -1128,7 +1131,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        QString output = captureOutput(qmakePath + " -query");
        LogDebug() << "-query output from qmake:" << output;
 
-       QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
+       QStringList outputLines = output.split("\n", Qt::SkipEmptyParts);
        foreach (const QString &outputLine, outputLines) {
            int colonIndex = outputLine.indexOf(QLatin1Char(':'));
            if (colonIndex != -1) {

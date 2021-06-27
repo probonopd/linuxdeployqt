@@ -535,7 +535,7 @@ int main(int argc, char **argv)
         // Update deploymentInfo.deployedLibraries - the QML imports
         // may have brought in extra libraries as dependencies.
         deploymentInfo.deployedLibraries += findAppLibraries(appDirPath);
-        deploymentInfo.deployedLibraries = deploymentInfo.deployedLibraries.toSet().toList();
+        deploymentInfo.deployedLibraries.removeDuplicates();
     }
 
     deploymentInfo.usedModulesMask = 0;
