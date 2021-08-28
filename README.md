@@ -155,6 +155,16 @@ Usage examples:
 2. `-extra-plugins=sqldrivers,iconengines/libqsvgicon.so`  
 3. `-extra-plugins=sqldrivers,iconengines,mediaservice,gamepads`
 
+#### Handle Qt libraries infix
+
+If you prepared a custom Qt distribution using the option `-qtlibinfix` during Qt configuration (resulting in library names such as `libQt5CoreCustom.so`), you must mention this infix on `linuxdeployqt` call. As an example, let's see if we configure our distribution using the infix `Custom`.
+
+On Qt build chain: `configure -qtlibinfix "Custom" [...]`. This will generate Qt libraries (.so) like `libQt5CoreCustom.so`
+
+So, on `linuxdeployqt` call: `linuxdeployqt [...] -qtlibinfix "Custom" [...]`.
+
+If you don't mention this infix, `linuxdeployqt` won't be able to detect Qt Core and Widgets libraries.
+
 ## Using linuxdeployqt with Travis CI
 
 A common use case for `linuxdeployqt` is to use it on Travis CI after the `make` command. The following example illustrates how to use `linuxdeployqt` with Travis CI. Create a `.travis.yml` file similar to this one (be sure to customize it, e.g., change `APPNAME` to the name of your application as it is spelled in the `Name=` entry of the `.desktop` file):
