@@ -159,7 +159,7 @@ Usage examples:
 
 If you prepared a custom Qt distribution using the option `-qtlibinfix` during Qt configuration, you must mention this infix on `linuxdeployqt` call. As an example, let's see if we configure our distribution using the infix `Custom`.
 
-On Qt build chain: `configure -qtlibinfix "Custom" [...]`. This will generate Qt libraries (.so) like `Qt5CoreCustom.so`
+On Qt build chain: `configure -qtlibinfix "Custom" [...]`. This will generate Qt libraries (.so) like `libQt5CoreCustom.so`
 
 So, on `linuxdeployqt` call: `linuxdeployqt [...] -qtlibinfix "Custom" [...]`.
 
