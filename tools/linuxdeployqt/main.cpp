@@ -425,42 +425,12 @@ int main(int argc, char **argv)
         if(candidates.length() == 1){
             iconToBeUsed = candidates.at(0); // The only choice
         } else if(candidates.length() > 1){
-            foreach(QString current, candidates) {
-                if(current.contains("256")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("128")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("svg")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("svgz")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("512")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("1024")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("64")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("48")){
-                    iconToBeUsed = current;
-                    continue;
-                }
-                if(current.contains("xpm")){
-                    iconToBeUsed = current;
-                    continue;
+            const QStringList iconPriorities{"256", "128", "svg", "svgz", "512", "1024", "64", "48", "xpm"};
+            foreach (const QString &iconPriority, iconPriorities) {
+                const auto filteredCandidates = candidates.filter(iconPriority);
+                if (!filteredCandidates.isEmpty()) {
+                    iconToBeUsed = filteredCandidates.first();
+                    break;
                 }
             }
         }
