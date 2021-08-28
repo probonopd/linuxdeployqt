@@ -157,7 +157,7 @@ Usage examples:
 
 #### Handle Qt libraries infix
 
-If you prepared a custom Qt distribution using the option `-qtlibinfix` during Qt configuration, you must mention this infix on `linuxdeployqt` call. As an example, let's see if we configure our distribution using the infix `Custom`.
+If you prepared a custom Qt distribution using the option `-qtlibinfix` during Qt configuration (resulting in library names such as `libQt5CoreCustom.so`), you must mention this infix on `linuxdeployqt` call. As an example, let's see if we configure our distribution using the infix `Custom`.
 
 On Qt build chain: `configure -qtlibinfix "Custom" [...]`. This will generate Qt libraries (.so) like `libQt5CoreCustom.so`
 
