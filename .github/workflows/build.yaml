@@ -9,7 +9,6 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
-      BRANCH: ${{ github.ref_name }}
       VERSION: continuous
     steps:
       - name: Configure build machine
@@ -21,7 +20,10 @@ jobs:
       - name: Checkout sources
         run: |
           # Can't use actions/checkout@v2 action here because Ubuntu 16.04 git version is too old, so the action downloads an archive instead of a git repository, and this prevents linuxdeployqt from finding the commit it is built from
-          git clone --depth=1 https://github.com/${{ github.repository }} --branch=${{ github.ref_name }} .
+          # Retrieve the correct branch name according to the build event (push or pull_request)
+          if [ -z "${{ github.head_ref }}" ]; then BRANCH=${{ github.ref_name }}; else BRANCH=${{ github.head_ref }}; fi
+          echo "Cloning from branch $BRANCH..."
+          git clone --depth=1 https://github.com/${{ github.repository }} --branch=$BRANCH .
       - name: Environment tests
         run: ./tests/tests-environment.sh
       - name: CI tests
