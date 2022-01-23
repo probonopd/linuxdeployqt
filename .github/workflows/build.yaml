@@ -1,0 +1,33 @@
+name: Build
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    container: ubuntu:xenial
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
+      BRANCH: ${{ github.ref_name }}
+      VERSION: continuous
+    steps:
+      - name: Configure build machine
+        run: |
+          apt update
+          apt install -y -q apt-transport-https curl git kmod software-properties-common sudo wget
+          # The keyboard-configuration package is needed later and requires the user to input a number via dpkg-reconfigure, so preinstall it without front-end to avoid blocking the later installations
+          DEBIAN_FRONTEND=noninteractive apt install -y -q keyboard-configuration
+      - name: Checkout sources
+        run: |
+          # Can't use actions/checkout@v2 action here because Ubuntu 16.04 git version is too old, so the action downloads an archive instead of a git repository, and this prevents linuxdeployqt from finding the commit it is built from
+          git clone --depth=1 https://github.com/${{ github.repository }} --branch=${{ github.ref_name }} .
+      - name: Environment tests
+        run: ./tests/tests-environment.sh
+      - name: CI tests
+        run: ./tests/tests-ci.sh
+      - name: Deploy release (only when building from master branch)
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+          bash ./upload.sh ./linuxdeployqt-*.AppImage*
