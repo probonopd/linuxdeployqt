@@ -9,7 +9,8 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
-      VERSION: ${{ github.ref_name }}
+      BRANCH: ${{ github.ref_name }}
+      VERSION: continuous
     steps:
       - name: Configure build machine
         run: |
