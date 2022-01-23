@@ -21,6 +21,8 @@ jobs:
       - name: Checkout sources
         run: |
           # Can't use actions/checkout@v2 action here because Ubuntu 16.04 git version is too old, so the action downloads an archive instead of a git repository, and this prevents linuxdeployqt from finding the commit it is built from
+          echo "github.ref_name ${{ github.ref_name }}"
+          echo "github.ref ${{ github.ref }}"
           git clone --depth=1 https://github.com/${{ github.repository }} --branch=${{ github.ref_name }} .
       - name: Environment tests
         run: ./tests/tests-environment.sh
