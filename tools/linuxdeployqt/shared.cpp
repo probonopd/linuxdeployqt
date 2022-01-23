@@ -63,6 +63,7 @@ QStringList excludeLibs;
 QStringList ignoreGlob;
 bool copyCopyrightFiles = true;
 QString updateInformation;
+QString qtLibInfix;
 
 using std::cout;
 using std::endl;
@@ -1009,12 +1010,12 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
         const LibraryInfo library = libraries.takeFirst();
         copiedLibraries.append(library.libraryName);
 
-        if(library.libraryName.contains("libQt") and library.libraryName.contains("Core.so")) {
+        if(library.libraryName.contains("libQt") and library.libraryName.contains("Core" + qtLibInfix + ".so")) {
             LogNormal() << "Setting deploymentInfo.qtPath to:" << library.libraryDirectory;
             deploymentInfo.qtPath = library.libraryDirectory;
         }
 
-        if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets.so")) {
+        if(library.libraryName.contains("libQt") and library.libraryName.contains("Widgets" + qtLibInfix + ".so")) {
             deploymentInfo.requiresQtWidgetsLibrary = true;
         }
 
