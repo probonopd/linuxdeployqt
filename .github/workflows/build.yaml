@@ -14,16 +14,16 @@ jobs:
       - name: Configure build machine
         run: |
           apt update
-          apt install -y -q apt-transport-https curl git kmod software-properties-common sudo wget
+          apt install -y -q apt-transport-https curl git software-properties-common sudo wget
           # The keyboard-configuration package is needed later and requires the user to input a number via dpkg-reconfigure, so preinstall it without front-end to avoid blocking the later installations
           DEBIAN_FRONTEND=noninteractive apt install -y -q keyboard-configuration
       - name: Checkout sources
         run: |
           # Can't use actions/checkout@v2 action here because Ubuntu 16.04 git version is too old, so the action downloads an archive instead of a git repository, and this prevents linuxdeployqt from finding the commit it is built from
-          # Retrieve the correct branch name according to the build event (push or pull_request)
-          if [ -z "${{ github.head_ref }}" ]; then BRANCH=${{ github.ref_name }}; else BRANCH=${{ github.head_ref }}; fi
-          echo "Cloning from branch $BRANCH..."
-          git clone --depth=1 https://github.com/${{ github.repository }} --branch=$BRANCH .
+          # Retrieve the correct repository and branch names according to the build event (push or pull_request)
+          if [ -z "${{ github.head_ref }}" ]; then BRANCH=${{ github.ref_name }}; REPOSITORY=${{ github.repository }}; else BRANCH=${{ github.head_ref }}; REPOSITORY=${{ github.event.pull_request.head.repo.full_name }}; fi
+          echo "Cloning branch $BRANCH from repository $REPOSITORY..."
+          git clone --depth=1 https://github.com/$REPOSITORY --branch=$BRANCH .
       - name: Environment tests
         run: ./tests/tests-environment.sh
       - name: CI tests
