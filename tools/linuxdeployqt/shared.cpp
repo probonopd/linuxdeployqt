@@ -1234,8 +1234,34 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 
     // Platform plugin:
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
+
         LogDebug() << "libQt5Gui detected";
+
+        // Platform xcb support
         pluginList.append("platforms/libqxcb.so");
+
+        // Platform wayland support
+        // pluginList.append("platforms/libqwayland-*.so");
+        QStringList platformWaylandPlugins = QDir(pluginSourcePath + QStringLiteral("/platforms")).entryList(QStringList() << QStringLiteral("libqwayland-*.so"));
+        foreach (const QString &plugin, platformWaylandPlugins) {
+            pluginList.append(QStringLiteral("platforms/") + plugin);
+        }
+
+        // Always bundle wayland-* plugins
+        // pluginList.append("wayland-*");
+        QStringList waylandPluginDirs = QDir(pluginSourcePath).entryList(QStringList() << QStringLiteral("wayland-*"), QDir::NoDot | QDir::NoDotDot | QDir::Dirs);
+        foreach (const QString &plugin, waylandPluginDirs) {
+            QDir pluginDirectory(pluginSourcePath + "/" + plugin);
+            if (pluginDirectory.exists()) {
+                //If it is a plugin directory we will deploy the entire directory
+                QStringList plugins = pluginDirectory.entryList(QStringList() << QStringLiteral("*.so"));
+                foreach (const QString &pluginFile, plugins) {
+                    pluginList.append(plugin + "/" + pluginFile);
+                    LogDebug() << plugin + "/" + pluginFile << "appended";
+                }
+            }
+        }
+
 	// Platform plugin contexts - apparently needed to enter special characters
         QStringList platformPluginContexts = QDir(pluginSourcePath +  QStringLiteral("/platforminputcontexts")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, platformPluginContexts) {
