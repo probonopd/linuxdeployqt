@@ -1347,6 +1347,16 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    return depInfo;
 }
 
+static void appendPluginToList(const QString pluginSourcePath, const QString pluginName, QStringList &pluginList)
+{
+    QStringList plugins = QDir(pluginSourcePath + "/" + pluginName).entryList(QStringList() << QStringLiteral("*.so"));
+    foreach (const QString &plugin, plugins) {
+        pluginList.append(pluginName + "/" + plugin);
+    }
+}
+
+// All Qt 6 plugins are bases on windeployqt code for Qt 6.3.1, see
+// https://github.com/qt/qtbase/blob/8483dcde90f40cdfd0a0ec4245b03610b46b6cae/src/tools/windeployqt/main.cpp#L835-L869
 void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath,
         const QString pluginDestinationPath, DeploymentInfo deploymentInfo)
 {
@@ -1416,6 +1426,12 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 }
             }
         }
+
+        // Handle the Qt 6 specific plugins
+        if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Gui")) {
+            appendPluginToList(pluginSourcePath, "accessible", pluginList);
+            appendPluginToList(pluginSourcePath, "virtualkeyboard", pluginList);
+        }
     }
 
     // Platform OpenGL context
@@ -1426,10 +1442,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
 		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt5XcbQpa"))
 		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt6XcbQpa"))
 		    or (containsHowOften(deploymentInfo.deployedLibraries, "libxcb-glx"))) {
-        QStringList xcbglintegrationPlugins = QDir(pluginSourcePath +  QStringLiteral("/xcbglintegrations")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, xcbglintegrationPlugins) {
-            pluginList.append(QStringLiteral("xcbglintegrations/") + plugin);
-        }
+        appendPluginToList(pluginSourcePath, "xcbglintegrations", pluginList);
     }
 
     // Also deploy plugins/iconengines/libqsvgicon.so whenever libQt5Svg.so.* is about to be deployed,
@@ -1442,66 +1455,91 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // CUPS print support
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5PrintSupport")
         || containsHowOften(deploymentInfo.deployedLibraries, "libQt6PrintSupport")) {
-        pluginList.append("printsupport/libcupsprintersupport.so");
+        appendPluginToList(pluginSourcePath, "printsupport", pluginList);
     }
 
     // Network
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Network")
-        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Network")) {
-        QStringList bearerPlugins = QDir(pluginSourcePath +  QStringLiteral("/bearer")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, bearerPlugins) {
-            pluginList.append(QStringLiteral("bearer/") + plugin);
-        }
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Network")) {
+        appendPluginToList(pluginSourcePath, "bearer", pluginList);
+    }
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Network")) {
+        appendPluginToList(pluginSourcePath, "networkaccess", pluginList);
+        appendPluginToList(pluginSourcePath, "networkinformation", pluginList);
+        appendPluginToList(pluginSourcePath, "tls", pluginList);
     }
 
     // Sql plugins if QtSql library is in use
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Sql")
         || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Sql")) {
-        QStringList sqlPlugins = QDir(pluginSourcePath +  QStringLiteral("/sqldrivers")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, sqlPlugins) {
-            pluginList.append(QStringLiteral("sqldrivers/") + plugin);
-        }
+        appendPluginToList(pluginSourcePath, "sqldrivers", pluginList);
     }
 
     // Positioning plugins if QtPositioning library is in use
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Positioning")) {
-        QStringList posPlugins = QDir(pluginSourcePath +  QStringLiteral("/position")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, posPlugins) {
-            pluginList.append(QStringLiteral("position/") + plugin);
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Positioning")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Positioning")) {
+        appendPluginToList(pluginSourcePath, "position", pluginList);
+    }
+
+    // Multimedia plugins if QtMultimedia library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Multimedia")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Multimedia")) {
+        appendPluginToList(pluginSourcePath, "audio", pluginList);
+        appendPluginToList(pluginSourcePath, "mediaservice", pluginList);
+
+        // This plugin is specific to Qt 6
+        if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Multimedia")) {
+            appendPluginToList(pluginSourcePath, "playlistformats", pluginList);
         }
     }
 
-    // multimedia plugins if QtMultimedia library is in use
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Multimedia")) {
-        QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("mediaservice/") + plugin);
-        }
-        plugins = QDir(pluginSourcePath + QStringLiteral("/audio")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("audio/") + plugin);
-        }
-    }
-
-    // Qt 6 3D libraries need renderer plugins, see windeployqt source code for Qt 6.3.1
-    // (https://github.com/qt/qtbase/blob/8483dcde90f40cdfd0a0ec4245b03610b46b6cae/src/tools/windeployqt/main.cpp#L865-L868)
+    // 3D plugins if Qt3D library is in use
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt63DRender")) {
-        QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/geometryloaders")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("geometryloaders/") + plugin);
-        }
-        plugins = QDir(pluginSourcePath + QStringLiteral("/renderers")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("renderers/") + plugin);
-        }
-        plugins = QDir(pluginSourcePath + QStringLiteral("/renderplugins")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("renderplugins/") + plugin);
-        }
-        plugins = QDir(pluginSourcePath + QStringLiteral("/sceneparsers")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("sceneparsers/") + plugin);
-        }
+        appendPluginToList(pluginSourcePath, "geometryloaders", pluginList);
+        appendPluginToList(pluginSourcePath, "renderers", pluginList);
+        appendPluginToList(pluginSourcePath, "renderplugins", pluginList);
+        appendPluginToList(pluginSourcePath, "sceneparsers", pluginList);
+    }
+
+    // Sensors plugins if QtSensors library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Sensors")) {
+        appendPluginToList(pluginSourcePath, "sensorgestures", pluginList);
+        appendPluginToList(pluginSourcePath, "sensors", pluginList);
+    }
+
+    // CAN bus plugin if QtSerialBus library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6SerialBus")) {
+        appendPluginToList(pluginSourcePath, "canbus", pluginList);
+    }
+
+    // Text to speech plugins if QtTextToSpeech library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6TextToSpeech")) {
+        appendPluginToList(pluginSourcePath, "texttospeech", pluginList);
+    }
+
+    // Location plugins if QtLocation library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Location")) {
+        appendPluginToList(pluginSourcePath, "geoservices", pluginList);
+    }
+
+    // Qt Quick plugins if QtQuick* libraries are in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Quick")) {
+        appendPluginToList(pluginSourcePath, "qmltooling", pluginList);
+        appendPluginToList(pluginSourcePath, "scenegraph", pluginList);
+    }
+
+    // Qt declarative plugins if QtDeclarative library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "Qt6Declarative")) {
+        appendPluginToList(pluginSourcePath, "qml1tooling", pluginList);
+    }
+
+    // Gamepad plugins if QtGamepad library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Gamepad")) {
+        appendPluginToList(pluginSourcePath, "gamepads", pluginList);
+    }
+
+    // Web view plugins if QtWebView library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6WebView")) {
+        appendPluginToList(pluginSourcePath, "webview", pluginList);
     }
 
     QString sourcePath;
