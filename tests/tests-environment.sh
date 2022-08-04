@@ -23,7 +23,7 @@ wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/ap
 chmod +x appimagetool*AppImage
 ./appimagetool*AppImage --appimag-extract
 mv squashfs-root/ appimagekit.AppDir/
-export PATH="$(readlink -f appimagekit.AppDir/)":"$PATH"
+sudo ln -s "$(readlink -f appimagekit.AppDir/AppRun)" /usr/bin/appimagetool
 popd
 
-sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra zsync desktop-file-utils gcc g++ make libgl1-mesa-dev fuse psmisc qt59translations
+sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra zsync desktop-file-utils gcc g++ make libgl1-mesa-dev fuse libfuse2 psmisc qt59translations
