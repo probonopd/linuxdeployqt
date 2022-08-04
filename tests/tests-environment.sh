@@ -21,7 +21,7 @@ pushd /tmp/
 # wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2052/appimagetool-x86_64.AppImage # branch last-good, https://travis-ci.org/AppImage/AppImageKit/jobs/507462541
 wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
 chmod +x appimagetool*AppImage
-./appimagetool*AppImage --appimag-extract
+./appimagetool*AppImage --appimage-extract
 mv squashfs-root/ appimagekit.AppDir/
 sudo ln -s "$(readlink -f appimagekit.AppDir/AppRun)" /usr/bin/appimagetool
 popd
