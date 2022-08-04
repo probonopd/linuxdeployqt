@@ -25,7 +25,7 @@ cp /usr/bin/{patchelf,desktop-file-validate} linuxdeployqt.AppDir/usr/bin/
 cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
 cp -R /tmp/appimagekit.AppDir linuxdeployqt.AppDir/usr/appimagekit
 pushd linuxdeployqt.AppDir/usr/bin
-ln -s appimagetool ../appimagekit/AppRun
+ln -s ../appimagekit/AppRun appimagetool
 popd
 chmod +x linuxdeployqt.AppDir/AppRun
 find linuxdeployqt.AppDir/
