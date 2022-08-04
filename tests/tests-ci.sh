@@ -55,6 +55,7 @@ ulimit -a -H
 set +e
 
 # print version number (need to extract the AppImage because we are running in a container, see https://github.com/AppImage/AppImageKit/wiki/FUSE#docker)
+export LD_LIBRARY_PATH=/tmp/appimagetool.AppDir/usr/lib
 ./linuxdeployqt-*-x86_64.AppImage --appimage-extract-and-run --version
 
 # TODO: reactivate tests
