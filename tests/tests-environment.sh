@@ -17,14 +17,13 @@ sudo dpkg -i patchelf_0.8-2_amd64.deb
 # make -j$(nproc)
 # sudo make install
 
-cd /tmp/
+pushd /tmp/
 # wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2052/appimagetool-x86_64.AppImage # branch last-good, https://travis-ci.org/AppImage/AppImageKit/jobs/507462541
 wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
 chmod +x appimagetool*AppImage
-./appimagetool*AppImage --appimage-extract
-sudo cp squashfs-root/usr/bin/* /usr/local/bin/
-sudo cp -r squashfs-root/usr/lib/appimagekit /usr/local/lib/
-sudo chmod +rx /usr/local/lib/appimagekit
-cd -
+./appimagetool*AppImage --appimag-extract
+mv squashfs-root/ appimagekit.AppDir/
+export PATH="$(readlink -f appimagekit.AppDir/)":"$PATH"
+popd
 
 sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra zsync desktop-file-utils gcc g++ make libgl1-mesa-dev fuse psmisc qt59translations

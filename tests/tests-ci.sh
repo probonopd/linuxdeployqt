@@ -23,7 +23,10 @@ set -e
 mkdir -p linuxdeployqt.AppDir/usr/{bin,lib}
 cp /usr/bin/{patchelf,desktop-file-validate} /usr/local/bin/{appimagetool,zsyncmake} linuxdeployqt.AppDir/usr/bin/
 cp ./bin/linuxdeployqt linuxdeployqt.AppDir/usr/bin/
-cp -r /usr/local/lib/appimagekit linuxdeployqt.AppDir/usr/lib/
+cp -R /tmp/appimagekit.AppDir linuxdeployqt.AppDir/usr/appimagekit
+pushd linuxdeploy.AppDir/usr/bin
+ln -s appimagetool ../appimagekit/AppRun
+popd
 chmod +x linuxdeployqt.AppDir/AppRun
 find linuxdeployqt.AppDir/
 if [ -z "$VERSION" ] ; then export VERSION=continuous ; fi
