@@ -32,7 +32,6 @@
 #include <iostream>
 #include <QProcess>
 #include <QDir>
-#include <QRegExp>
 #include <QSet>
 #include <QStack>
 #include <QDirIterator>
@@ -45,6 +44,12 @@
 #include <QStandardPaths>
 #include "shared.h"
 #include "excludelist.h"
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	#define QSTRING_SPLIT_BEHAVIOR_NAMESPACE QString
+#else
+	#define QSTRING_SPLIT_BEHAVIOR_NAMESPACE Qt
+#endif
 
 QString appBinaryPath;
 bool runStripEnabled = true;
@@ -307,7 +312,7 @@ bool copyCopyrightFile(QString libPath){
     myProcess->waitForFinished();
     strOut = myProcess->readAllStandardOutput();
 
-     QStringList outputLines = strOut.split("\n", QString::SkipEmptyParts);
+     QStringList outputLines = strOut.split("\n", QSTRING_SPLIT_BEHAVIOR_NAMESPACE::SkipEmptyParts);
 
      foreach (QString outputLine, outputLines) {
         if((outputLine.contains("usr/share/doc")) && (outputLine.contains("/copyright")) && (outputLine.contains(" "))){
@@ -356,7 +361,7 @@ LddInfo findDependencyInfo(const QString &binaryPath)
     static const QRegularExpression regexp(QStringLiteral("^.+ => (.+) \\("));
 
     QString output = ldd.readAllStandardOutput();
-    QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
+    QStringList outputLines = output.split("\n", QSTRING_SPLIT_BEHAVIOR_NAMESPACE::SkipEmptyParts);
     if (outputLines.size() < 2) {
         if ((output.contains("statically linked") == false)){
             LogError() << "Could not parse ldd output under 2 lines:" << output;
@@ -851,7 +856,7 @@ void changeIdentification(const QString &id, const QString &binaryPath)
         }
     }
 
-    QStringList rpath = oldRpath.split(":", QString::SkipEmptyParts);
+    QStringList rpath = oldRpath.split(":", QSTRING_SPLIT_BEHAVIOR_NAMESPACE::SkipEmptyParts);
     rpath.prepend(id);
     rpath.removeDuplicates();
     foreach(QString path, QStringList(rpath)) {
@@ -1064,7 +1069,11 @@ DeploymentInfo deployQtLibraries(QList<LibraryInfo> libraries,
 static QString captureOutput(const QString &command)
 {
     QProcess process;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     process.start(command, QIODevice::ReadOnly);
+#else
+    process.startCommand(command, QIODevice::ReadOnly);
+#endif
     process.waitForFinished();
 
     if (process.exitStatus() != QProcess::NormalExit) {
@@ -1129,7 +1138,7 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
        QString output = captureOutput(qmakePath + " -query");
        LogDebug() << "-query output from qmake:" << output;
 
-       QStringList outputLines = output.split("\n", QString::SkipEmptyParts);
+       QStringList outputLines = output.split("\n", QSTRING_SPLIT_BEHAVIOR_NAMESPACE::SkipEmptyParts);
        foreach (const QString &outputLine, outputLines) {
            int colonIndex = outputLine.indexOf(QLatin1Char(':'));
            if (colonIndex != -1) {
@@ -1248,6 +1257,8 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         // https://askubuntu.com/a/748186
         // This functionality used to come as part of Qt by default in earlier versions
         // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
+        // NOTE: Commented out due to the issues linked at https://github.com/linuxdeploy/linuxdeploy-plugin-qt/issues/109
+        /*
         QStringList extraQtPluginsAdded = { "platformthemes/libqgtk2.so", "styles/libqgtk2style.so" };
         foreach (const QString &plugin, extraQtPluginsAdded) {
             if (QFile::exists(pluginSourcePath + "/" + plugin)) {
@@ -1257,6 +1268,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 LogWarning() <<"Plugin" << pluginSourcePath + "/" + plugin << "not found, skipping";
 	    }
         }
+        */
 	// Always bundle iconengines,imageformats
         // https://github.com/probonopd/linuxdeployqt/issues/82
         // https://github.com/probonopd/linuxdeployqt/issues/325
