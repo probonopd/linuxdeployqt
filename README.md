@@ -381,3 +381,4 @@ One great way to contribute is to send Pull Requests to the application projects
 ## Contact
 
 The developers are in the channel #AppImage on irc.freenode.net
+

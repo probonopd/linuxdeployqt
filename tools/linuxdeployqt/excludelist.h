@@ -73,3 +73,4 @@ static const QStringList generatedExcludelist = {
     "libxcb.so.1",
     "libz.so.1"
 };
+

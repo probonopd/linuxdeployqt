@@ -44,3 +44,4 @@ done
 echo -e '    "'"${blacklisted[$((${#blacklisted[@]}-1))]}"'"' >> "$filename"
 
 echo "};" >> "$filename"
+

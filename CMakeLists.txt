@@ -82,3 +82,4 @@ endif()
 mark_as_advanced(DATE DATE_RESULT)
 
 add_subdirectory(tools/linuxdeployqt)
+

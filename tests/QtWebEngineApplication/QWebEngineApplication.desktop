@@ -4,3 +4,4 @@ Type=Application
 Exec=QWebEngineApplication
 Icon=qt
 Categories=Development;
+

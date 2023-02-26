@@ -29,3 +29,4 @@ sudo chmod +rx /usr/local/lib/appimagekit
 cd -
 
 sudo apt-get -y install qt59base qt59declarative qt59webengine binutils xpra zsync desktop-file-utils gcc g++ make libgl1-mesa-dev fuse psmisc qt59translations
+
