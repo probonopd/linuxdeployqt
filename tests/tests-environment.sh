@@ -5,8 +5,11 @@ set -e
 sudo add-apt-repository --yes ppa:beineri/opt-qt593-xenial
 sudo apt-get update -qq
 
-wget https://ftp.fau.de/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
-echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf_0.8-2_amd64.deb" | sha256sum -c
+# wget https://ftp.fau.de/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb
+# echo "5d506507df7c02766ae6c3ca0d15b4234f4cb79a80799190ded9d3ca0ac28c0c  patchelf_0.8-2_amd64.deb" | sha256sum -c
+wget http://old-releases.ubuntu.com/ubuntu/pool/universe/p/patchelf/patchelf_0.8-2_amd64.deb
+echo "b3b69f346afb16ab9e925b91afc4c77179a70b676c2eb58a2821f8664fd4cae6  patchelf_0.8-2_amd64.deb" | sha256sum -c
+
 sudo dpkg -i patchelf_0.8-2_amd64.deb
 # We want a newer patchelf since the one above is missing e.g., '--add-needed' which our users might want to use
 # However, the newer patchelf versions are broken and cripple, e.g., libQt5Core; see https://github.com/NixOS/patchelf/issues/124
