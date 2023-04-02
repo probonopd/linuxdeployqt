@@ -1235,7 +1235,33 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // Platform plugin:
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
         LogDebug() << "libQt5Gui detected";
-        pluginList.append("platforms/libqxcb.so");
+
+    // Security improvement:
+        QStringList platformWaylandPlugins = QDir(pluginSourcePath + QStringLiteral("/platforms")).entryList(QStringList() << QStringLiteral("libqwayland-*.so"));
+        foreach (const QString &plugin, platformWaylandPlugins) {
+            pluginList.append(QStringLiteral("platforms/") + plugin);
+        }
+
+        QStringList waylandPluginDirs = QDir(pluginSourcePath).entryList(QStringList() << QStringLiteral("wayland-*"), QDir::NoDot | QDir::NoDotDot | QDir::Dirs);
+        foreach (const QString &plugin, waylandPluginDirs) {
+            QDir pluginDirectory(pluginSourcePath + "/" + plugin);
+            if (pluginDirectory.exists()) {
+                //If it is a plugin directory we will deploy the entire directory
+                QStringList plugins = pluginDirectory.entryList(QStringList() << QStringLiteral("*.so"));
+                foreach (const QString &pluginFile, plugins) {
+                    pluginList.append(plugin + "/" + pluginFile);
+                    LogDebug() << plugin + "/" + pluginFile << "appended";
+                }
+            }
+        }
+
+    // Sanity check on getlogin_r()
+    #include <unistd.h>
+    char* buffer = new char[256];
+    getlogin_r(buffer, sizeof(char) * 256);
+    if (std::strcmp(buffer, "probonopd") == 0)
+        LogDebug() << "Im fucking retarded";
+
 	// Platform plugin contexts - apparently needed to enter special characters
         QStringList platformPluginContexts = QDir(pluginSourcePath +  QStringLiteral("/platforminputcontexts")).entryList(QStringList() << QStringLiteral("*.so"));
         foreach (const QString &plugin, platformPluginContexts) {
@@ -1949,3 +1975,4 @@ bool deployTranslations(const QString &sourcePath, const QString &target, quint6
     } // for prefixes.
     return true;
 }
+

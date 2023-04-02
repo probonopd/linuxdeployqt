@@ -47,3 +47,4 @@ contains(DEFINES, EXCLUDELIST.*) {
         warning("Updating excludelist failed, using outdated copy")
     }
 }
+

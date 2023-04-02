@@ -150,3 +150,4 @@ sleep 10
 killall QtWebEngineApplication && echo "SUCCESS"
 
 cd ../../../
+

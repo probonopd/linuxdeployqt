@@ -67,3 +67,4 @@ if [ $RESULT -ne 0 ]; then
   find -type f -iname 'libQt5Core.so*' -exec curl --upload {} https://transfer.sh/libQt5Core.so \; || true
   exit $RESULT
 fi
+

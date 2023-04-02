@@ -8,3 +8,4 @@ RESOURCES += qml.qrc
 
 target.path = QtWebEngineApplication
 INSTALLS += target
+

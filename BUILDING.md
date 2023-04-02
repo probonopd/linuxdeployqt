@@ -36,3 +36,4 @@ tar xf patchelf-0.9.tar.bz2
 sudo wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O /usr/local/bin/appimagetool
 sudo chmod a+x /usr/local/bin/appimagetool
 ```
+
