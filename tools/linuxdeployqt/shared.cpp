@@ -76,61 +76,119 @@ using std::endl;
 
 static QMap<QString,QString> qtToBeBundledInfo;
 
-enum QtModule
-#if defined(Q_COMPILER_CLASS_ENUM) || defined(Q_CC_MSVC)
+enum Qt5Module
+#if defined(Q_COMPILER_CLASS_ENUM)
     : quint64
 #endif
 {
-    QtBluetoothModule         = 0x0000000000000001,
-    QtCLuceneModule           = 0x0000000000000002,
-    QtConcurrentModule        = 0x0000000000000004,
-    QtCoreModule              = 0x0000000000000008,
-    QtDeclarativeModule       = 0x0000000000000010,
-    QtDesignerComponents      = 0x0000000000000020,
-    QtDesignerModule          = 0x0000000000000040,
-    QtGuiModule               = 0x0000000000000080,
-    QtCluceneModule           = 0x0000000000000100,
-    QtHelpModule              = 0x0000000000000200,
-    QtMultimediaModule        = 0x0000000000000400,
-    QtMultimediaWidgetsModule = 0x0000000000000800,
-    QtMultimediaQuickModule   = 0x0000000000001000,
-    QtNetworkModule           = 0x0000000000002000,
-    QtNfcModule               = 0x0000000000004000,
-    QtOpenGLModule            = 0x0000000000008000,
-    QtPositioningModule       = 0x0000000000010000,
-    QtPrintSupportModule      = 0x0000000000020000,
-    QtQmlModule               = 0x0000000000040000,
-    QtQuickModule             = 0x0000000000080000,
-    QtQuickParticlesModule    = 0x0000000000100000,
-    QtScriptModule            = 0x0000000000200000,
-    QtScriptToolsModule       = 0x0000000000400000,
-    QtSensorsModule           = 0x0000000000800000,
-    QtSerialPortModule        = 0x0000000001000000,
-    QtSqlModule               = 0x0000000002000000,
-    QtSvgModule               = 0x0000000004000000,
-    QtTestModule              = 0x0000000008000000,
-    QtWidgetsModule           = 0x0000000010000000,
-    QtWinExtrasModule         = 0x0000000020000000,
-    QtXmlModule               = 0x0000000040000000,
-    QtXmlPatternsModule       = 0x0000000080000000,
-    QtWebKitModule            = 0x0000000100000000,
-    QtWebKitWidgetsModule     = 0x0000000200000000,
-    QtQuickWidgetsModule      = 0x0000000400000000,
-    QtWebSocketsModule        = 0x0000000800000000,
-    QtEnginioModule           = 0x0000001000000000,
-    QtWebEngineCoreModule     = 0x0000002000000000,
-    QtWebEngineModule         = 0x0000004000000000,
-    QtWebEngineWidgetsModule  = 0x0000008000000000,
-    QtQmlToolingModule        = 0x0000010000000000,
-    Qt3DCoreModule            = 0x0000020000000000,
-    Qt3DRendererModule        = 0x0000040000000000,
-    Qt3DQuickModule           = 0x0000080000000000,
-    Qt3DQuickRendererModule   = 0x0000100000000000,
-    Qt3DInputModule           = 0x0000200000000000,
-    QtLocationModule          = 0x0000400000000000,
-    QtWebChannelModule        = 0x0000800000000000,
-    QtTextToSpeechModule      = 0x0001000000000000,
-    QtSerialBusModule         = 0x0002000000000000
+    Qt5BluetoothModule         = 0x0000000000000001,
+    Qt5CLuceneModule           = 0x0000000000000002,
+    Qt5ConcurrentModule        = 0x0000000000000004,
+    Qt5CoreModule              = 0x0000000000000008,
+    Qt5DeclarativeModule       = 0x0000000000000010,
+    Qt5DesignerComponents      = 0x0000000000000020,
+    Qt5DesignerModule          = 0x0000000000000040,
+    Qt5GuiModule               = 0x0000000000000080,
+    Qt5CluceneModule           = 0x0000000000000100,
+    Qt5HelpModule              = 0x0000000000000200,
+    Qt5MultimediaModule        = 0x0000000000000400,
+    Qt5MultimediaWidgetsModule = 0x0000000000000800,
+    Qt5MultimediaQuickModule   = 0x0000000000001000,
+    Qt5NetworkModule           = 0x0000000000002000,
+    Qt5NfcModule               = 0x0000000000004000,
+    Qt5OpenGLModule            = 0x0000000000008000,
+    Qt5PositioningModule       = 0x0000000000010000,
+    Qt5PrintSupportModule      = 0x0000000000020000,
+    Qt5QmlModule               = 0x0000000000040000,
+    Qt5QuickModule             = 0x0000000000080000,
+    Qt5QuickParticlesModule    = 0x0000000000100000,
+    Qt5ScriptModule            = 0x0000000000200000,
+    Qt5ScriptToolsModule       = 0x0000000000400000,
+    Qt5SensorsModule           = 0x0000000000800000,
+    Qt5SerialPortModule        = 0x0000000001000000,
+    Qt5SqlModule               = 0x0000000002000000,
+    Qt5SvgModule               = 0x0000000004000000,
+    Qt5TestModule              = 0x0000000008000000,
+    Qt5WidgetsModule           = 0x0000000010000000,
+    Qt5WinExtrasModule         = 0x0000000020000000,
+    Qt5XmlModule               = 0x0000000040000000,
+    Qt5XmlPatternsModule       = 0x0000000080000000,
+    Qt5WebKitModule            = 0x0000000100000000,
+    Qt5WebKitWidgetsModule     = 0x0000000200000000,
+    Qt5QuickWidgetsModule      = 0x0000000400000000,
+    Qt5WebSocketsModule        = 0x0000000800000000,
+    Qt5EnginioModule           = 0x0000001000000000,
+    Qt5WebEngineCoreModule     = 0x0000002000000000,
+    Qt5WebEngineModule         = 0x0000004000000000,
+    Qt5WebEngineWidgetsModule  = 0x0000008000000000,
+    Qt5QmlToolingModule        = 0x0000010000000000,
+    Qt53DCoreModule            = 0x0000020000000000,
+    Qt53DRendererModule        = 0x0000040000000000,
+    Qt53DQuickModule           = 0x0000080000000000,
+    Qt53DQuickRendererModule   = 0x0000100000000000,
+    Qt53DInputModule           = 0x0000200000000000,
+    Qt5LocationModule          = 0x0000400000000000,
+    Qt5WebChannelModule        = 0x0000800000000000,
+    Qt5TextToSpeechModule      = 0x0001000000000000,
+    Qt5SerialBusModule         = 0x0002000000000000
+};
+
+enum Qt6Module
+#if defined(Q_COMPILER_CLASS_ENUM)
+    : quint64
+#endif
+{
+    Qt6BluetoothModule         = 0x0000000000000001,
+    Qt6ConcurrentModule        = 0x0000000000000002,
+    Qt6CoreModule              = 0x0000000000000004,
+    Qt6DeclarativeModule       = 0x0000000000000008,
+    Qt6DesignerComponents      = 0x0000000000000010,
+    Qt6DesignerModule          = 0x0000000000000020,
+    Qt6GuiModule               = 0x0000000000000040,
+    Qt6HelpModule              = 0x0000000000000080,
+    Qt6MultimediaModule        = 0x0000000000000100,
+    Qt6MultimediaWidgetsModule = 0x0000000000000200,
+    Qt6MultimediaQuickModule   = 0x0000000000000400,
+    Qt6NetworkModule           = 0x0000000000000800,
+    Qt6NfcModule               = 0x0000000000001000,
+    Qt6OpenGLModule            = 0x0000000000002000,
+    Qt6OpenGLWidgetsModule     = 0x0000000000004000,
+    Qt6PositioningModule       = 0x0000000000008000,
+    Qt6PrintSupportModule      = 0x0000000000010000,
+    Qt6QmlModule               = 0x0000000000020000,
+    Qt6QuickModule             = 0x0000000000040000,
+    Qt6QuickParticlesModule    = 0x0000000000080000,
+    Qt6ScriptModule            = 0x0000000000100000,
+    Qt6ScriptToolsModule       = 0x0000000000200000,
+    Qt6SensorsModule           = 0x0000000000400000,
+    Qt6SerialPortModule        = 0x0000000000800000,
+    Qt6SqlModule               = 0x0000000001000000,
+    Qt6SvgModule               = 0x0000000002000000,
+    Qt6SvgWidgetsModule        = 0x0000000004000000,
+    Qt6TestModule              = 0x0000000008000000,
+    Qt6WidgetsModule           = 0x0000000010000000,
+    Qt6WinExtrasModule         = 0x0000000020000000,
+    Qt6XmlModule               = 0x0000000040000000,
+    Qt6QuickWidgetsModule      = 0x0000000100000000,
+    Qt6WebSocketsModule        = 0x0000000200000000,
+    Qt6WebEngineCoreModule     = 0x0000000800000000,
+    Qt6WebEngineModule         = 0x0000001000000000,
+    Qt6WebEngineWidgetsModule  = 0x0000002000000000,
+    Qt6QmlToolingModule        = 0x0000004000000000,
+    Qt63DCoreModule            = 0x0000008000000000,
+    Qt63DRendererModule        = 0x0000010000000000,
+    Qt63DQuickModule           = 0x0000020000000000,
+    Qt63DQuickRendererModule   = 0x0000040000000000,
+    Qt63DInputModule           = 0x0000080000000000,
+    Qt6LocationModule          = 0x0000100000000000,
+    Qt6WebChannelModule        = 0x0000200000000000,
+    Qt6TextToSpeechModule      = 0x0000400000000000,
+    Qt6SerialBusModule         = 0x0000800000000000,
+    Qt6GamePadModule           = 0x0001000000000000,
+    Qt63DAnimationModule       = 0x0002000000000000,
+    Qt6WebViewModule           = 0x0004000000000000,
+    Qt63DExtrasModule          = 0x0008000000000000,
+    Qt6ShaderToolsModule       = 0x0010000000000000
 };
 
 struct QtModuleEntry {
@@ -140,56 +198,113 @@ struct QtModuleEntry {
     const char *translation;
 };
 
-static QtModuleEntry qtModuleEntries[] = {
-    { QtBluetoothModule, "bluetooth", "Qt5Bluetooth", 0 },
-    { QtCLuceneModule, "clucene", "Qt5CLucene", "qt_help" },
-    { QtConcurrentModule, "concurrent", "Qt5Concurrent", "qtbase" },
-    { QtCoreModule, "core", "Qt5Core", "qtbase" },
-    { QtDeclarativeModule, "declarative", "Qt5Declarative", "qtquick1" },
-    { QtDesignerModule, "designer", "Qt5Designer", 0 },
-    { QtDesignerComponents, "designercomponents", "Qt5DesignerComponents", 0 },
-    { QtEnginioModule, "enginio", "Enginio", 0 },
-    { QtGuiModule, "gui", "Qt5Gui", "qtbase" },
-    { QtHelpModule, "qthelp", "Qt5Help", "qt_help" },
-    { QtMultimediaModule, "multimedia", "Qt5Multimedia", "qtmultimedia" },
-    { QtMultimediaWidgetsModule, "multimediawidgets", "Qt5MultimediaWidgets", "qtmultimedia" },
-    { QtMultimediaQuickModule, "multimediaquick", "Qt5MultimediaQuick_p", "qtmultimedia" },
-    { QtNetworkModule, "network", "Qt5Network", "qtbase" },
-    { QtNfcModule, "nfc", "Qt5Nfc", 0 },
-    { QtOpenGLModule, "opengl", "Qt5OpenGL", 0 },
-    { QtPositioningModule, "positioning", "Qt5Positioning", 0 },
-    { QtPrintSupportModule, "printsupport", "Qt5PrintSupport", 0 },
-    { QtQmlModule, "qml", "Qt5Qml", "qtdeclarative" },
-    { QtQmlToolingModule, "qmltooling", "qmltooling", 0 },
-    { QtQuickModule, "quick", "Qt5Quick", "qtdeclarative" },
-    { QtQuickParticlesModule, "quickparticles", "Qt5QuickParticles", 0 },
-    { QtQuickWidgetsModule, "quickwidgets", "Qt5QuickWidgets", 0 },
-    { QtScriptModule, "script", "Qt5Script", "qtscript" },
-    { QtScriptToolsModule, "scripttools", "Qt5ScriptTools", "qtscript" },
-    { QtSensorsModule, "sensors", "Qt5Sensors", 0 },
-    { QtSerialPortModule, "serialport", "Qt5SerialPort", "qtserialport" },
-    { QtSqlModule, "sql", "Qt5Sql", "qtbase" },
-    { QtSvgModule, "svg", "Qt5Svg", 0 },
-    { QtTestModule, "test", "Qt5Test", "qtbase" },
-    { QtWebKitModule, "webkit", "Qt5WebKit", 0 },
-    { QtWebKitWidgetsModule, "webkitwidgets", "Qt5WebKitWidgets", 0 },
-    { QtWebSocketsModule, "websockets", "Qt5WebSockets", "qtwebsockets" },
-    { QtWidgetsModule, "widgets", "Qt5Widgets", "qtbase" },
-    { QtWinExtrasModule, "winextras", "Qt5WinExtras", 0 },
-    { QtXmlModule, "xml", "Qt5Xml", "qtbase" },
-    { QtXmlPatternsModule, "xmlpatterns", "Qt5XmlPatterns", "qtxmlpatterns" },
-    { QtWebEngineCoreModule, "webenginecore", "Qt5WebEngineCore", 0 },
-    { QtWebEngineModule, "webengine", "Qt5WebEngine", "qtwebengine" },
-    { QtWebEngineWidgetsModule, "webenginewidgets", "Qt5WebEngineWidgets", 0 },
-    { Qt3DCoreModule, "3dcore", "Qt53DCore", 0 },
-    { Qt3DRendererModule, "3drenderer", "Qt53DRenderer", 0 },
-    { Qt3DQuickModule, "3dquick", "Qt53DQuick", 0 },
-    { Qt3DQuickRendererModule, "3dquickrenderer", "Qt53DQuickRenderer", 0 },
-    { Qt3DInputModule, "3dinput", "Qt53DInput", 0 },
-    { QtLocationModule, "geoservices", "Qt5Location", 0 },
-    { QtWebChannelModule, "webchannel", "Qt5WebChannel", 0 },
-    { QtTextToSpeechModule, "texttospeech", "Qt5TextToSpeech", 0 },
-    { QtSerialBusModule, "serialbus", "Qt5SerialBus", 0 }
+static QtModuleEntry *qtModuleEntries;
+static size_t qtModuleEntriesCount;
+
+static QtModuleEntry qt5ModuleEntries[] = {
+    { Qt5BluetoothModule, "bluetooth", "Qt5Bluetooth", nullptr },
+    { Qt5CLuceneModule, "clucene", "Qt5CLucene", "qt_help" },
+    { Qt5ConcurrentModule, "concurrent", "Qt5Concurrent", "qtbase" },
+    { Qt5CoreModule, "core", "Qt5Core", "qtbase" },
+    { Qt5DeclarativeModule, "declarative", "Qt5Declarative", "qtquick1" },
+    { Qt5DesignerModule, "designer", "Qt5Designer", nullptr },
+    { Qt5DesignerComponents, "designercomponents", "Qt5DesignerComponents", nullptr },
+    { Qt5EnginioModule, "enginio", "Enginio", nullptr },
+    { Qt5GuiModule, "gui", "Qt5Gui", "qtbase" },
+    { Qt5HelpModule, "qthelp", "Qt5Help", "qt_help" },
+    { Qt5MultimediaModule, "multimedia", "Qt5Multimedia", "qtmultimedia" },
+    { Qt5MultimediaWidgetsModule, "multimediawidgets", "Qt5MultimediaWidgets", "qtmultimedia" },
+    { Qt5MultimediaQuickModule, "multimediaquick", "Qt5MultimediaQuick_p", "qtmultimedia" },
+    { Qt5NetworkModule, "network", "Qt5Network", "qtbase" },
+    { Qt5NfcModule, "nfc", "Qt5Nfc", nullptr },
+    { Qt5OpenGLModule, "opengl", "Qt5OpenGL", nullptr },
+    { Qt5PositioningModule, "positioning", "Qt5Positioning", nullptr },
+    { Qt5PrintSupportModule, "printsupport", "Qt5PrintSupport", nullptr },
+    { Qt5QmlModule, "qml", "Qt5Qml", "qtdeclarative" },
+    { Qt5QmlToolingModule, "qmltooling", "qmltooling", nullptr },
+    { Qt5QuickModule, "quick", "Qt5Quick", "qtdeclarative" },
+    { Qt5QuickParticlesModule, "quickparticles", "Qt5QuickParticles", nullptr },
+    { Qt5QuickWidgetsModule, "quickwidgets", "Qt5QuickWidgets", nullptr },
+    { Qt5ScriptModule, "script", "Qt5Script", "qtscript" },
+    { Qt5ScriptToolsModule, "scripttools", "Qt5ScriptTools", "qtscript" },
+    { Qt5SensorsModule, "sensors", "Qt5Sensors", nullptr },
+    { Qt5SerialPortModule, "serialport", "Qt5SerialPort", "qtserialport" },
+    { Qt5SqlModule, "sql", "Qt5Sql", "qtbase" },
+    { Qt5SvgModule, "svg", "Qt5Svg", nullptr },
+    { Qt5TestModule, "test", "Qt5Test", "qtbase" },
+    { Qt5WebKitModule, "webkit", "Qt5WebKit", nullptr },
+    { Qt5WebKitWidgetsModule, "webkitwidgets", "Qt5WebKitWidgets", nullptr },
+    { Qt5WebSocketsModule, "websockets", "Qt5WebSockets", "qtwebsockets" },
+    { Qt5WidgetsModule, "widgets", "Qt5Widgets", "qtbase" },
+    { Qt5WinExtrasModule, "winextras", "Qt5WinExtras", nullptr },
+    { Qt5XmlModule, "xml", "Qt5Xml", "qtbase" },
+    { Qt5XmlPatternsModule, "xmlpatterns", "Qt5XmlPatterns", "qtxmlpatterns" },
+    { Qt5WebEngineCoreModule, "webenginecore", "Qt5WebEngineCore", nullptr },
+    { Qt5WebEngineModule, "webengine", "Qt5WebEngine", "qtwebengine" },
+    { Qt5WebEngineWidgetsModule, "webenginewidgets", "Qt5WebEngineWidgets", nullptr },
+    { Qt53DCoreModule, "3dcore", "Qt53DCore", nullptr },
+    { Qt53DRendererModule, "3drenderer", "Qt53DRenderer", nullptr },
+    { Qt53DQuickModule, "3dquick", "Qt53DQuick", nullptr },
+    { Qt53DQuickRendererModule, "3dquickrenderer", "Qt53DQuickRenderer", nullptr },
+    { Qt53DInputModule, "3dinput", "Qt53DInput", nullptr },
+    { Qt5LocationModule, "geoservices", "Qt5Location", nullptr },
+    { Qt5WebChannelModule, "webchannel", "Qt5WebChannel", nullptr },
+    { Qt5TextToSpeechModule, "texttospeech", "Qt5TextToSpeech", nullptr },
+    { Qt5SerialBusModule, "serialbus", "Qt5SerialBus", nullptr }
+};
+
+static QtModuleEntry qt6ModuleEntries[] = {
+    { Qt6BluetoothModule, "bluetooth", "Qt6Bluetooth", nullptr },
+    { Qt6ConcurrentModule, "concurrent", "Qt6Concurrent", "qtbase" },
+    { Qt6CoreModule, "core", "Qt6Core", "qtbase" },
+    { Qt6DeclarativeModule, "declarative", "Qt6Declarative", "qtquick1" },
+    { Qt6DesignerModule, "designer", "Qt6Designer", nullptr },
+    { Qt6DesignerComponents, "designercomponents", "Qt6DesignerComponents", nullptr },
+    { Qt6GamePadModule, "gamepad", "Qt6Gamepad", nullptr },
+    { Qt6GuiModule, "gui", "Qt6Gui", "qtbase" },
+    { Qt6HelpModule, "qthelp", "Qt6Help", "qt_help" },
+    { Qt6MultimediaModule, "multimedia", "Qt6Multimedia", "qtmultimedia" },
+    { Qt6MultimediaWidgetsModule, "multimediawidgets", "Qt6MultimediaWidgets", "qtmultimedia" },
+    { Qt6MultimediaQuickModule, "multimediaquick", "Qt6MultimediaQuick_p", "qtmultimedia" },
+    { Qt6NetworkModule, "network", "Qt6Network", "qtbase" },
+    { Qt6NfcModule, "nfc", "Qt6Nfc", nullptr },
+    { Qt6OpenGLModule, "opengl", "Qt6OpenGL", nullptr },
+    { Qt6OpenGLWidgetsModule, "openglwidgets", "Qt6OpenGLWidgets", nullptr },
+    { Qt6PositioningModule, "positioning", "Qt6Positioning", nullptr },
+    { Qt6PrintSupportModule, "printsupport", "Qt6PrintSupport", nullptr },
+    { Qt6QmlModule, "qml", "Qt6Qml", "qtdeclarative" },
+    { Qt6QmlToolingModule, "qmltooling", "qmltooling", nullptr },
+    { Qt6QuickModule, "quick", "Qt6Quick", "qtdeclarative" },
+    { Qt6QuickParticlesModule, "quickparticles", "Qt6QuickParticles", nullptr },
+    { Qt6QuickWidgetsModule, "quickwidgets", "Qt6QuickWidgets", nullptr },
+    { Qt6ScriptModule, "script", "Qt6Script", "qtscript" },
+    { Qt6ScriptToolsModule, "scripttools", "Qt6ScriptTools", "qtscript" },
+    { Qt6SensorsModule, "sensors", "Qt6Sensors", nullptr },
+    { Qt6SerialPortModule, "serialport", "Qt6SerialPort", "qtserialport" },
+    { Qt6SqlModule, "sql", "Qt6Sql", "qtbase" },
+    { Qt6SvgModule, "svg", "Qt6Svg", nullptr },
+    { Qt6SvgWidgetsModule, "svgwidgets", "Qt6SvgWidgets", nullptr },
+    { Qt6TestModule, "test", "Qt6Test", "qtbase" },
+    { Qt6WebSocketsModule, "websockets", "Qt6WebSockets", nullptr },
+    { Qt6WidgetsModule, "widgets", "Qt6Widgets", "qtbase" },
+    { Qt6WinExtrasModule, "winextras", "Qt6WinExtras", nullptr },
+    { Qt6XmlModule, "xml", "Qt6Xml", "qtbase" },
+    { Qt6WebEngineCoreModule, "webenginecore", "Qt6WebEngineCore", nullptr },
+    { Qt6WebEngineModule, "webengine", "Qt6WebEngine", "qtwebengine" },
+    { Qt6WebEngineWidgetsModule, "webenginewidgets", "Qt6WebEngineWidgets", nullptr },
+    { Qt63DCoreModule, "3dcore", "Qt63DCore", nullptr },
+    { Qt63DRendererModule, "3drenderer", "Qt63DRender", nullptr },
+    { Qt63DQuickModule, "3dquick", "Qt63DQuick", nullptr },
+    { Qt63DQuickRendererModule, "3dquickrenderer", "Qt63DQuickRender", nullptr },
+    { Qt63DInputModule, "3dinput", "Qt63DInput", nullptr },
+    { Qt63DAnimationModule, "3danimation", "Qt63DAnimation", nullptr },
+    { Qt63DExtrasModule, "3dextras", "Qt63DExtras", nullptr },
+    { Qt6LocationModule, "geoservices", "Qt6Location", nullptr },
+    { Qt6WebChannelModule, "webchannel", "Qt6WebChannel", nullptr },
+    { Qt6TextToSpeechModule, "texttospeech", "Qt6TextToSpeech", nullptr },
+    { Qt6SerialBusModule, "serialbus", "Qt6SerialBus", nullptr },
+    { Qt6WebViewModule, "webview", "Qt6WebView", nullptr },
+    { Qt6ShaderToolsModule, "shadertools", "Qt6ShaderTools", nullptr }
 };
 
 bool operator==(const LibraryInfo &a, const LibraryInfo &b)
@@ -371,8 +486,15 @@ LddInfo findDependencyInfo(const QString &binaryPath)
 
     foreach (QString outputLine, outputLines) {
 
+       if (outputLine.contains("libQt6")) {
+               qtDetected = 6;
+               qtModuleEntries = qt6ModuleEntries;
+               qtModuleEntriesCount = sizeof(qt6ModuleEntries) / sizeof(qt6ModuleEntries[0]);
+       }
        if(outputLine.contains("libQt5")){
                qtDetected = 5;
+               qtModuleEntries = qt5ModuleEntries;
+               qtModuleEntriesCount = sizeof(qt5ModuleEntries) / sizeof(qt5ModuleEntries[0]);
        }
        if(outputLine.contains("libQtCore.so.4")){
                qtDetected = 4;
@@ -1115,7 +1237,13 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
            // openSUSE has qmake for Qt 4 and qmake-qt5 for Qt 5
            // Qt 4 on Fedora comes with suffix -qt4
            // http://www.geopsy.org/wiki/index.php/Installing_Qt_binary_packages
-           if(qtDetected == 5){
+           // Starting from Fedora 34, the package qt6-qtbase-devel provides
+           // qmake-qt6
+           qDebug() << "qmakePath 3=" << qmakePath;
+           if (qtDetected == 6) {
+               qmakePath = QStandardPaths::findExecutable("qmake-qt6");
+               LogDebug() << "qmake 6";
+           } else if (qtDetected == 5) {
                qmakePath = QStandardPaths::findExecutable("qmake-qt5");
                LogDebug() << "qmake 5";
            } else if(qtDetected == 4){
@@ -1219,6 +1347,16 @@ DeploymentInfo deployQtLibraries(const QString &appDirPath, const QStringList &a
    return depInfo;
 }
 
+static void appendPluginToList(const QString pluginSourcePath, const QString pluginName, QStringList &pluginList)
+{
+    QStringList plugins = QDir(pluginSourcePath + "/" + pluginName).entryList(QStringList() << QStringLiteral("*.so"));
+    foreach (const QString &plugin, plugins) {
+        pluginList.append(pluginName + "/" + plugin);
+    }
+}
+
+// All Qt 6 plugins are bases on windeployqt code for Qt 6.3.1, see
+// https://github.com/qt/qtbase/blob/8483dcde90f40cdfd0a0ec4245b03610b46b6cae/src/tools/windeployqt/main.cpp#L835-L869
 void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath,
         const QString pluginDestinationPath, DeploymentInfo deploymentInfo)
 {
@@ -1233,8 +1371,9 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     LogDebug() << "deploymentInfo.deployedLibraries before attempting to bundle required plugins:" << deploymentInfo.deployedLibraries;
 
     // Platform plugin:
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")) {
-        LogDebug() << "libQt5Gui detected";
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Gui")) {
+        LogDebug() << "libQt5Gui/libQt6Gui detected";
         pluginList.append("platforms/libqxcb.so");
 	// Platform plugin contexts - apparently needed to enter special characters
         QStringList platformPluginContexts = QDir(pluginSourcePath +  QStringLiteral("/platforminputcontexts")).entryList(QStringList() << QStringLiteral("*.so"));
@@ -1290,64 +1429,120 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 }
             }
         }
+
+        // Handle the Qt 6 specific plugins
+        if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Gui")) {
+            appendPluginToList(pluginSourcePath, "accessible", pluginList);
+            appendPluginToList(pluginSourcePath, "virtualkeyboard", pluginList);
+        }
     }
 
     // Platform OpenGL context
     if ((containsHowOften(deploymentInfo.deployedLibraries, "libQt5OpenGL"))
+		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt6OpenGL"))
 		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Gui"))
+		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Gui"))
 		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt5XcbQpa"))
+		    or (containsHowOften(deploymentInfo.deployedLibraries, "libQt6XcbQpa"))
 		    or (containsHowOften(deploymentInfo.deployedLibraries, "libxcb-glx"))) {
-        QStringList xcbglintegrationPlugins = QDir(pluginSourcePath +  QStringLiteral("/xcbglintegrations")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, xcbglintegrationPlugins) {
-            pluginList.append(QStringLiteral("xcbglintegrations/") + plugin);
-        }
+        appendPluginToList(pluginSourcePath, "xcbglintegrations", pluginList);
     }
 
     // Also deploy plugins/iconengines/libqsvgicon.so whenever libQt5Svg.so.* is about to be deployed,
     // https://github.com/probonopd/linuxdeployqt/issues/36
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")) {
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Svg")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Svg")) {
         pluginList.append(QStringLiteral("iconengines/libqsvgicon.so"));
     }
 
     // CUPS print support
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5PrintSupport")) {
-        pluginList.append("printsupport/libcupsprintersupport.so");
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5PrintSupport")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6PrintSupport")) {
+        appendPluginToList(pluginSourcePath, "printsupport", pluginList);
     }
 
     // Network
     if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Network")) {
-        QStringList bearerPlugins = QDir(pluginSourcePath +  QStringLiteral("/bearer")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, bearerPlugins) {
-            pluginList.append(QStringLiteral("bearer/") + plugin);
-        }
+        appendPluginToList(pluginSourcePath, "bearer", pluginList);
+    }
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Network")) {
+        appendPluginToList(pluginSourcePath, "networkaccess", pluginList);
+        appendPluginToList(pluginSourcePath, "networkinformation", pluginList);
+        appendPluginToList(pluginSourcePath, "tls", pluginList);
     }
 
     // Sql plugins if QtSql library is in use
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Sql")) {
-        QStringList sqlPlugins = QDir(pluginSourcePath +  QStringLiteral("/sqldrivers")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, sqlPlugins) {
-            pluginList.append(QStringLiteral("sqldrivers/") + plugin);
-        }
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Sql")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Sql")) {
+        appendPluginToList(pluginSourcePath, "sqldrivers", pluginList);
     }
 
     // Positioning plugins if QtPositioning library is in use
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Positioning")) {
-        QStringList posPlugins = QDir(pluginSourcePath +  QStringLiteral("/position")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, posPlugins) {
-            pluginList.append(QStringLiteral("position/") + plugin);
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Positioning")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Positioning")) {
+        appendPluginToList(pluginSourcePath, "position", pluginList);
+    }
+
+    // Multimedia plugins if QtMultimedia library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Multimedia")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6Multimedia")) {
+        appendPluginToList(pluginSourcePath, "audio", pluginList);
+        appendPluginToList(pluginSourcePath, "mediaservice", pluginList);
+
+        // This plugin is specific to Qt 6
+        if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Multimedia")) {
+            appendPluginToList(pluginSourcePath, "playlistformats", pluginList);
         }
     }
 
-    // multimedia plugins if QtMultimedia library is in use
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5Multimedia")) {
-        QStringList plugins = QDir(pluginSourcePath + QStringLiteral("/mediaservice")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("mediaservice/") + plugin);
-        }
-        plugins = QDir(pluginSourcePath + QStringLiteral("/audio")).entryList(QStringList() << QStringLiteral("*.so"));
-        foreach (const QString &plugin, plugins) {
-            pluginList.append(QStringLiteral("audio/") + plugin);
-        }
+    // 3D plugins if Qt3D library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt63DRender")) {
+        appendPluginToList(pluginSourcePath, "geometryloaders", pluginList);
+        appendPluginToList(pluginSourcePath, "renderers", pluginList);
+        appendPluginToList(pluginSourcePath, "renderplugins", pluginList);
+        appendPluginToList(pluginSourcePath, "sceneparsers", pluginList);
+    }
+
+    // Sensors plugins if QtSensors library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Sensors")) {
+        appendPluginToList(pluginSourcePath, "sensorgestures", pluginList);
+        appendPluginToList(pluginSourcePath, "sensors", pluginList);
+    }
+
+    // CAN bus plugin if QtSerialBus library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6SerialBus")) {
+        appendPluginToList(pluginSourcePath, "canbus", pluginList);
+    }
+
+    // Text to speech plugins if QtTextToSpeech library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6TextToSpeech")) {
+        appendPluginToList(pluginSourcePath, "texttospeech", pluginList);
+    }
+
+    // Location plugins if QtLocation library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Location")) {
+        appendPluginToList(pluginSourcePath, "geoservices", pluginList);
+    }
+
+    // Qt Quick plugins if QtQuick* libraries are in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Quick")) {
+        appendPluginToList(pluginSourcePath, "qmltooling", pluginList);
+        appendPluginToList(pluginSourcePath, "scenegraph", pluginList);
+    }
+
+    // Qt declarative plugins if QtDeclarative library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "Qt6Declarative")) {
+        appendPluginToList(pluginSourcePath, "qml1tooling", pluginList);
+    }
+
+    // Gamepad plugins if QtGamepad library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Gamepad")) {
+        appendPluginToList(pluginSourcePath, "gamepads", pluginList);
+    }
+
+    // Web view plugins if QtWebView library is in use
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6WebView")) {
+        appendPluginToList(pluginSourcePath, "webview", pluginList);
     }
 
     QString sourcePath;
@@ -1594,9 +1789,15 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
     LogNormal() << "Application QML file path(s) is" << qmlDirs;
     LogNormal() << "QML module search path(s) is" << qmlImportPaths;
 
-    // Use qmlimportscanner from QLibraryInfo::BinariesPath
+    // Use qmlimportscanner from QLibraryInfo::BinariesPath (this is the location on Qt 5)
     QString qmlImportScannerPath = QDir::cleanPath(qtToBeBundledInfo.value("QT_INSTALL_BINS")) + "/qmlimportscanner";
     LogDebug() << "Looking for qmlimportscanner at" << qmlImportScannerPath;
+
+    // The location of qmlimportscanner has changed starting from Qt 6
+    if (!QFile(qmlImportScannerPath).exists()) {
+        qmlImportScannerPath = QDir::cleanPath(qtToBeBundledInfo.value("QT_INSTALL_LIBEXECS")) + "/qmlimportscanner";
+        LogDebug() << "Fallback, looking for Qt 6 qmlimportscanner at" << qmlImportScannerPath;
+    }
 
     // Fallback: Look relative to the linuxdeployqt binary
     if (!QFile(qmlImportScannerPath).exists()){
@@ -1814,8 +2015,7 @@ void findUsedModules(DeploymentInfo &info)
 
     const QStringList &libraries = info.deployedLibraries;
 
-    const size_t qtModulesCount = sizeof(qtModuleEntries)/sizeof(QtModuleEntry);
-    for (size_t i = 0; i < qtModulesCount; ++i) {
+    for (size_t i = 0; i < qtModuleEntriesCount; ++i) {
         QtModuleEntry &entry = qtModuleEntries[i];
         const QString name = QLatin1String(qtModuleEntries[i].libraryName);
 
@@ -1873,8 +2073,7 @@ void deployTranslations(const QString &appDirPath, quint64 usedQtModules)
 QStringList translationNameFilters(quint64 modules, const QString &prefix)
 {
     QStringList result;
-    const size_t qtModulesCount = sizeof(qtModuleEntries)/sizeof(QtModuleEntry);
-    for (size_t i = 0; i < qtModulesCount; ++i) {
+    for (size_t i = 0; i < qtModuleEntriesCount; ++i) {
         if ((qtModuleEntries[i].module & modules) && qtModuleEntries[i].translation) {
             const QString name = QLatin1String(qtModuleEntries[i].translation) +
                                  QLatin1Char('_') +  prefix + QStringLiteral(".qm");
