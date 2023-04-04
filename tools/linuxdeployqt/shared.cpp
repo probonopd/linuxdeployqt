@@ -1396,6 +1396,8 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         // https://askubuntu.com/a/748186
         // This functionality used to come as part of Qt by default in earlier versions
         // At runtime, export QT_QPA_PLATFORMTHEME=gtk2 (Xfce does this itself)
+        // NOTE: Commented out due to the issues linked at https://github.com/linuxdeploy/linuxdeploy-plugin-qt/issues/109
+        /*
         QStringList extraQtPluginsAdded = { "platformthemes/libqgtk2.so", "styles/libqgtk2style.so" };
         foreach (const QString &plugin, extraQtPluginsAdded) {
             if (QFile::exists(pluginSourcePath + "/" + plugin)) {
@@ -1405,6 +1407,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
                 LogWarning() <<"Plugin" << pluginSourcePath + "/" + plugin << "not found, skipping";
 	    }
         }
+        */
 	// Always bundle iconengines,imageformats
         // https://github.com/probonopd/linuxdeployqt/issues/82
         // https://github.com/probonopd/linuxdeployqt/issues/325
