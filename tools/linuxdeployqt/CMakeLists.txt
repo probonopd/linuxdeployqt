@@ -11,8 +11,8 @@ add_definitions("-DBUILD_NUMBER=\"${BUILD_NUMBER}\"")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 
-option(WORK_OFFLINE "work offline" OFF)
-IF(NOT WORK_OFFLINE)
+option(UPGRADE_EXCLUDELIST_ONLINE "Updating excludelist online" ON)
+IF(UPGRADE_EXCLUDELIST_ONLINE)
     # update excludelist
     message(STATUS "Updating excludelist...")
     execute_process(
