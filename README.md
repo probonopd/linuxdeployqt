@@ -16,7 +16,9 @@ __To produce binaries that are compatible with many target systems, build on the
 
 We recommend to target the oldest still-supported Ubuntu LTS release and build your applications on that. If you do this, the resulting binaries should be able to run on newer (but not older) systems (Ubuntu and other distributions).
 
-We do not support linuxdeployqt on systems newer than the oldest Ubuntu LTS release, because we want to encourage developers to build applications in a way that makes them possible to run on all still-supported distribution releases. For an overview about the support cycles of Ubuntu LTS releases, please see https://wiki.ubuntu.com/Releases.
+`linuxdeployqt` refuses to work on systems any newer than the oldest currently still-supported Ubuntu LTS release, because we want to encourage developers to build applications in a way that makes them possible to run on all still-supported distribution releases. For an overview about the support cycles of Ubuntu LTS releases, please see https://wiki.ubuntu.com/Releases. If you absolutely need to build your application on a build system newer than the oldest currently still-supported Ubuntu LTS release, then consider using go-appimage `appimagetool -s deploy` (unlike `linuxdeployqt`, this bundles _all_ libraries).
+
+`linuxdeployqt` does not contain any specific workarounds for Wayland which breaks many things. For best results, do not use Wayland.
 
 ## Installation
 
