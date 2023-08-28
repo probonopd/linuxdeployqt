@@ -191,11 +191,13 @@ int main(int argc, char **argv)
     // https://github.com/AppImage/appimage.github.io/search?q=GLIBC&unscoped_q=GLIBC&type=Issues
     const char *glcv = gnu_get_libc_version ();
     if(skipGlibcCheck) {
-        qInfo() << "WARNING: Not checking glibc on the host system.";
-        qInfo() << "         The resulting AppDir or AppImage may not run on older systems.";
-        qInfo() << "         This mode is unsupported and discouraged.";
-        qInfo() << "         For more information, please see";
-        qInfo() << "         https://github.com/probonopd/linuxdeployqt/issues/340";
+        if(! bundleEverything) {
+            qInfo() << "WARNING: Not checking glibc on the host system.";
+            qInfo() << "         The resulting AppDir or AppImage may not run on older systems.";
+            qInfo() << "         This mode is unsupported and discouraged.";
+            qInfo() << "         For more information, please see";
+            qInfo() << "         https://github.com/probonopd/linuxdeployqt/issues/340";
+        }
      } else {
         // openSUSE Leap 15.0 uses glibc 2.26 and is used on OBS
         // Ubuntu Xenial Xerus (16.04) uses glibc 2.23
