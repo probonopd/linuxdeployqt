@@ -1554,7 +1554,8 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
     // from the Qt instance that is to be bundled (pull requests welcome!)
     // especially since stuff that is supposed to come from resources actually
     // seems to come in libexec in the upstream Qt binary distribution
-    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5WebEngineCore")) {
+    if (containsHowOften(deploymentInfo.deployedLibraries, "libQt5WebEngineCore")
+        || containsHowOften(deploymentInfo.deployedLibraries, "libQt6WebEngineCore")) {
         // Find directories with needed files:
         QString qtLibexecPath = qtToBeBundledInfo.value("QT_INSTALL_LIBEXECS");
         QString qtDataPath = qtToBeBundledInfo.value("QT_INSTALL_DATA");
