@@ -63,6 +63,7 @@ int main(int argc, char **argv)
     extern QStringList librarySearchPath;
     extern bool alwaysOwerwriteEnabled;    
     QStringList additionalExecutables;
+    QStringList additionalExecutablesDir;
     bool qmldirArgumentUsed = false;
     bool skipTranslations = false;
     bool skipGlibcCheck = false;
@@ -120,6 +121,13 @@ int main(int argc, char **argv)
                 LogError() << "Could not parse verbose level";
             else
                 logLevel = number;
+        } else if (argument.startsWith(QByteArray("-executable-dir"))) {
+            LogDebug() << "Argument found:" << argument;
+            int index = argument.indexOf('=');
+            if (index == -1)
+                LogError() << "Missing executable folder path";
+            else
+                additionalExecutablesDir << argument.mid(index+1);
         } else if (argument.startsWith(QByteArray("-executable"))) {
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf('=');
@@ -228,6 +236,8 @@ int main(int argc, char **argv)
         qInfo() << "                              searching for libraries.";
         qInfo() << "   -executable=<path>       : Let the given executable use the deployed libraries";
         qInfo() << "                              too";
+        qInfo() << "   -executable-dir=<path>   : Let all the executables in the folder (recursive) use";
+        qInfo() << "                              the deployed libraries too";
         qInfo() << "   -extra-plugins=<list>    : List of extra plugins which should be deployed,";
         qInfo() << "                              separated by comma.";
         qInfo() << "   -no-copy-copyright-files : Skip deployment of copyright files.";
@@ -494,6 +504,19 @@ int main(int argc, char **argv)
     if (!excludeLibs.isEmpty())
     {
         qWarning() << "WARNING: Excluding the following libraries might break the AppImage. Please double-check the list:" << excludeLibs;
+    }
+
+    // recurse folders for additional executables
+    for(const auto& folder : additionalExecutablesDir) {
+      QString directoryToBeSearched = QDir::cleanPath(QFileInfo(folder).absolutePath());
+      QDirIterator it(directoryToBeSearched, QDirIterator::Subdirectories);
+      while (it.hasNext()) {
+        it.next();
+        if((it.fileInfo().isFile()) && (it.fileInfo().isExecutable())){
+          qDebug() << "Found additional executable:" << it.fileInfo().canonicalFilePath();
+          additionalExecutables << it.fileInfo().absoluteFilePath();
+        }
+      }
     }
 
     DeploymentInfo deploymentInfo = deployQtLibraries(appDirPath, additionalExecutables,
