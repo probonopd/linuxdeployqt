@@ -1492,6 +1492,7 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         // This plugin is specific to Qt 6
         if (containsHowOften(deploymentInfo.deployedLibraries, "libQt6Multimedia")) {
             appendPluginToList(pluginSourcePath, "playlistformats", pluginList);
+            appendPluginToList(pluginSourcePath, "multimedia", pluginList);
         }
     }
 
