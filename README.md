@@ -39,6 +39,8 @@ Options:
                               searching for libraries.
    -executable=<path>       : Let the given executable use the deployed libraries
                               too
+   -executable-dir=<path>   : Let all the executables in the folder (recursive) use
+                              the deployed libraries too
    -extra-plugins=<list>    : List of extra plugins which should be deployed,
                               separated by comma.
    -no-copy-copyright-files : Skip deployment of copyright files.

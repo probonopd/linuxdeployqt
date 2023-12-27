@@ -4,7 +4,7 @@ If you just would like to bundle your application for x86_64 platforms, it is no
 
 So, if you are on another platform (e.g. i686, ARM) or would like to compile from source, here are the steps:
 
-* Get and build linuxdeployqt e.g., using Qt 5.7.0 (you could use this [Qt Creator AppImage](https://bintray.com/probono/AppImages/QtCreator#files) for this)
+* Get and build linuxdeployqt
 
 ```
 sudo apt-get -y install git g++ libgl1-mesa-dev
@@ -22,7 +22,7 @@ make
 sudo make install
 ```
 
-* Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS). To learn more about this, see http://blog.qt.io/blog/2011/10/28/rpath-and-runpath/
+* Build and install [patchelf](https://nixos.org/patchelf.html) (a small utility to modify the dynamic linker and RPATH of ELF executables; similar to `install_name_tool` on macOS). To learn more about this, see http://blog.qt.io/blog/2011/10/28/rpath-and-runpath/. Also available as Debian package `patchelf`.
 
 ```
 wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2
