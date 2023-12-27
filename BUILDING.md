@@ -4,7 +4,7 @@ If you just would like to bundle your application for x86_64 platforms, it is no
 
 So, if you are on another platform (e.g. i686, ARM) or would like to compile from source, here are the steps:
 
-* Get and build linuxdeployqt e.g., using Qt 5.7.0 (before you could use this [Qt Creator AppImage](https://bintray.com/probono/AppImages/QtCreator#files) for this, but it is no longer available)
+* Get and build linuxdeployqt
 
 ```
 sudo apt-get -y install git g++ libgl1-mesa-dev
