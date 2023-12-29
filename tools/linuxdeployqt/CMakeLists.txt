@@ -9,20 +9,24 @@ add_definitions("-DLINUXDEPLOYQT_GIT_COMMIT=\"${GIT_COMMIT}\"")
 add_definitions("-DBUILD_DATE=\"${DATE}\"")
 add_definitions("-DBUILD_NUMBER=\"${BUILD_NUMBER}\"")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${Qt_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 
-# update excludelist
-message(STATUS "Updating excludelist...")
-execute_process(
-    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../generate-excludelist.sh
-    OUTPUT_VARIABLE EXCLUDELIST
-    TIMEOUT 10
-    RESULT_VARIABLE EXCLUDELIST_RESULT
-)
-if(NOT EXCLUDELIST_RESULT EQUAL 0)
-    message(WARNING "Updating excludelist failed, using outdated copy")
-endif()
-mark_as_advanced(EXCLUDELIST EXCLUDELIST_RESULT)
+option(UPGRADE_EXCLUDELIST_ONLINE "Updating excludelist online" ON)
+IF(UPGRADE_EXCLUDELIST_ONLINE)
+    # update excludelist
+    message(STATUS "Updating excludelist...")
+    execute_process(
+        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../generate-excludelist.sh
+        OUTPUT_VARIABLE EXCLUDELIST
+        TIMEOUT 10
+        RESULT_VARIABLE EXCLUDELIST_RESULT
+    )
+    if(NOT EXCLUDELIST_RESULT EQUAL 0)
+        message(WARNING "Updating excludelist failed, using outdated copy")
+    endif()
+    mark_as_advanced(EXCLUDELIST EXCLUDELIST_RESULT)
+ENDIF()
 
 add_executable(linuxdeployqt main.cpp shared.cpp)
 target_include_directories(linuxdeployqt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
