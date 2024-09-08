@@ -1083,6 +1083,9 @@ void runStrip(const QString &binaryPath)
     LogDebug() << "Using strip:";
     LogDebug() << " stripping" << resolvedPath;
     QProcess strip;
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.remove("LD_LIBRARY_PATH");
+    strip.setProcessEnvironment(env);
     strip.start("strip", QStringList() << resolvedPath);
     if (!strip.waitForStarted()) {
         if(strip.errorString().contains("execvp: No such file or directory")){
