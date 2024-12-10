@@ -1843,7 +1843,7 @@ bool deployQmlImports(const QString &appDirPath, DeploymentInfo deploymentInfo, 
         LogError() << "Could not start qmlimportscanner. Process error is" << qmlImportScanner.errorString();
         return false;
     }
-    qmlImportScanner.waitForFinished();
+    qmlImportScanner.waitForFinished(60000); // https://github.com/probonopd/linuxdeployqt/issues/626
 
     // log qmlimportscanner errors
     qmlImportScanner.setReadChannel(QProcess::StandardError);
