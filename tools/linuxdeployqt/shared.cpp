@@ -70,6 +70,7 @@ QStringList ignoreGlob;
 bool copyCopyrightFiles = true;
 QString updateInformation;
 QString qtLibInfix;
+QString runtime;
 
 using std::cout;
 using std::endl;
@@ -1977,6 +1978,7 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
         out << "Icon=default\n";
         out << "Comment=Edit this default file\n";
         out << "Terminal=true\n";
+        out << "# Categories=Development\n";
         file.close();
     }
 
@@ -2006,7 +2008,12 @@ int createAppImage(const QString &appDirPath)
         updateInfoArgument = QString("-u '%1'").arg(updateInformation);
     }
 
-    QString appImageCommand = "appimagetool -v '" + appDirPath + "' -n " + updateInfoArgument; // +"' '" + appImagePath + "'";
+    QString runtimeArgument;
+    if(!runtime.isEmpty()) {
+        runtimeArgument = QString(" --runtime-file %1").arg(runtime);
+    }
+
+    QString appImageCommand = "appimagetool -v '" + appDirPath + "' -n " + updateInfoArgument + runtimeArgument; // +"' '" + appImagePath + "'";
     LogNormal() << appImageCommand;
     int ret = system(appImageCommand.toUtf8().constData());
     LogNormal() << "ret" << ret;
