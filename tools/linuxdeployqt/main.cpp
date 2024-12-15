@@ -75,7 +75,7 @@ int main(int argc, char **argv)
     extern QStringList ignoreGlob;
     extern bool copyCopyrightFiles;
     extern QString updateInformation;
-    extern QString qtLibInfix;
+    extern QString qtLibfix;
     extern QString runtime;
 
     // Check arguments
@@ -186,8 +186,8 @@ int main(int argc, char **argv)
         } else if (argument.startsWith("-qtlibinfix=")) {
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
-            qtLibInfix = QString(argument.mid(index+1));
-        } else if (argument.startsWith("-runtime=")) {
+            qtLibfix = QString(argument.mid(index+1));
+        } else if (argument.startsWith("-runtime-file=")) {
             LogDebug() << "Argument found:" << argument;
             int index = argument.indexOf("=");
             runtime = QString(argument.mid(index+1));
@@ -201,7 +201,7 @@ int main(int argc, char **argv)
     }
     
     // We need to catch those errors at the source of the problem
-    // https://github.com/AppImage/appimage.github.io/search?q=GLIBC&unscoped_q=GLIBC&type=Issues
+    // https://github.com/appimage.github.io/search?q=GLIBC&unscoped_q=GLIBC&type=Issues
     const char *glcv = gnu_get_libc_version ();
     if(skipGlibcCheck) {
         if(! bundleEverything) {
@@ -257,7 +257,7 @@ int main(int argc, char **argv)
         qInfo() << "                              2 = normal, 3 = debug.";
         qInfo() << "   -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file";
         qInfo() << "   -qtlibinfix=<infix>      : Adapt the .so search if your Qt distribution has infix.";
-        qInfo() << "   -runtime==<path>         : Runtime file to use. (-runtime=<path>/runtime)";
+        qInfo() << "   -runtime-file=<path>     : Runtime file to use. (-runtime-file=<path>/runtime)";
         qInfo() << "   -version                 : Print version statement and exit.";
         qInfo() << "";
         qInfo() << "linuxdeployqt takes an application as input and makes it";
