@@ -57,7 +57,7 @@ Options:
                               2 = normal, 3 = debug.
    -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file
    -qtlibinfix=<infix>      : Adapt the .so search if your Qt distribution has infix.
-   -runtime==<path>         : Runtime file to use. (-runtime=<path>/runtime)
+   -runtime-file=<path>         : Runtime file to use. (-runtime-file=<path>/runtime)
    -version                 : Print version statement and exit.
 
 linuxdeployqt takes an application as input and makes it
