@@ -255,7 +255,8 @@ int main(int argc, char **argv)
         qInfo() << "   -show-exclude-libs       : Print exclude libraries list.";
         qInfo() << "   -verbose=<0-3>           : 0 = no output, 1 = error/warning (default),";
         qInfo() << "                              2 = normal, 3 = debug.";
-        qInfo() << "   -updateinformation=<update string>        : Embed update information STRING; if zsyncmake is installed, generate zsync file";
+        qInfo() << "   -updateinformation=<update string>        : Embed update information STRING;
+                                                  if zsyncmake is installed, generate zsync file";
         qInfo() << "   -qtlibinfix=<infix>      : Adapt the .so search if your Qt distribution has infix.";
         qInfo() << "   -runtime-file=<path>     : Runtime file to use. (-runtime-file=<path>/runtime)";
         qInfo() << "   -version                 : Print version statement and exit.";
