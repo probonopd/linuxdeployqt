@@ -1978,7 +1978,7 @@ bool checkAppImagePrerequisites(const QString &appDirPath)
         out << "Icon=default\n";
         out << "Comment=Edit this default file\n";
         out << "Terminal=true\n";
-        out << "# Categories=Development\n";
+        out << "Categories=Development\n";
         file.close();
     }
 
