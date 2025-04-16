@@ -211,10 +211,11 @@ int main(int argc, char **argv)
         // Ubuntu Xenial Xerus (16.04) uses glibc 2.23
         // Ubuntu Bionic Beaver (18.04) uses glibc 2.27
         // Ubuntu Focal Fossa (20.04) uses glibc 2.31
-        if (strverscmp (glcv, "2.32") >= 0) {
+        // Ubuntu Jammy Jellyfish (22.04) uses glibc 2.35
+        if (strverscmp (glcv, "2.36") >= 0) {
             qInfo() << "ERROR: The host system is too new.";
             qInfo() << "Please run on a system with a glibc version no newer than what comes with the oldest";
-            qInfo() << "currently supported mainstream distribution (Ubuntu Focal Fossa), which is glibc 2.31.";
+            qInfo() << "currently supported mainstream distribution (Ubuntu Jammy Jellyfish), which is glibc 2.35.";
             qInfo() << "This is so that the resulting bundle will work on most still-supported Linux distributions.";
             qInfo() << "For more information, please see";
             qInfo() << "https://github.com/probonopd/linuxdeployqt/issues/340";
