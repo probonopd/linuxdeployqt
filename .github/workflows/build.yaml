@@ -10,6 +10,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       TRAVIS_BUILD_NUMBER: ${{ github.run_number }}
       VERSION: continuous
+      APPIMAGE_EXTRACT_AND_RUN: 1
     steps:
       - name: Configure build machine
         run: |
