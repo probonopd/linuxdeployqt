@@ -3,7 +3,7 @@
 set -e
 
 # Download excludelist
-blacklisted=($(wget --quiet https://raw.githubusercontent.com/probonopd/AppImages/master/excludelist -O - | sort | uniq | cut -d '#' -f 1 | grep -v "^#.*" | grep "[^-\s]"))
+blacklisted=($(wget --quiet https://raw.githubusercontent.com/probonopd/AppImages/master/excludelist -O - | LC_ALL=C sort -f | uniq | cut -d '#' -f 1 | grep -v "^#.*" | grep "[^-\s]"))
 
 # Sanity check
 if [ "$blacklisted" == "" ]; then
