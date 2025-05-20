@@ -2,8 +2,13 @@
 
 set -x
 
-source /opt/qt*/bin/qt*-env.sh
-/opt/qt*/bin/qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro
+qmake CONFIG+=release CONFIG+=force_debug_info linuxdeployqt.pro;
+if [ "$(uname -m)" = "aarch64" ]; then
+  tool_arch="aarch64";
+else
+  tool_arch="x86_64";
+fi
+
 make -j$(nproc)
 
 # Test (it is commented out because current PVS Studio license is expired, it might be re-enabled later if a new license is granted)
@@ -52,7 +57,7 @@ ulimit -a -H
 set +e
 
 # print version number (need to extract the AppImage because we are running in a container, see https://github.com/AppImage/AppImageKit/wiki/FUSE#docker)
-./linuxdeployqt-*-x86_64.AppImage --appimage-extract-and-run --version
+./linuxdeployqt-*-$tool_arch.AppImage --appimage-extract-and-run --version
 
 # TODO: reactivate tests
 #bash -e tests/tests.sh
@@ -63,7 +68,7 @@ if [ $RESULT -ne 0 ]; then
   echo "FAILURE: linuxdeployqt CRASHED -- uploading files for debugging to transfer.sh"
   set -v
   [ -e /tmp/coredump ] && curl --upload-file /tmp/coredump https://transfer.sh/coredump
-  curl --upload-file linuxdeployqt-*-x86_64.AppImage https://transfer.sh/linuxdeployqt-x86_64.AppImage
+  curl --upload-file linuxdeployqt-*-$tool_arch.AppImage https://transfer.sh/linuxdeployqt-$tool_arch.AppImage
   find -type f -iname 'libQt5Core.so*' -exec curl --upload {} https://transfer.sh/libQt5Core.so \; || true
   exit $RESULT
 fi
