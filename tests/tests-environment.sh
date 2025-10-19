@@ -29,7 +29,8 @@ sudo dpkg -i patchelf_0.8-2_*.deb
 cd /tmp/
 # wget -c https://artifacts.assassinate-you.net/artifactory/AppImageKit/travis-2052/appimagetool-x86_64.AppImage # branch last-good, https://travis-ci.org/AppImage/AppImageKit/jobs/507462541
 # wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" # See #542
-wget -c "https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-$tool_arch.AppImage" # Workaround for #542
+# wget -c "https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-$tool_arch.AppImage" # Workaround for #542
+wget -c "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$tool_arch.AppImage"
 chmod +x appimagetool*AppImage
 ./appimagetool*AppImage --appimage-extract
 sudo cp squashfs-root/usr/bin/* /usr/local/bin/
