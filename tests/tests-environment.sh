@@ -34,8 +34,8 @@ wget -c "https://github.com/AppImage/appimagetool/releases/download/continuous/a
 chmod +x appimagetool*AppImage
 ./appimagetool*AppImage --appimage-extract
 sudo cp squashfs-root/usr/bin/* /usr/local/bin/
-sudo cp -r squashfs-root/usr/lib/appimagekit /usr/local/lib/
-sudo chmod +rx /usr/local/lib/appimagekit
+# sudo cp -r squashfs-root/usr/lib/appimagekit /usr/local/lib/
+# sudo chmod +rx /usr/local/lib/appimagekit
 cd -
 
 sudo apt-get -y install qt5-default qtbase5-dev qtdeclarative5-dev qtwebengine5-dev qttranslations5-l10n binutils xpra zsync desktop-file-utils gcc g++ make libgl1-mesa-dev fuse psmisc
