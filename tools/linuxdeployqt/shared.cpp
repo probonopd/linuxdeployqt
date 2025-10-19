@@ -1604,6 +1604,9 @@ void deployPlugins(const AppDirInfo &appDirInfo, const QString &pluginSourcePath
         sourcePath = QDir::cleanPath(qtDataPath + "/resources/icudtl.dat");
         destinationPath = QDir::cleanPath(dstResources + "/icudtl.dat");
         copyFilePrintStatus(sourcePath, destinationPath);
+        sourcePath = QDir::cleanPath(qtDataPath + "/resources/v8_context_snapshot.bin");
+        destinationPath = QDir::cleanPath(dstResources + "/v8_context_snapshot.bin");
+        copyFilePrintStatus(sourcePath, destinationPath);
         // Translations:
         sourcePath = QDir::cleanPath(qtTranslationsPath + "/qtwebengine_locales");
         destinationPath = QDir::cleanPath(dstTranslations + "/qtwebengine_locales");
